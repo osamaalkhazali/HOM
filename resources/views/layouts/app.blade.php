@@ -86,30 +86,14 @@
         }
 
         .nav-link {
-            color: var(--primary-color) !important;
+            color: #6c757d !important;
             font-weight: 500;
             position: relative;
             transition: all 0.3s ease;
         }
 
         .nav-link:hover {
-            color: var(--primary-light) !important;
-        }
-
-        .nav-link::after {
-            content: '';
-            position: absolute;
-            width: 0;
-            height: 2px;
-            bottom: 0;
-            left: 50%;
-            background: var(--gradient-1);
-            transition: all 0.3s ease;
-        }
-
-        .nav-link:hover::after {
-            width: 100%;
-            left: 0;
+            color: var(--primary-color) !important;
         }
 
         /* Button Animations */

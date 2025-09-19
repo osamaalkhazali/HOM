@@ -12,27 +12,21 @@
 
         <!-- Navigation Menu -->
         <div class="collapse navbar-collapse" id="navbarNav">
-            <!-- All Links on Right Side -->
             <ul class="navbar-nav ms-auto me-4">
                 <li class="nav-item" data-aos="fade-down" data-aos-delay="100">
-                    <a class="nav-link fw-medium position-relative" href="{{ url('/') }}">
-                        <i class="fas fa-home me-1"></i> Home
-                    </a>
+                    <a class="nav-link fw-medium position-relative" href="#services">Services</a>
                 </li>
                 <li class="nav-item" data-aos="fade-down" data-aos-delay="200">
-                    <a class="nav-link fw-medium position-relative" href="{{ route('jobs.index') }}">
-                        <i class="fas fa-briefcase me-1"></i> Jobs
-                    </a>
+                    <a class="nav-link fw-medium" href="#clients">Clients</a>
                 </li>
                 <li class="nav-item" data-aos="fade-down" data-aos-delay="300">
-                    <a class="nav-link fw-medium position-relative" href="{{ url('/#about') }}">
-                        <i class="fas fa-info-circle me-1"></i> About
-                    </a>
+                    <a class="nav-link fw-medium" href="#about">About</a>
                 </li>
                 <li class="nav-item" data-aos="fade-down" data-aos-delay="400">
-                    <a class="nav-link fw-medium position-relative" href="{{ url('/#contact') }}">
-                        <i class="fas fa-envelope me-1"></i> Contact
-                    </a>
+                    <a class="nav-link fw-medium" href="#contact">Contact</a>
+                </li>
+                <li class="nav-item" data-aos="fade-down" data-aos-delay="500">
+                    <a class="nav-link fw-medium" href="{{ route('jobs.index') }}">Jobs</a>
                 </li>
             </ul>
 
@@ -43,17 +37,17 @@
                     <button class="btn morph-btn pulse-btn fw-semibold px-4 py-2 text-white dropdown-toggle"
                         style="background: var(--gradient-1); border: none; border-radius: 25px;" type="button"
                         id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="fas fa-user-circle me-2"></i>{{ Auth::user()->name }}
+                        {{ Auth::user()->name }}
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                         <li>
                             <a class="dropdown-item" href="{{ route('dashboard') }}">
-                                <i class="fas fa-tachometer-alt me-2"></i> Dashboard
+                                Dashboard
                             </a>
                         </li>
                         <li>
                             <a class="dropdown-item" href="{{ route('profile.edit') }}">
-                                <i class="fas fa-user-edit me-2"></i> Profile
+                                Profile
                             </a>
                         </li>
                         <li>
@@ -63,7 +57,7 @@
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
                                 <button type="submit" class="dropdown-item">
-                                    <i class="fas fa-sign-out-alt me-2"></i> Logout
+                                    Logout
                                 </button>
                             </form>
                         </li>
@@ -74,12 +68,13 @@
                 <div class="d-flex gap-2" data-aos="fade-left">
                     <a href="{{ route('login') }}" class="btn btn-outline-primary fw-semibold px-3 py-2"
                         style="border-radius: 25px; border: 2px solid var(--primary-color); color: var(--primary-color);">
-                        <i class="fas fa-sign-in-alt me-1"></i> Login
+                        Login
                     </a>
-                    <a href="{{ route('register') }}" class="btn morph-btn fw-semibold px-4 py-2 text-white"
-                        style="background: var(--gradient-1); border: none; border-radius: 25px;">
-                        <i class="fas fa-user-plus me-1"></i> Register
-                    </a>
+                    <button class="btn morph-btn pulse-btn fw-semibold px-4 py-2 text-white"
+                        style="background: var(--gradient-1); border: none; border-radius: 25px;"
+                        onclick="window.location.href='{{ route('register') }}'">
+                        Get Started
+                    </button>
                 </div>
             @endauth
         </div>
