@@ -220,39 +220,79 @@
                     <div class="p-6">
                         <div class="space-y-4">
                             <div>
-                                <h4 class="text-lg font-semibold text-gray-900">{{ $application->job->title }}</h4>
-                                <p class="text-gray-600">{{ $application->job->company }}</p>
+                                <h4 class="text-lg font-semibold text-gray-900">
+                                    @if($application->job)
+                                        {{ $application->job->title }}
+                                        @if($application->job->deleted_at)
+                                            <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700 border border-red-200">
+                                                <i class="fas fa-exclamation-triangle mr-1 text-[10px]"></i>Job Removed
+                                            </span>
+                                        @elseif($application->job->status === 'draft')
+                                            <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-200 text-gray-800">
+                                                <i class="fas fa-pencil-alt mr-1 text-[10px]"></i>Draft
+                                            </span>
+                                        @endif
+                                    @else
+                                        Job Deleted
+                                    @endif
+                                </h4>
+                                <p class="text-gray-600">{{ $application->job->company ?? 'N/A' }}</p>
                             </div>
                             <div class="space-y-2">
-                                <div class="flex items-center text-sm text-gray-600">
-                                    <i class="fas fa-map-marker-alt mr-2"></i>
-                                    {{ $application->job->location }}
-                                </div>
-                                @if(optional($application->job)->salary)
-                                <div class="flex items-center text-sm text-gray-600">
-                                    <i class="fas fa-dollar-sign mr-2"></i>
-                                    ${{ number_format($application->job->salary) }}
-                                </div>
+                                @if($application->job)
+                                    <div class="flex items-center text-sm text-gray-600">
+                                        <i class="fas fa-map-marker-alt mr-2"></i>
+                                        {{ $application->job->location ?? 'N/A' }}
+                                    </div>
+                                    @if(optional($application->job)->salary)
+                                    <div class="flex items-center text-sm text-gray-600">
+                                        <i class="fas fa-dollar-sign mr-2"></i>
+                                        ${{ number_format($application->job->salary) }}
+                                    </div>
+                                    @endif
+                                    @if(optional($application->job)->level)
+                                    <div class="flex items-center text-sm text-gray-600">
+                                        <i class="fas fa-layer-group mr-2"></i>
+                                        {{ ucfirst($application->job->level) }}
+                                    </div>
+                                    @endif
+                                    @if(optional($application->job->subCategory)->category)
+                                    <div class="flex items-center text-sm text-gray-600">
+                                        <i class="fas fa-tags mr-2"></i>
+                                        {{ $application->job->subCategory->category->name }}
+                                        @if($application->job->subCategory)
+                                            <span class="mx-1">></span>
+                                            {{ $application->job->subCategory->name }}
+                                        @endif
+                                    </div>
+                                    @endif
+                                    @if(optional($application->job)->deadline)
+                                    <div class="flex items-center text-sm text-gray-600">
+                                        <i class="fas fa-calendar mr-2"></i>
+                                        Deadline: {{ $application->job->deadline->format('M d, Y') }}
+                                    </div>
+                                    @endif
+                                @else
+                                    <div class="text-sm text-gray-600">N/A</div>
                                 @endif
-                                <div class="flex items-center text-sm text-gray-600">
-                                    <i class="fas fa-layer-group mr-2"></i>
-                                    {{ ucfirst($application->job->level) }}
-                                </div>
-                                <div class="flex items-center text-sm text-gray-600">
-                                    <i class="fas fa-tags mr-2"></i>
-                                    {{ $application->job->subCategory->category->name }} >
-                                    {{ $application->job->subCategory->name }}
-                                </div>
-                                <div class="flex items-center text-sm text-gray-600">
-                                    <i class="fas fa-calendar mr-2"></i>
-                                    Deadline: {{ $application->job->deadline->format('M d, Y') }}
-                                </div>
                             </div>
                             <div class="pt-4">
-                                <a href="{{ route('admin.jobs.show', $application->job) }}"
-                                    class="text-blue-600 hover:text-blue-800 text-sm font-medium">
-                                    View Job Details →
-                                </a>
+                                    @if($application->job && !$application->job->deleted_at)
+                                    @if($application->job->status === 'draft')
+                                        <span class="text-gray-500 text-sm inline-flex items-center">
+                                            <i class="fas fa-pencil-alt mr-2"></i>Draft
+                                        </span>
+                                    @else
+                                        <a href="{{ route('admin.jobs.show', $application->job) }}"
+                                            class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                                            View Job Details →
+                                        </a>
+                                    @endif
+                                @else
+                                    <span class="text-gray-500 text-sm inline-flex items-center">
+                                        <i class="fas fa-exclamation-triangle mr-2"></i>Job Removed
+                                    </span>
+                                @endif
                             </div>
                         </div>
                     </div>

@@ -242,18 +242,43 @@
                                     </div>
                                 </td>
                                 <td class="px-6 py-4">
-                                    <div class="text-sm font-medium text-gray-900">
-                                        {{ $application->job->title ?? 'Job Deleted' }}
+                                    <div class="text-sm font-medium text-gray-900 flex items-center flex-wrap gap-2">
+                                        <span>{{ $application->job->title ?? 'Job Deleted' }}</span>
+                                        @if(!$application->job)
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700 border border-red-200">
+                                                <i class="fas fa-exclamation-triangle mr-1 text-[10px]"></i>Job Removed
+                                            </span>
+                                        @elseif($application->job->deleted_at)
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700 border border-red-200">
+                                                <i class="fas fa-exclamation-triangle mr-1 text-[10px]"></i>Job Removed
+                                            </span>
+                                        @elseif($application->job->status === 'draft')
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-200 text-gray-800">
+                                                <i class="fas fa-pencil-alt mr-1 text-[10px]"></i>Draft
+                                            </span>
+                                        @elseif($application->job->status === 'inactive')
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-700 border border-orange-200">
+                                                <i class="fas fa-pause-circle mr-1 text-[10px]"></i>Inactive
+                                            </span>
+                                        @elseif($application->job->status === 'active')
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700 border border-green-200">
+                                                <i class="fas fa-check mr-1 text-[10px]"></i>Open
+                                            </span>
+                                        @endif
                                     </div>
                                     <div class="text-sm text-gray-500">{{ $application->job->company ?? 'N/A' }}</div>
                                     <div class="flex items-center mt-1">
                                         @if($application->job)
-                                            <span class="text-xs text-gray-400">
-                                                <i class="fas fa-map-marker-alt mr-1"></i>{{ $application->job->location }}
-                                            </span>
-                                            <span class="text-xs text-gray-400 ml-3">
-                                                <i class="fas fa-dollar-sign mr-1"></i>${{ number_format($application->job->salary) }}
-                                            </span>
+                                            @if(!empty($application->job->location))
+                                                <span class="text-xs text-gray-400">
+                                                    <i class="fas fa-map-marker-alt mr-1"></i>{{ $application->job->location }}
+                                                </span>
+                                            @endif
+                                            @if(!empty($application->job->salary))
+                                                <span class="text-xs text-gray-400 ml-3">
+                                                    <i class="fas fa-dollar-sign mr-1"></i>${{ number_format($application->job->salary) }}
+                                                </span>
+                                            @endif
                                         @endif
                                     </div>
                                 </td>

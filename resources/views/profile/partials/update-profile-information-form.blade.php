@@ -168,6 +168,11 @@
             <label for="skills" class="form-label fw-medium">{{ __('Skills') }}</label>
             <textarea class="form-control" id="skills" name="skills" rows="3"
                 placeholder="List your key skills separated by commas" style="border-radius: 15px; border: 2px solid #e9ecef;">{{ old('skills', $user->profile->skills ?? '') }}</textarea>
+            <div class="form-text">Tip: Separate skills with commas, e.g., <em>PHP, Laravel, MySQL</em></div>
+            <div class="mt-2">
+                <small class="text-muted d-block mb-1">Preview</small>
+                <div id="skills-preview" class="d-flex flex-wrap gap-2"></div>
+            </div>
             @if ($errors->get('skills'))
                 <div class="text-danger small mt-1">
                     @foreach ($errors->get('skills') as $error)
@@ -249,4 +254,49 @@
             @endif
         </div>
     </form>
+    <script>
+        (function() {
+            function renderSkillsPreview() {
+                var textarea = document.getElementById('skills');
+                var preview = document.getElementById('skills-preview');
+                if (!textarea || !preview) return;
+
+                // Clear existing
+                preview.innerHTML = '';
+
+                var raw = textarea.value || '';
+                var items = raw.split(',')
+                    .map(function(s) { return s.trim(); })
+                    .filter(function(s) { return s.length > 0; });
+
+                // Optionally de-duplicate while preserving order
+                var seen = new Set();
+                items.forEach(function(skill) {
+                    if (seen.has(skill.toLowerCase())) return;
+                    seen.add(skill.toLowerCase());
+                    var span = document.createElement('span');
+                    span.className = 'badge rounded-pill bg-light text-primary border border-primary';
+                    span.textContent = skill;
+                    preview.appendChild(span);
+                });
+
+                if (items.length === 0) {
+                    var none = document.createElement('span');
+                    none.className = 'text-muted small';
+                    none.textContent = 'No skills to preview';
+                    preview.appendChild(none);
+                }
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+                renderSkillsPreview();
+                var textarea = document.getElementById('skills');
+                if (textarea) {
+                    textarea.addEventListener('input', renderSkillsPreview);
+                    textarea.addEventListener('change', renderSkillsPreview);
+                    textarea.addEventListener('blur', renderSkillsPreview);
+                }
+            });
+        })();
+    </script>
 </section>

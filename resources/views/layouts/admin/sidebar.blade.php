@@ -39,7 +39,7 @@
                             style="{{ request()->get('status') === 'active' ? 'background: rgba(13,110,253,0.06); color: var(--primary-color);' : '' }}">
                             <i class="fas fa-eye mr-3"></i>Active Jobs
                             <span class="ml-auto bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
-                                {{ \App\Models\Job::where('is_active', true)->count() }}
+                                {{ \App\Models\Job::where('status', 'active')->count() }}
                             </span>
                         </a>
                         <a href="{{ route('admin.jobs.index', ['status' => 'inactive']) }}"
@@ -47,7 +47,15 @@
                             style="{{ request()->get('status') === 'inactive' ? 'background: rgba(13,110,253,0.06); color: var(--primary-color);' : '' }}">
                             <i class="fas fa-pause mr-3"></i>Inactive Jobs
                             <span class="ml-auto bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full">
-                                {{ \App\Models\Job::where('is_active', false)->count() }}
+                                {{ \App\Models\Job::where('status', 'inactive')->count() }}
+                            </span>
+                        </a>
+                        <a href="{{ route('admin.jobs.index', ['status' => 'draft']) }}"
+                            class="group flex items-center px-2 py-2 text-sm rounded-md {{ request()->get('status') === 'draft' ? '' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
+                            style="{{ request()->get('status') === 'draft' ? 'background: rgba(13,110,253,0.06); color: var(--primary-color);' : '' }}">
+                            <i class="fas fa-file-alt mr-3"></i>Draft Jobs
+                            <span class="ml-auto bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-full">
+                                {{ \App\Models\Job::where('status', 'draft')->count() }}
                             </span>
                         </a>
                         <a href="{{ route('admin.jobs.deleted') }}"

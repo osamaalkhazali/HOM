@@ -251,6 +251,13 @@
                                     <button class="btn btn-secondary btn-lg w-100" disabled>
                                         <i class="fas fa-times me-2"></i>Applications Closed
                                     </button>
+                                @elseif ($job->isInactive())
+                                    <div class="alert alert-warning mb-3" role="alert">
+                                        <i class="fas fa-pause-circle me-2"></i>This job is no longer accepting applications.
+                                    </div>
+                                    <button class="btn btn-warning btn-lg w-100" disabled>
+                                        <i class="fas fa-pause me-2"></i>Not Accepting Applications
+                                    </button>
                                 @elseif ($hasApplied)
                                     <div class="alert alert-success mb-3" role="alert">
                                         <i class="fas fa-check-circle me-2"></i>You have already applied for this position

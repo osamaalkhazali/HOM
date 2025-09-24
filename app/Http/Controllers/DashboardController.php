@@ -17,7 +17,8 @@ class DashboardController extends Controller
     // Get recent applications with job data, ordered by created_at desc
     $recentApplications = $user->applications()
       ->with(['job' => function ($query) {
-        $query->select('id', 'title', 'company', 'salary', 'location');
+      $query->withTrashed() // Include soft-deleted jobs
+        ->select('id', 'title', 'company', 'salary', 'location', 'status', 'deleted_at');
       }])
       ->orderBy('created_at', 'desc')
       ->take(5)

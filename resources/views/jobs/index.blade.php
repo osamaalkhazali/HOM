@@ -8,9 +8,11 @@
                 <p class="subtitle mb-0">Discover amazing opportunities</p>
             </div>
             <div class="actions d-flex gap-2">
-                <a href="{{ route('dashboard') }}" class="btn btn-outline-light btn-sm">
-                    <i class="fas fa-arrow-left me-1"></i>Back to Dashboard
-                </a>
+                @auth
+                    <a href="{{ route('dashboard') }}" class="btn btn-outline-light btn-sm">
+                        <i class="fas fa-arrow-left me-1"></i>Back to Dashboard
+                    </a>
+                @endauth
             </div>
         </div>
     </x-slot>

@@ -113,7 +113,28 @@
                                     <div class="row align-items-center g-3">
                                         <div class="col-12 col-md-8">
                                             <div class="d-flex align-items-center gap-2 flex-wrap mb-2">
-                                                <h6 class="fw-bold mb-0">{{ $application->job->title }}</h6>
+                                                @if($application->job && !$application->job->deleted_at)
+                                                    @if($application->job->status === 'draft')
+                                                        <h6 class="fw-bold mb-0 text-muted">{{ $application->job->title }}
+                                                            <span class="badge bg-secondary ms-2 small">
+                                                                <i class="fas fa-ban me-1"></i>Job Unavailable
+                                                            </span>
+                                                        </h6>
+                                                    @else
+                                                        <h6 class="fw-bold mb-0">{{ $application->job->title }}</h6>
+                                                    @endif
+                                                @else
+                                                    <h6 class="fw-bold mb-0 text-muted">
+                                                        @if($application->job)
+                                                            {{ $application->job->title }}
+                                                        @else
+                                                            Deleted Job
+                                                        @endif
+                                                        <span class="badge bg-danger ms-2 small">
+                                                            <i class="fas fa-exclamation-triangle me-1"></i>Job Removed
+                                                        </span>
+                                                    </h6>
+                                                @endif
                                                 <span class="status status-{{ $application->status }}">
                                                     @if ($application->status === 'pending')
                                                         <i class="fas fa-clock me-1"></i>Pending
@@ -132,41 +153,108 @@
                                             </div>
 
                                             <div class="row g-3 text-muted small">
-                                                <div class="col-sm-6">
-                                                    <div class="d-flex align-items-center mb-1">
-                                                        <i class="fas fa-building me-2"></i>{{ $application->job->company }}
-                                                    </div>
-                                                    <div class="d-flex align-items-center mb-1">
-                                                        <i class="fas fa-map-marker-alt me-2"></i>{{ $application->job->location }}
-                                                    </div>
-                                                    <div class="d-flex align-items-center">
-                                                        <i class="fas fa-calendar me-2"></i>Applied: {{ $application->created_at->format('M d, Y') }}
-                                                    </div>
-                                                </div>
-                                                <div class="col-sm-6">
-                                                    <div class="d-flex align-items-center mb-1">
-                                                        <i class="fas fa-layer-group me-2"></i>{{ ucfirst($application->job->level) }}
-                                                    </div>
-                                                    @if ($application->job->salary && $application->job->salary > 0)
-                                                        <div class="d-flex align-items-center mb-1">
-                                                            <i class="fas fa-dollar-sign me-2"></i>${{ number_format($application->job->salary) }}
+                                                @if($application->job && !$application->job->deleted_at)
+                                                    @if($application->job->status === 'draft')
+                                                        <div class="col-12">
+                                                            <div class="alert alert-info mb-2 py-2">
+                                                                <i class="fas fa-info-circle me-2"></i>
+                                                                <strong>Job Unavailable:</strong> This listing is currently in draft by the employer and isn’t publicly available. Your application remains on file and will be reviewed once it’s published.
+                                                            </div>
+                                                            <div class="d-flex align-items-center mb-1">
+                                                                <i class="fas fa-info-circle me-2"></i>Status:
+                                                                <span class="badge bg-secondary ms-2 small">
+                                                                    <i class="fas fa-ban me-1"></i>Job Unavailable
+                                                                </span>
+                                                            </div>
+                                                            <div class="d-flex align-items-center mb-1">
+                                                                <i class="fas fa-building me-2"></i>{{ $application->job->company }}
+                                                            </div>
+                                                            <div class="d-flex align-items-center">
+                                                                <i class="fas fa-calendar me-2"></i>Applied: {{ $application->created_at->format('M d, Y') }}
+                                                            </div>
+                                                        </div>
+                                                    @else
+                                                        <div class="col-sm-6">
+                                                            <div class="d-flex align-items-center mb-1">
+                                                                <i class="fas fa-info-circle me-2"></i>Status:
+                                                                @if($application->job->status === 'inactive' || $application->job->isExpired())
+                                                                    <span class="badge bg-warning text-dark ms-2 small"><i class="fas fa-lock me-1"></i>Closed</span>
+                                                                @elseif($application->job->status === 'active')
+                                                                    <span class="badge bg-success ms-2 small"><i class="fas fa-check me-1"></i>Open</span>
+                                                                @elseif($application->job->status === 'draft')
+                                                                    <span class="badge bg-secondary ms-2 small"><i class="fas fa-ban me-1"></i>Job Unavailable</span>
+                                                                @endif
+                                                            </div>
+                                                            <div class="d-flex align-items-center mb-1">
+                                                                <i class="fas fa-building me-2"></i>{{ $application->job->company }}
+                                                            </div>
+                                                            <div class="d-flex align-items-center mb-1">
+                                                                <i class="fas fa-map-marker-alt me-2"></i>{{ $application->job->location }}
+                                                            </div>
+                                                            <div class="d-flex align-items-center">
+                                                                <i class="fas fa-calendar me-2"></i>Applied: {{ $application->created_at->format('M d, Y') }}
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-sm-6">
+                                                            <div class="d-flex align-items-center mb-1">
+                                                                <i class="fas fa-layer-group me-2"></i>{{ ucfirst($application->job->level) }}
+                                                            </div>
+                                                            @if ($application->job->salary && $application->job->salary > 0)
+                                                                <div class="d-flex align-items-center mb-1">
+                                                                    <i class="fas fa-dollar-sign me-2"></i>${{ number_format($application->job->salary) }}
+                                                                </div>
+                                                            @endif
+                                                            <div class="d-flex align-items-center">
+                                                                <i class="fas fa-clock me-2"></i>Deadline: {{ \Carbon\Carbon::parse($application->job->deadline)->format('M d, Y') }}
+                                                                @if ($application->job->isExpired())
+                                                                    <span class="badge bg-danger ms-1 small">Expired</span>
+                                                                @endif
+                                                            </div>
                                                         </div>
                                                     @endif
-                                                    <div class="d-flex align-items-center">
-                                                        <i class="fas fa-clock me-2"></i>Deadline: {{ \Carbon\Carbon::parse($application->job->deadline)->format('M d, Y') }}
-                                                        @if ($application->job->isExpired())
-                                                            <span class="badge bg-danger ms-1 small">Expired</span>
+                                                @else
+                                                    <div class="col-12">
+                                                        <div class="alert alert-warning mb-2 py-2">
+                                                            <i class="fas fa-info-circle me-2"></i>
+                                                            <strong>Job No Longer Available:</strong> This position has been removed by the employer.
+                                                            Your application status will remain visible for your records.
+                                                        </div>
+                                                        <div class="d-flex align-items-center mb-1">
+                                                            <i class="fas fa-info-circle me-2"></i>Status:
+                                                            <span class="badge bg-danger ms-2 small">
+                                                                <i class="fas fa-exclamation-triangle me-1"></i>Job Removed
+                                                            </span>
+                                                        </div>
+                                                        @if($application->job)
+                                                            <div class="d-flex align-items-center mb-1">
+                                                                <i class="fas fa-building me-2"></i>{{ $application->job->company ?? 'Company information unavailable' }}
+                                                            </div>
                                                         @endif
+                                                        <div class="d-flex align-items-center">
+                                                            <i class="fas fa-calendar me-2"></i>Applied: {{ $application->created_at->format('M d, Y') }}
+                                                        </div>
                                                     </div>
-                                                </div>
+                                                @endif
                                             </div>
                                         </div>
 
                                         <div class="col-12 col-md-4 text-end">
                                             <div class="d-flex flex-wrap gap-2 justify-content-md-end">
-                                                <a href="{{ route('jobs.show', $application->job) }}" class="btn btn-sm btn-outline-primary">
-                                                    <i class="fas fa-eye me-1"></i>View Job
-                                                </a>
+                                                @if($application->job && !$application->job->deleted_at)
+                                                    @if($application->job->status === 'draft')
+                                                        <span class="btn btn-sm btn-outline-secondary disabled">
+                                                            <i class="fas fa-ban me-1"></i>Job Unavailable
+                                                        </span>
+                                                    @else
+                                                        <a href="{{ route('jobs.show', $application->job) }}" class="btn btn-sm btn-outline-primary">
+                                                            <i class="fas fa-eye me-1"></i>View Job
+                                                        </a>
+                                                    @endif
+                                                @else
+                                                    <span class="btn btn-sm btn-outline-secondary disabled">
+                                                        <i class="fas fa-ban me-1"></i>Job Unavailable
+                                                    </span>
+                                                @endif
                                                 @if ($application->cv_path)
                                                     <a href="{{ Storage::url($application->cv_path) }}" target="_blank" class="btn btn-sm btn-outline-secondary">
                                                         <i class="fas fa-download me-1"></i>CV

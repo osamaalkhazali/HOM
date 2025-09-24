@@ -67,18 +67,18 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <!-- Category -->
                         <div>
-                            <label for="category" class="block text-sm font-medium text-gray-700 mb-1">Category *</label>
-                            <select id="category" name="category" required onchange="updateSubcategories()"
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 @error('category') border-red-500 @enderror">
+                            <label for="category_id" class="block text-sm font-medium text-gray-700 mb-1">Category *</label>
+                            <select id="category_id" name="category_id" required onchange="updateSubcategories()"
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 @error('category_id') border-red-500 @enderror">
                                 <option value="">Select Category</option>
                                 @foreach ($categories as $category)
                                     <option value="{{ $category->id }}"
-                                        {{ old('category') == $category->id ? 'selected' : '' }}>
+                                        {{ old('category_id') == $category->id ? 'selected' : '' }}>
                                         {{ $category->name }}
                                     </option>
                                 @endforeach
                             </select>
-                            @error('category')
+                            @error('category_id')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
@@ -86,10 +86,10 @@
                         <!-- Subcategory -->
                         <div>
                             <label for="sub_category_id" class="block text-sm font-medium text-gray-700 mb-1">Subcategory
-                                *</label>
-                            <select id="sub_category_id" name="sub_category_id" required
+                                <span class="text-gray-400">(Optional)</span></label>
+                            <select id="sub_category_id" name="sub_category_id"
                                 class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 @error('sub_category_id') border-red-500 @enderror">
-                                <option value="">Select Subcategory</option>
+                                <option value="">No Subcategory</option>
                                 @if (old('sub_category_id'))
                                     @foreach ($categories as $category)
                                         @foreach ($category->subCategories as $subCategory)
@@ -198,20 +198,29 @@
                 <!-- Status -->
                 <div>
                     <h3 class="text-lg font-medium text-gray-900 mb-4">Publication Status</h3>
-                    <div class="flex items-center space-x-4">
+                                    <div class="bg-gray-50 p-4 rounded-lg">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Job Status</h3>
+                    <div class="space-y-3">
                         <label class="flex items-center">
-                            <input type="radio" name="is_active" value="1"
-                                {{ old('is_active', '1') === '1' ? 'checked' : '' }}
+                            <input type="radio" name="status" value="active"
+                                {{ old('status', 'active') === 'active' ? 'checked' : '' }}
                                 class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300">
-                            <span class="ml-2 text-sm text-gray-700">Active (Visible to job seekers)</span>
+                            <span class="ml-2 text-sm text-gray-700">Active (Visible and accepting applications)</span>
                         </label>
                         <label class="flex items-center">
-                            <input type="radio" name="is_active" value="0"
-                                {{ old('is_active') === '0' ? 'checked' : '' }}
-                                class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300">
+                            <input type="radio" name="status" value="inactive"
+                                {{ old('status') === 'inactive' ? 'checked' : '' }}
+                                class="h-4 w-4 text-yellow-600 focus:ring-yellow-500 border-gray-300">
+                            <span class="ml-2 text-sm text-gray-700">Inactive (Visible but not accepting applications)</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="radio" name="status" value="draft"
+                                {{ old('status') === 'draft' ? 'checked' : '' }}
+                                class="h-4 w-4 text-gray-600 focus:ring-gray-500 border-gray-300">
                             <span class="ml-2 text-sm text-gray-700">Draft (Hidden from job seekers)</span>
                         </label>
                     </div>
+                </div>
                 </div>
 
                 <!-- Form Actions -->
@@ -234,22 +243,29 @@
         const categoriesData = @json($categories);
 
         function updateSubcategories() {
-            const categorySelect = document.getElementById('category');
+            const categorySelect = document.getElementById('category_id');
             const subcategorySelect = document.getElementById('sub_category_id');
             const selectedCategoryId = categorySelect.value;
 
             // Clear existing subcategories
-            subcategorySelect.innerHTML = '<option value="">Select Subcategory</option>';
+            subcategorySelect.innerHTML = '<option value="">No Subcategory</option>';
 
             if (selectedCategoryId) {
                 const category = categoriesData.find(cat => cat.id == selectedCategoryId);
-                if (category && category.sub_categories) {
+                if (category && category.sub_categories && category.sub_categories.length > 0) {
                     category.sub_categories.forEach(subcat => {
                         const option = document.createElement('option');
                         option.value = subcat.id;
                         option.textContent = subcat.name;
                         subcategorySelect.appendChild(option);
                     });
+                } else {
+                    // If no subcategories, show message
+                    const option = document.createElement('option');
+                    option.value = '';
+                    option.textContent = 'No subcategories available';
+                    option.disabled = true;
+                    subcategorySelect.appendChild(option);
                 }
             }
         }
@@ -274,20 +290,4 @@
         }
     </script>
 
-    // Toggle salary input visibility for create form
-    function toggleSalaryInputCreate() {
-    const salaryDiv = document.getElementById('salary_input_div_create');
-    const fixedRadio = document.querySelector('input[name="salary_type"][value="fixed"]');
-    const salaryInput = document.getElementById('salary');
-
-    if (fixedRadio.checked) {
-    salaryDiv.classList.remove('hidden');
-    salaryInput.required = true;
-    } else {
-    salaryDiv.classList.add('hidden');
-    salaryInput.required = false;
-    salaryInput.value = '';
-    }
-    }
-    </script>
 @endsection

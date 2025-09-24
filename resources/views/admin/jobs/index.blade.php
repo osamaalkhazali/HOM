@@ -50,8 +50,8 @@
                             class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                             <option value="">All Status</option>
                             <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>Active</option>
-                            <option value="inactive" {{ request('status') === 'inactive' ? 'selected' : '' }}>Inactive
-                            </option>
+                            <option value="inactive" {{ request('status') === 'inactive' ? 'selected' : '' }}>Inactive</option>
+                            <option value="draft" {{ request('status') === 'draft' ? 'selected' : '' }}>Draft</option>
                         </select>
                     </div>
 
@@ -198,16 +198,23 @@
                                         class="inline-flex items-center justify-center px-3 py-1.5 rounded-full text-xs font-medium bg-red-100 text-red-700 border border-red-200 mb-1">
                                         <i class="fas fa-calendar-times text-red-600 mr-1.5 text-[10px]"></i>Expired
                                     </span>
-                                @elseif ($job->is_active)
-                                    <span
-                                        class="inline-flex items-center justify-center px-3 py-1.5 rounded-full text-xs font-medium bg-green-100 text-green-700 border border-green-200">
-                                        <i class="fas fa-check text-green-600 mr-1.5 text-[10px]"></i>Active
-                                    </span>
                                 @else
-                                    <span
-                                        class="inline-flex items-center justify-center px-3 py-1.5 rounded-full text-xs font-medium bg-red-100 text-red-700 border border-red-200">
-                                        <i class="fas fa-pause text-red-600 mr-1.5 text-[10px]"></i>Inactive
-                                    </span>
+                                    @if ($job->status === 'active')
+                                        <span
+                                            class="inline-flex items-center justify-center px-3 py-1.5 rounded-full text-xs font-medium bg-green-100 text-green-700 border border-green-200">
+                                            <i class="fas fa-check text-green-600 mr-1.5 text-[10px]"></i>Active
+                                        </span>
+                                    @elseif ($job->status === 'inactive')
+                                        <span
+                                            class="inline-flex items-center justify-center px-3 py-1.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700 border border-yellow-200">
+                                            <i class="fas fa-pause text-yellow-600 mr-1.5 text-[10px]"></i>Inactive
+                                        </span>
+                                    @else
+                                        <span
+                                            class="inline-flex items-center justify-center px-3 py-1.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200">
+                                            <i class="fas fa-file-alt text-gray-600 mr-1.5 text-[10px]"></i>Draft
+                                        </span>
+                                    @endif
                                 @endif
                             </td>
                             <td class="px-6 py-4">
@@ -232,16 +239,6 @@
                                         class="text-yellow-600 hover:text-yellow-900 p-1 rounded" title="Edit Job">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    <form method="POST" action="{{ route('admin.jobs.toggle-status', $job) }}"
-                                        class="inline">
-                                        @csrf
-                                        @method('PATCH')
-                                        <button type="submit"
-                                            class="text-{{ $job->is_active ? 'red' : 'green' }}-600 hover:text-{{ $job->is_active ? 'red' : 'green' }}-900 p-1 rounded"
-                                            title="{{ $job->is_active ? 'Deactivate' : 'Activate' }}">
-                                            <i class="fas fa-{{ $job->is_active ? 'ban' : 'play' }}"></i>
-                                        </button>
-                                    </form>
                                     <form method="POST" action="{{ route('admin.jobs.destroy', $job) }}" class="inline"
                                         onsubmit="return confirm('Are you sure you want to delete this job?')">
                                         @csrf

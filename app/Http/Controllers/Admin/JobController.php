@@ -42,11 +42,7 @@ class JobController extends Controller
 
     // Filter by status
     if ($request->filled('status')) {
-      if ($request->status === 'active') {
-        $query->where('is_active', true);
-      } elseif ($request->status === 'inactive') {
-        $query->where('is_active', false);
-      }
+      $query->where('status', $request->status);
     }
 
     // Filter by level
@@ -103,13 +99,14 @@ class JobController extends Controller
     $validated = $request->validate([
       'title' => 'required|string|max:255',
       'description' => 'required|string',
-      'sub_category_id' => 'required|exists:sub_categories,id',
+      'category_id' => 'required|exists:categories,id',
+      'sub_category_id' => 'nullable|exists:sub_categories,id',
       'company' => 'required|string|max:255',
       'salary_type' => 'required|in:negotiable,fixed',
       'location' => 'required|string|max:255',
       'level' => 'required|in:entry,mid,senior,executive',
       'deadline' => 'required|date|after:today',
-      'is_active' => 'boolean'
+      'status' => 'required|in:active,inactive,draft'
     ]);
 
     // Handle salary based on type
@@ -126,7 +123,6 @@ class JobController extends Controller
     unset($validated['salary_type']);
 
     $validated['posted_by'] = auth('admin')->id();
-    $validated['is_active'] = $request->boolean('is_active', true);
 
     Job::create($validated);
 
@@ -160,13 +156,14 @@ class JobController extends Controller
     $validated = $request->validate([
       'title' => 'required|string|max:255',
       'description' => 'required|string',
-      'sub_category_id' => 'required|exists:sub_categories,id',
+      'category_id' => 'required|exists:categories,id',
+      'sub_category_id' => 'nullable|exists:sub_categories,id',
       'company' => 'required|string|max:255',
       'salary_type' => 'required|in:negotiable,fixed',
       'location' => 'required|string|max:255',
       'level' => 'required|in:entry,mid,senior,executive',
       'deadline' => 'required|date',
-      'is_active' => 'boolean'
+      'status' => 'required|in:active,inactive,draft'
     ]);
 
     // Handle salary based on type
@@ -182,23 +179,9 @@ class JobController extends Controller
     // Remove salary_type from validated data as it's not a database field
     unset($validated['salary_type']);
 
-    $validated['is_active'] = $request->boolean('is_active');
-
     $job->update($validated);
 
     return redirect()->route('admin.jobs.index')->with('success', 'Job updated successfully');
-  }
-
-  /**
-   * Toggle job active status
-   */
-  public function toggleStatus(Job $job)
-  {
-    $job->is_active = !$job->is_active;
-    $job->save();
-
-    $status = $job->is_active ? 'activated' : 'deactivated';
-    return redirect()->back()->with('success', "Job {$status} successfully");
   }
 
   /**
@@ -229,8 +212,11 @@ class JobController extends Controller
 
     // Filter by category
     if ($request->filled('category')) {
-      $query->whereHas('subCategory', function ($q) use ($request) {
-        $q->where('category_id', $request->category);
+      $query->where(function ($q) use ($request) {
+        $q->where('category_id', $request->category)
+          ->orWhereHas('subCategory', function ($sq) use ($request) {
+            $sq->where('category_id', $request->category);
+          });
       });
     }
 

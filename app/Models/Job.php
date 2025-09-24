@@ -18,6 +18,7 @@ class Job extends Model
   protected $fillable = [
     'title',
     'description',
+    'category_id',
     'sub_category_id',
     'company',
     'salary',
@@ -26,6 +27,7 @@ class Job extends Model
     'deadline',
     'posted_by',
     'is_active',
+    'status',
   ];
 
   /**
@@ -34,10 +36,18 @@ class Job extends Model
    * @var array<string, string>
    */
   protected $casts = [
-    'salary' => 'decimal:2',
     'deadline' => 'date',
     'is_active' => 'boolean',
+    'status' => 'string',
   ];
+
+  /**
+   * Get the category that owns the job.
+   */
+  public function category()
+  {
+    return $this->belongsTo(Category::class);
+  }
 
   /**
    * Get the sub category that owns the job.
@@ -45,14 +55,6 @@ class Job extends Model
   public function subCategory()
   {
     return $this->belongsTo(SubCategory::class);
-  }
-
-  /**
-   * Get the category through sub category.
-   */
-  public function category()
-  {
-    return $this->hasOneThrough(Category::class, SubCategory::class, 'id', 'id', 'sub_category_id', 'category_id');
   }
 
   /**
@@ -102,5 +104,61 @@ class Job extends Model
   public function scopeExpired($query)
   {
     return $query->where('deadline', '<', now()->toDateString());
+  }
+
+  /**
+   * Scope a query to only include active jobs.
+   */
+  public function scopeActive($query)
+  {
+    return $query->where('status', 'active');
+  }
+
+  /**
+   * Scope a query to only include inactive jobs.
+   */
+  public function scopeInactive($query)
+  {
+    return $query->where('status', 'inactive');
+  }
+
+  /**
+   * Scope a query to only include draft jobs.
+   */
+  public function scopeDraft($query)
+  {
+    return $query->where('status', 'draft');
+  }
+
+  /**
+   * Scope a query to only include visible jobs (active and inactive).
+   */
+  public function scopeVisible($query)
+  {
+    return $query->whereIn('status', ['active', 'inactive']);
+  }
+
+  /**
+   * Check if the job is active.
+   */
+  public function isActive()
+  {
+    return $this->status === 'active';
+  }
+
+  /**
+   * Check if the job is inactive.
+   */
+  public function isInactive()
+  {
+    return $this->status === 'inactive';
+  }
+
+  /**
+   * Check if the job is draft.
+   */
+  public function isDraft()
+  {
+    return $this->status === 'draft';
   }
 }

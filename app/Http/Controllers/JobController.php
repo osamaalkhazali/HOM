@@ -21,7 +21,7 @@ class JobController extends Controller
     public function index(Request $request)
     {
         $query = Job::with(['subCategory.category', 'postedBy'])
-            ->where('is_active', true); // Only hide inactive jobs, show expired ones
+            ->visible(); // Only show active and inactive jobs, hide draft
 
         // Filter by category if provided (through subcategories)
         if ($request->filled('category')) {
@@ -85,13 +85,18 @@ class JobController extends Controller
      */
     public function show(Job $job)
     {
+        // Prevent access to draft jobs on public site
+        if ($job->isDraft()) {
+            abort(404);
+        }
+
         $job->load(['subCategory.category', 'postedBy', 'applications']);
 
         // Get related jobs from the same subcategory
         $relatedJobs = Job::with(['subCategory.category'])
             ->where('sub_category_id', $job->sub_category_id)
             ->where('id', '!=', $job->id)
-            ->where('is_active', true)
+            ->visible() // Only show active and inactive jobs
             ->limit(3)
             ->get();
 
@@ -118,7 +123,7 @@ class JobController extends Controller
         }
 
         // Check if job is active
-        if (!$job->is_active) {
+        if (!$job->isActive()) {
             return redirect()->route('jobs.show', $job)
                 ->with('error', 'This job is no longer accepting applications.');
         }
@@ -147,7 +152,7 @@ class JobController extends Controller
         }
 
         // Check if job is active
-        if (!$job->is_active) {
+        if (!$job->isActive()) {
             return redirect()->route('jobs.show', $job)
                 ->with('error', 'This job is no longer accepting applications.');
         }
@@ -213,14 +218,17 @@ class JobController extends Controller
     public function myApplications(Request $request)
     {
         $userId = Auth::id();
-        $query = Application::with(['job.subCategory.category'])
+        $query = Application::with(['job' => function ($q) {
+            $q->withTrashed(); // Include soft-deleted jobs
+        }, 'job.subCategory.category'])
             ->where('user_id', $userId);
 
         // Filter by search
         if ($request->filled('search')) {
             $search = $request->search;
             $query->whereHas('job', function ($q) use ($search) {
-                $q->where('title', 'like', "%{$search}%")
+                $q->withTrashed() // Include soft-deleted jobs in search
+                    ->where('title', 'like', "%{$search}%")
                     ->orWhere('company', 'like', "%{$search}%");
             });
         }
@@ -237,13 +245,13 @@ class JobController extends Controller
                 $query->orderBy('created_at', 'asc');
                 break;
             case 'job_title':
-                $query->join('jobs', 'applications.job_id', '=', 'jobs.id')
-                    ->orderBy('jobs.title', 'asc')
+                $query->leftJoin('jobs', 'applications.job_id', '=', 'jobs.id')
+                    ->orderByRaw('COALESCE(jobs.title, "Deleted Job") asc')
                     ->select('applications.*');
                 break;
             case 'company':
-                $query->join('jobs', 'applications.job_id', '=', 'jobs.id')
-                    ->orderBy('jobs.company', 'asc')
+                $query->leftJoin('jobs', 'applications.job_id', '=', 'jobs.id')
+                    ->orderByRaw('COALESCE(jobs.company, "Deleted Job") asc')
                     ->select('applications.*');
                 break;
             default: // newest

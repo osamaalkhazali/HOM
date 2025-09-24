@@ -71,7 +71,28 @@
                                         <div class="row align-items-center g-2 g-md-0">
                                             <div class="col-12 col-md-9">
                                                 <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
-                                                    <h6 class="fw-semibold mb-0">{{ $application->job->title }}</h6>
+                                                    @if($application->job && !$application->job->deleted_at)
+                                                        @if($application->job->status === 'draft')
+                                                            <h6 class="fw-semibold mb-0 text-muted">{{ $application->job->title }}
+                                                                <span class="badge bg-secondary ms-2 small">
+                                                                    <i class="fas fa-ban me-1"></i>Job Unavailable
+                                                                </span>
+                                                            </h6>
+                                                        @else
+                                                            <h6 class="fw-semibold mb-0">{{ $application->job->title }}</h6>
+                                                        @endif
+                                                    @else
+                                                        <h6 class="fw-semibold mb-0 text-muted">
+                                                            @if($application->job)
+                                                                {{ $application->job->title }}
+                                                            @else
+                                                                Deleted Job
+                                                            @endif
+                                                            <span class="badge bg-danger ms-2 small">
+                                                                <i class="fas fa-exclamation-triangle me-1"></i>Job Removed
+                                                            </span>
+                                                        </h6>
+                                                    @endif
                                                     <span class="status status-{{ $application->status }}">
                                                         @if ($application->status === 'pending')
                                                             <i class="fas fa-clock me-1"></i>Pending
@@ -91,7 +112,15 @@
                                                     </span>
                                                 </div>
                                                 <div class="d-flex align-items-center text-muted small mb-1">
-                                                    <i class="fas fa-building me-1"></i>{{ $application->job->company }}
+                                                    @if($application->job && !$application->job->deleted_at)
+                                                        <i class="fas fa-building me-1"></i>{{ $application->job->company }}
+                                                    @else
+                                                        <i class="fas fa-exclamation-triangle me-1"></i>
+                                                        Job no longer available
+                                                        @if($application->job)
+                                                            - {{ $application->job->company }}
+                                                        @endif
+                                                    @endif
                                                 </div>
                                                 <div class="d-flex align-items-center text-muted small">
                                                     <i class="fas fa-calendar me-1"></i>Applied:
@@ -106,10 +135,22 @@
                                                         <i class="fas fa-ellipsis-v"></i>
                                                     </button>
                                                     <ul class="dropdown-menu dropdown-menu-end">
-                                                        <li><a class="dropdown-item"
-                                                                href="{{ route('jobs.show', $application->job) }}">
-                                                                <i class="fas fa-eye me-2"></i>View Job
-                                                            </a></li>
+                                                        @if($application->job && !$application->job->deleted_at)
+                                                            @if($application->job->status === 'draft')
+                                                                <li><span class="dropdown-item text-muted">
+                                                                        <i class="fas fa-ban me-2"></i>Job Unavailable
+                                                                    </span></li>
+                                                            @else
+                                                                <li><a class="dropdown-item"
+                                                                        href="{{ route('jobs.show', $application->job) }}">
+                                                                        <i class="fas fa-eye me-2"></i>View Job
+                                                                    </a></li>
+                                                            @endif
+                                                        @else
+                                                            <li><span class="dropdown-item text-muted">
+                                                                    <i class="fas fa-ban me-2"></i>Job Unavailable
+                                                                </span></li>
+                                                        @endif
                                                         @if ($application->cv_path)
                                                             <li><a class="dropdown-item"
                                                                     href="{{ Storage::url($application->cv_path) }}"

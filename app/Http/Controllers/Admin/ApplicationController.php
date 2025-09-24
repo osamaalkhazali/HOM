@@ -16,7 +16,13 @@ class ApplicationController extends Controller
    */
   public function index(Request $request)
   {
-    $query = Application::with(['user', 'job.subCategory.category']);
+    $query = Application::with([
+      'user',
+      'job' => function ($q) {
+        $q->withTrashed();
+      },
+      'job.subCategory.category'
+    ]);
 
     // Search functionality
     if ($request->filled('search')) {
@@ -78,7 +84,13 @@ class ApplicationController extends Controller
    */
   public function show(Application $application)
   {
-    $application->load(['user.profile', 'job.subCategory.category']);
+    $application->load([
+      'user.profile',
+      'job' => function ($q) {
+        $q->withTrashed();
+      },
+      'job.subCategory.category'
+    ]);
     return view('admin.applications.show', compact('application'));
   }
 
@@ -87,7 +99,13 @@ class ApplicationController extends Controller
    */
   public function edit(Application $application)
   {
-    $application->load(['user.profile', 'job.subCategory.category']);
+    $application->load([
+      'user.profile',
+      'job' => function ($q) {
+        $q->withTrashed();
+      },
+      'job.subCategory.category'
+    ]);
     return view('admin.applications.edit', compact('application'));
   }
 

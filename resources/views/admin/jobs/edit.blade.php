@@ -75,27 +75,26 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <!-- Category -->
                         <div>
-                            <label for="category" class="block text-sm font-medium text-gray-700 mb-1">Category *</label>
-                            <select id="category" name="category" required onchange="updateSubcategories()"
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 @error('category') border-red-500 @enderror">
+                            <label for="category_id" class="block text-sm font-medium text-gray-700 mb-1">Category *</label>
+                            <select id="category_id" name="category_id" required onchange="updateSubcategories()"
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 @error('category_id') border-red-500 @enderror">
                                 <option value="">Select Category</option>
                                 @foreach ($categories as $category)
                                     <option value="{{ $category->id }}"
-                                        {{ old('category', $job->subCategory->category->id) == $category->id ? 'selected' : '' }}>
+                                        {{ old('category_id', $job->category_id ?? ($job->subCategory ? $job->subCategory->category->id : '')) == $category->id ? 'selected' : '' }}>
                                         {{ $category->name }}
                                     </option>
                                 @endforeach
                             </select>
-                            @error('category')
+                            @error('category_id')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
 
                         <!-- Subcategory -->
                         <div>
-                            <label for="sub_category_id" class="block text-sm font-medium text-gray-700 mb-1">Subcategory
-                                *</label>
-                            <select id="sub_category_id" name="sub_category_id" required
+                            <label for="sub_category_id" class="block text-sm font-medium text-gray-700 mb-1">Subcategory (Optional)</label>
+                            <select id="sub_category_id" name="sub_category_id"
                                 class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 @error('sub_category_id') border-red-500 @enderror">
                                 <option value="">Select Subcategory</option>
                                 @foreach ($categories as $category)
@@ -205,18 +204,24 @@
 
                 <!-- Status -->
                 <div class="border-b border-gray-200 pb-6">
-                    <h3 class="text-lg font-medium text-gray-900 mb-4">Publication Status</h3>
-                    <div class="flex items-center space-x-4">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Job Status</h3>
+                    <div class="space-y-3">
                         <label class="flex items-center">
-                            <input type="radio" name="is_active" value="1"
-                                {{ old('is_active', $job->is_active ? '1' : '0') === '1' ? 'checked' : '' }}
+                            <input type="radio" name="status" value="active"
+                                {{ old('status', $job->status) === 'active' ? 'checked' : '' }}
                                 class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300">
-                            <span class="ml-2 text-sm text-gray-700">Active (Visible to job seekers)</span>
+                            <span class="ml-2 text-sm text-gray-700">Active (Visible and accepting applications)</span>
                         </label>
                         <label class="flex items-center">
-                            <input type="radio" name="is_active" value="0"
-                                {{ old('is_active', $job->is_active ? '1' : '0') === '0' ? 'checked' : '' }}
-                                class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300">
+                            <input type="radio" name="status" value="inactive"
+                                {{ old('status', $job->status) === 'inactive' ? 'checked' : '' }}
+                                class="h-4 w-4 text-yellow-600 focus:ring-yellow-500 border-gray-300">
+                            <span class="ml-2 text-sm text-gray-700">Inactive (Visible but not accepting applications)</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="radio" name="status" value="draft"
+                                {{ old('status', $job->status) === 'draft' ? 'checked' : '' }}
+                                class="h-4 w-4 text-gray-600 focus:ring-gray-500 border-gray-300">
                             <span class="ml-2 text-sm text-gray-700">Draft (Hidden from job seekers)</span>
                         </label>
                     </div>
@@ -236,8 +241,10 @@
                                 <p><strong>Current Status:</strong>
                                     <span
                                         class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium
-                                    {{ $job->is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
-                                        {{ $job->is_active ? 'Active' : 'Inactive' }}
+                                    @if($job->status === 'active') bg-green-100 text-green-800
+                                    @elseif($job->status === 'inactive') bg-yellow-100 text-yellow-800
+                                    @else bg-gray-100 text-gray-800 @endif">
+                                        {{ ucfirst($job->status) }}
                                     </span>
                                 </p>
                             </div>
@@ -265,17 +272,17 @@
         const categoriesData = @json($categories);
 
         function updateSubcategories() {
-            const categorySelect = document.getElementById('category');
+            const categorySelect = document.getElementById('category_id');
             const subcategorySelect = document.getElementById('sub_category_id');
             const selectedCategoryId = categorySelect.value;
-            const currentSubcategoryId = {{ $job->sub_category_id }};
+            const currentSubcategoryId = {{ $job->sub_category_id ?: 'null' }};
 
             // Clear existing subcategories
             subcategorySelect.innerHTML = '<option value="">Select Subcategory</option>';
 
             if (selectedCategoryId) {
                 const category = categoriesData.find(cat => cat.id == selectedCategoryId);
-                if (category && category.sub_categories) {
+                if (category && category.sub_categories && category.sub_categories.length > 0) {
                     category.sub_categories.forEach(subcat => {
                         const option = document.createElement('option');
                         option.value = subcat.id;
@@ -285,7 +292,18 @@
                         }
                         subcategorySelect.appendChild(option);
                     });
+                    subcategorySelect.disabled = false;
+                } else {
+                    // No subcategories available for this category
+                    const noSubcatOption = document.createElement('option');
+                    noSubcatOption.value = '';
+                    noSubcatOption.textContent = 'No subcategories available';
+                    noSubcatOption.disabled = true;
+                    subcategorySelect.appendChild(noSubcatOption);
+                    subcategorySelect.disabled = true;
                 }
+            } else {
+                subcategorySelect.disabled = false;
             }
         }
 
