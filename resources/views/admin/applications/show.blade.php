@@ -228,10 +228,12 @@
                                     <i class="fas fa-map-marker-alt mr-2"></i>
                                     {{ $application->job->location }}
                                 </div>
+                                @if(optional($application->job)->salary)
                                 <div class="flex items-center text-sm text-gray-600">
                                     <i class="fas fa-dollar-sign mr-2"></i>
                                     ${{ number_format($application->job->salary) }}
                                 </div>
+                                @endif
                                 <div class="flex items-center text-sm text-gray-600">
                                     <i class="fas fa-layer-group mr-2"></i>
                                     {{ ucfirst($application->job->level) }}
@@ -257,7 +259,10 @@
                 </div>
 
                 <!-- Resume/CV -->
-                @if ($application->user->profile && $application->user->profile->resume_path)
+                @php
+                    $cvPath = $application->cv_path ?? optional($application->user->profile)->cv_path;
+                @endphp
+                @if ($cvPath)
                     <div class="bg-white rounded-lg shadow">
                         <div class="px-6 py-4 border-b border-gray-200">
                             <h3 class="text-lg font-medium text-gray-900">Resume/CV</h3>
@@ -266,11 +271,22 @@
                             <div class="text-center">
                                 <i class="fas fa-file-pdf text-red-500 text-4xl mb-4"></i>
                                 <p class="text-sm text-gray-600 mb-4">Resume attached</p>
-                                <a href="{{ Storage::url($application->user->profile->resume_path) }}" target="_blank"
+                                <a href="{{ Storage::url($cvPath) }}" target="_blank"
                                     class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm transition-colors">
                                     <i class="fas fa-download mr-2"></i>Download Resume
                                 </a>
                             </div>
+                        </div>
+                    </div>
+                @else
+                    <div class="bg-white rounded-lg shadow">
+                        <div class="px-6 py-4 border-b border-gray-200">
+                            <h3 class="text-lg font-medium text-gray-900">Resume/CV</h3>
+                        </div>
+                        <div class="p-6">
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-600">
+                                <i class="fas fa-file-slash mr-1"></i>No CV
+                            </span>
                         </div>
                     </div>
                 @endif

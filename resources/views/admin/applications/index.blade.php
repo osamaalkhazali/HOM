@@ -1,4 +1,4 @@
-   @extends('layouts.admin.app')
+@extends('layouts.admin.app')
 
 @section('title', 'Application Management')
 
@@ -291,8 +291,11 @@
                                     <div class="text-xs text-gray-500">{{ $application->created_at->diffForHumans() }}</div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    @if($application->user->profile && $application->user->profile->resume_path)
-                                        <a href="{{ Storage::url($application->user->profile->resume_path) }}" target="_blank"
+                                    @php
+                                        $cvPath = $application->cv_path ?? optional($application->user->profile)->cv_path;
+                                    @endphp
+                                    @if($cvPath)
+                                        <a href="{{ Storage::url($cvPath) }}" target="_blank"
                                            class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors">
                                             <i class="fas fa-file-pdf mr-1"></i>View CV
                                         </a>
