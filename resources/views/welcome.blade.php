@@ -392,6 +392,8 @@
 
     @include('landing.focus')
 
+    @include('landing.profile-download')
+
 
 
     @include('layouts.footer')

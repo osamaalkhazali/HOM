@@ -132,16 +132,9 @@
                     Admin Management
                 </a>
 
-                <!-- Reports -->
-                <a href="#"
-                    class="text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-2 py-2 text-sm font-medium rounded-md">
-                    <i class="fas fa-chart-bar mr-3"></i>
-                    Reports
-                </a>
-
                 <!-- Settings -->
-                <a href="#"
-                    class="text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-2 py-2 text-sm font-medium rounded-md">
+                <a href="{{ route('admin.settings.hom-profile.edit') }}"
+                    class="group flex items-center px-2 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.settings.*') ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
                     <i class="fas fa-cog mr-3"></i>
                     Settings
                 </a>

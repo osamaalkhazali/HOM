@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\ApplicationController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ProfileManagementController;
 use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\SettingController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -105,6 +106,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::patch('/admins/{admin}', [AdminController::class, 'update'])->name('admins.update');
         Route::patch('/admins/{admin}/toggle-status', [AdminController::class, 'toggleStatus'])->name('admins.toggle-status');
         Route::delete('/admins/{admin}', [AdminController::class, 'destroy'])->name('admins.destroy');
+
+        // Settings (HOM Profile PDF)
+        Route::get('/settings/hom-profile', [SettingController::class, 'editHomProfile'])->name('settings.hom-profile.edit');
+        Route::post('/settings/hom-profile', [SettingController::class, 'updateHomProfile'])->name('settings.hom-profile.update');
     });
 });
 
