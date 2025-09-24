@@ -12,9 +12,9 @@
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <style>
         :root {
-            --primary-color: #18458f;
+            --primary-color: #002954;
             --primary-dark: #123660;
-            --primary-light: #2a5ba8;
+            --primary-light: #4e80bb;
             --gradient-1: linear-gradient(135deg, #18458f 0%, #667eea 100%);
             --gradient-2: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
             --gradient-3: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
@@ -28,23 +28,8 @@
         }
 
         body {
-            font-family: 'Poppins', sans-serif;
+            font-family: 'Poppins', sans-serif !important;
             overflow-x: hidden;
-        }
-
-        /* Hero Background with Image */
-        .hero-bg {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(rgba(24, 69, 143, 0.7), rgba(24, 69, 143, 0.7)), url('{{ asset('assets/images/hero.jpg') }}');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            background-attachment: fixed;
-            z-index: -2;
         }
 
         .floating-shapes {
@@ -114,64 +99,6 @@
             border: 1px solid rgba(255, 255, 255, 0.3);
             border-radius: 20px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-        }
-
-        /* Service Cards with Fixed Dimensions */
-        .service-card {
-            height: 280px;
-            width: 100%;
-            border-radius: 20px;
-            color: white;
-            padding: 2rem;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .service-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: inherit;
-            opacity: 0.9;
-            z-index: 1;
-        }
-
-        .service-card-content {
-            position: relative;
-            z-index: 2;
-        }
-
-        .service-icon {
-            width: 60px;
-            height: 60px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 1rem;
-        }
-
-        .gradient-card-1 {
-            background: var(--gradient-1);
-        }
-
-        .gradient-card-2 {
-            background: var(--gradient-2);
-        }
-
-        .gradient-card-3 {
-            background: var(--gradient-3);
-        }
-
-        .gradient-card-4 {
-            background: var(--gradient-4);
         }
 
         /* Timeline Fixes */
@@ -255,40 +182,198 @@
             color: var(--primary-color);
         }
 
-        /* Hero Section Improvements */
-        .hero-section {
-            min-height: 100vh;
+        .metric-box {
             display: flex;
             align-items: center;
-            position: relative;
-            overflow: hidden;
-            padding: 6rem 0 4rem;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: #f8f9fa;
+            border-radius: 10px;
         }
 
-        .hero-content {
+        .metric-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .metric-value {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 0.2rem;
+        }
+
+        .metric-label {
+            font-size: 0.75rem;
+            color: #6c757d;
+            margin: 0;
+        }
+
+        .progress {
+            height: 6px;
+            background: #e9ecef;
+            border-radius: 3px;
+        }
+
+        .progress-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .floating-card-1, .floating-card-2 {
+            position: absolute;
+            width: 220px;
+            padding: 1rem;
+            z-index: 8;
+        }
+
+        .floating-card-1 {
+            top: 5%;
+            right: -15%;
+            transform: rotate(3deg);
+        }
+
+        .floating-card-2 {
+            bottom: 10%;
+            left: -10%;
+            transform: rotate(-2deg);
+        }
+
+        .floating-card-1 h6, .floating-card-2 h6 {
+            font-size: 0.9rem;
+        }
+
+        .floating-card-1 small, .floating-card-2 small {
+            font-size: 0.75rem;
+        }
+
+        .icon-wrapper {
+            width: 35px;
+            height: 35px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .decoration-1 {
+            width: 200px;
+            height: 200px;
+            top: -50px;
+            right: -50px;
+        }
+
+        .decoration-2 {
+            width: 150px;
+            height: 150px;
+            bottom: 10%;
+            right: 60%;
+        }
+
+        .decoration-3 {
+            width: 100px;
+            height: 100px;
+            top: 60%;
+            left: -30px;
+        }
+
+        .scroll-indicator {
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            color: #6c757d;
+            z-index: 10;
+        }
+
+        .scroll-arrow {
+            width: 40px;
+            height: 40px;
+            border: 2px solid #6c757d;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 0.5rem;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+
+        /* Section Styling - Consistent with Hero */
+        .section-with-bg {
+            background-image: linear-gradient(135deg, rgba(0, 0, 0, 0.2) 0%, rgba(24, 69, 143, 0.1) 100%),
+                              url('{{ asset('assets/images/hero.jpg') }}');
+            background-size: cover;
+            background-position: center center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .section-bg-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 249, 252, 0.9) 50%, rgba(255, 255, 255, 0.85) 100%);
+            z-index: 1;
+        }
+
+        .section-with-bg .container {
             position: relative;
             z-index: 2;
         }
 
-        .hero-title {
-            font-size: clamp(2.5rem, 8vw, 4.5rem);
-            font-weight: 800;
-            line-height: 1.2;
-            margin-bottom: 2rem;
+        .section-with-bg h2,
+        .section-with-bg h3,
+        .section-with-bg h4 {
+            position: relative;
+            z-index: 3;
         }
 
-        .hero-subtitle {
-            font-size: clamp(1rem, 4vw, 1.5rem);
-            line-height: 1.6;
-            margin-bottom: 3rem;
-            opacity: 0.95;
+        /* Mobile Responsive */
+        @media (max-width: 991px) {
+            .section-with-bg {
+                background-image: none !important;
+                background: linear-gradient(135deg, #f8f9fc 0%, #ffffff 100%);
+                background-attachment: scroll;
+            }
+
+            .section-bg-overlay {
+                background: none;
+            }
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 991px) {
+            .floating-card-1, .floating-card-2 {
+                display: none;
+            }
+        }
+
+        @media (max-width: 576px) {
         }
 
         /* Typing Animation */
         .typing-text {
             color: #ffd700;
             display: inline-block;
-            border-right: 3px solid # font-size: 1.5rem !important;
+            border-right: 3px solid #ffd700;
+            font-size: 1.5rem !important;
+            animation: blink 1s step-end infinite;
         }
 
         @keyframes blink {
@@ -362,18 +447,6 @@
             object-fit: contain;
         }
 
-        /* Custom Navbar */
-        .navbar-custom {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            transition: all 0.3s ease;
-        }
-
-        .navbar-scrolled {
-            background: rgba(255, 255, 255, 0.98);
-            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
-        }
-
         /* Mobile Responsive */
         @media (max-width: 768px) {
             .timeline-line {
@@ -393,12 +466,6 @@
                 font-size: 2rem;
             }
 
-            .service-card {
-                height: auto;
-                min-height: 280px;
-                margin-bottom: 2rem;
-            }
-
             .hero-section {
                 padding: 8rem 0 4rem;
                 text-align: center;
@@ -414,572 +481,55 @@
         }
 
         @media (max-width: 576px) {
-            .service-card {
-                height: auto;
-                min-height: 250px;
-                padding: 1.5rem;
-            }
-
             .timeline-item .col-lg-6 {
                 padding-left: 4rem !important;
             }
         }
+
+        /* Position scroll indicator */
+        .scroll-indicator {
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+        }
+
+        /* Buttons: 10px radius and gradients */
+        .btn-hom { border-radius: 10px !important; }
+        .btn-gradient-1 { background: var(--gradient-1); border: 0; color: #fff; }
+        .btn-gradient-1:hover { filter: brightness(0.95); color: #fff; }
+        .btn-gradient-2 { background: var(--gradient-3); border: 0; color: #fff; }
+        .btn-gradient-2:hover { filter: brightness(0.95); color: #fff; }
+
+        /* HOM Primary text utility */
+        .text-hom-primary { color: var(--primary-color) !important; }
     </style>
 </head>
 
-<body>
+<body id="top">
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-custom fixed-top" id="mainNav">
-        <div class="container">
-            <a class="navbar-brand d-flex align-items-center" href="{{ url('/') }}" data-aos="fade-right">
-                <img src="{{ asset('assets/images/HOM-logo.png') }}" alt="HOM Logo" class="logo-img">
-            </a>
-
-            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse"
-                data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto me-4">
-                    <li class="nav-item" data-aos="fade-down" data-aos-delay="100">
-                        <a class="nav-link fw-medium position-relative" href="#services">Services</a>
-                    </li>
-                    <li class="nav-item" data-aos="fade-down" data-aos-delay="200">
-                        <a class="nav-link fw-medium" href="#clients">Clients</a>
-                    </li>
-                    <li class="nav-item" data-aos="fade-down" data-aos-delay="300">
-                        <a class="nav-link fw-medium" href="#about">About</a>
-                    </li>
-                    <li class="nav-item" data-aos="fade-down" data-aos-delay="400">
-                        <a class="nav-link fw-medium" href="#contact">Contact</a>
-                    </li>
-                    <li class="nav-item" data-aos="fade-down" data-aos-delay="500">
-                        <a class="nav-link fw-medium" href="{{ route('jobs.index') }}">Jobs</a>
-                    </li>
-                </ul>
-
-                <!-- Authentication Section -->
-                @auth
-                    <!-- User Dropdown Button -->
-                    <div class="dropdown" data-aos="fade-left">
-                        <button class="btn morph-btn pulse-btn fw-semibold px-4 py-2 text-white dropdown-toggle"
-                            style="background: var(--gradient-1); border: none; border-radius: 25px;" type="button"
-                            id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                            {{ Auth::user()->name }}
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                            <li>
-                                <a class="dropdown-item" href="{{ route('dashboard') }}">
-                                    Dashboard
-                                </a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item" href="{{ route('profile.edit') }}">
-                                    Profile
-                                </a>
-                            </li>
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
-                            <li>
-                                <form method="POST" action="{{ route('logout') }}">
-                                    @csrf
-                                    <button type="submit" class="dropdown-item">
-                                        Logout
-                                    </button>
-                                </form>
-                            </li>
-                        </ul>
-                    </div>
-                @else
-                    <!-- Guest Login/Register Buttons -->
-                    <div class="d-flex gap-2" data-aos="fade-left">
-                        <a href="{{ route('login') }}" class="btn btn-outline-primary fw-semibold px-3 py-2"
-                            style="border-radius: 25px; border: 2px solid var(--primary-color); color: var(--primary-color);">
-                            Login
-                        </a>
-                        <button class="btn morph-btn pulse-btn fw-semibold px-4 py-2 text-white"
-                            style="background: var(--gradient-1); border: none; border-radius: 25px;"
-                            onclick="window.location.href='{{ route('register') }}'">
-                            Get Started
-                        </button>
-                    </div>
-                @endauth
-            </div>
-        </div>
-    </nav>
+    @include('layouts.navigation')
 
     <!-- Hero Section -->
-    <section class="hero-section text-white position-relative">
-        <div class="hero-bg"></div>
-        <div class="floating-shapes">
-            <div class="shape"></div>
-            <div class="shape"></div>
-            <div class="shape"></div>
-        </div>
+    @include('landing.hero')
 
-        <div class="container">
-            <div class="row justify-content-center">
-                <div class="col-lg-10 col-xl-8">
-                    <div class="hero-content text-center">
-                        <div data-aos="fade-up" data-aos-duration="1000">
-                            <h1 class="hero-title">
-                                Strategic Excellence in<br>
-                                <span class="typing-text" id="typingText">Management Consulting</span>
-                            </h1>
-                        </div>
 
-                        <div data-aos="fade-up" data-aos-delay="300" data-aos-duration="1000">
-                            <p class="hero-subtitle">
-                                Proactive financial advisory, commercial strategy, and project management solutions
-                                with <strong>flexible staff</strong> and <strong>qualified business partners</strong>
-                                across diverse industries.
-                            </p>
-                        </div>
-
-                        <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center" data-aos="fade-up"
-                            data-aos-delay="600">
-                            <button class="btn btn-light btn-lg fw-semibold px-5 py-3 morph-btn hover-lift"
-                                style="border-radius: 50px; color: var(--primary-color);">
-                                <i class="fas fa-rocket me-2"></i>Explore Our Services
-                            </button>
-                            <button class="btn btn-outline-light btn-lg fw-semibold px-5 py-3 morph-btn hover-lift"
-                                style="border-radius: 50px; border-width: 2px;">
-                                <i class="fas fa-calendar me-2"></i>Schedule Consultation
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Scroll Indicator -->
-        <div class="position-absolute bottom-0 start-50 translate-middle-x mb-4" data-aos="fade-up"
-            data-aos-delay="1000">
-            <div class="text-center">
-                <div class="animate__animated animate__bounce animate__infinite">
-                    <i class="fas fa-chevron-down fs-4"></i>
-                </div>
-                <small class="d-block mt-2">Scroll to explore</small>
-            </div>
-        </div>
-    </section>
-
-    <!-- Stats Section -->
-    <section class="py-5 bg-light position-relative">
-        <div class="container">
-            <div class="row g-4 text-center">
-                <div class="col-lg-3 col-md-6" data-aos="zoom-in" data-aos-delay="100">
-                    <div class="glass-card p-4 h-100 hover-lift">
-                        <div class="counter" data-target="150">0</div>
-                        <h5 class="fw-bold text-dark">Projects Completed</h5>
-                        <p class="text-muted mb-0">Successful deliveries across industries</p>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6" data-aos="zoom-in" data-aos-delay="200">
-                    <div class="glass-card p-4 h-100 hover-lift">
-                        <div class="counter" data-target="50">0</div>
-                        <h5 class="fw-bold text-dark">Expert Partners</h5>
-                        <p class="text-muted mb-0">Qualified business professionals</p>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6" data-aos="zoom-in" data-aos-delay="300">
-                    <div class="glass-card p-4 h-100 hover-lift">
-                        <div class="counter" data-target="15">0</div>
-                        <h5 class="fw-bold text-dark">Years Experience</h5>
-                        <p class="text-muted mb-0">Proven track record of excellence</p>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6" data-aos="zoom-in" data-aos-delay="400">
-                    <div class="glass-card p-4 h-100 hover-lift">
-                        <div class="counter" data-target="98">0</div>
-                        <h5 class="fw-bold text-dark">Client Satisfaction</h5>
-                        <p class="text-muted mb-0">Percentage of satisfied clients</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
 
     <!-- Services Section -->
-    <section id="services" class="py-5 position-relative">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-8 mx-auto text-center mb-5" data-aos="fade-up">
-                    <h2 class="display-4 fw-bold text-dark mb-4">Our Core Services</h2>
-                    <p class="lead text-muted">
-                        Comprehensive expertise delivered through our <strong>flexible staff base</strong> and
-                        <strong>qualified business partners</strong>
-                    </p>
-                </div>
-            </div>
+    @include('landing.services')
 
-            <div class="row g-4">
-                <div class="col-lg-6" data-aos="fade-up" data-aos-delay="100">
-                    <div class="service-card gradient-card-1 hover-lift">
-                        <div class="service-card-content">
-                            <div class="d-flex align-items-center mb-3">
-                                <div class="service-icon">
-                                    <i class="fas fa-chart-line fs-3"></i>
-                                </div>
-                                <div class="ms-3">
-                                    <h4 class="fw-bold mb-1">Financial Advisory</h4>
-                                    <small class="opacity-75">Strategic solutions</small>
-                                </div>
-                            </div>
-                            <p class="opacity-90 mb-0">Strategic financial planning, risk assessment, and investment
-                                guidance tailored to your business needs with proactive market insights.</p>
-                        </div>
-                    </div>
-                </div>
+    <!-- Our Valued Clients Section -->
+    @include('landing.clients')
 
-                <div class="col-lg-6" data-aos="fade-up" data-aos-delay="200">
-                    <div class="service-card gradient-card-2 hover-lift">
-                        <div class="service-card-content">
-                            <div class="d-flex align-items-center mb-3">
-                                <div class="service-icon">
-                                    <i class="fas fa-briefcase fs-3"></i>
-                                </div>
-                                <div class="ms-3">
-                                    <h4 class="fw-bold mb-1">Commercial Strategy</h4>
-                                    <small class="opacity-75">Growth focused</small>
-                                </div>
-                            </div>
-                            <p class="opacity-90 mb-0">Market analysis, business development, and commercial
-                                optimization strategies for sustainable growth and competitive advantage.</p>
-                        </div>
-                    </div>
-                </div>
+    <!-- Our Business Partners Section -->
+    @include('landing.partners')
 
-                <div class="col-lg-6" data-aos="fade-up" data-aos-delay="300">
-                    <div class="service-card gradient-card-3 hover-lift">
-                        <div class="service-card-content">
-                            <div class="d-flex align-items-center mb-3">
-                                <div class="service-icon">
-                                    <i class="fas fa-tasks fs-3"></i>
-                                </div>
-                                <div class="ms-3">
-                                    <h4 class="fw-bold mb-1">Project Management</h4>
-                                    <small class="opacity-75">End-to-end delivery</small>
-                                </div>
-                            </div>
-                            <p class="opacity-90 mb-0">Comprehensive project oversight, timeline management, and
-                                resource optimization for successful delivery across all sectors.</p>
-                        </div>
-                    </div>
-                </div>
+    @include('landing.focus')
 
-                <div class="col-lg-6" data-aos="fade-up" data-aos-delay="400">
-                    <div class="service-card gradient-card-4 hover-lift">
-                        <div class="service-card-content">
-                            <div class="d-flex align-items-center mb-3">
-                                <div class="service-icon">
-                                    <i class="fas fa-building fs-3"></i>
-                                </div>
-                                <div class="ms-3">
-                                    <h4 class="fw-bold mb-1">Construction Strategy</h4>
-                                    <small class="opacity-75">Quality assured</small>
-                                </div>
-                            </div>
-                            <p class="opacity-90 mb-0">Strategic construction planning, cost optimization, and quality
-                                assurance for building projects of all scales.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
 
-    <!-- Client Types Section with Timeline -->
-    <section id="clients" class="py-5 bg-light">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-8 mx-auto text-center mb-5" data-aos="fade-up">
-                    <h2 class="display-4 fw-bold text-dark mb-4">Organizations We Serve</h2>
-                    <p class="lead text-muted">
-                        Our <strong>flexible staff base</strong> and <strong>qualified business partners</strong>
-                        provide effective services across diverse sectors
-                    </p>
-                </div>
-            </div>
 
-            <div class="timeline-section position-relative">
-                <div class="timeline-line"></div>
-
-                <div class="timeline-item" data-aos="fade-right">
-                    <div class="timeline-dot"></div>
-                    <div class="row">
-                        <div class="col-lg-6 pe-lg-5">
-                            <div class="timeline-card p-4">
-                                <div class="d-flex align-items-center mb-3">
-                                    <div class="me-3"
-                                        style="width: 60px; height: 60px; background: var(--gradient-1); border-radius: 15px; display: flex; align-items: center; justify-content: center;">
-                                        <i class="fas fa-industry fs-3 text-white"></i>
-                                    </div>
-                                    <h4 class="fw-bold mb-0">Manufacturers/Industry</h4>
-                                </div>
-                                <p class="text-muted mb-0">Comprehensive support for facility owners and operators in
-                                    manufacturing and industrial sectors with cutting-edge solutions.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="timeline-item" data-aos="fade-left">
-                    <div class="timeline-dot"></div>
-                    <div class="row">
-                        <div class="col-lg-6 offset-lg-6 ps-lg-5">
-                            <div class="timeline-card p-4">
-                                <div class="d-flex align-items-center mb-3">
-                                    <div class="me-3"
-                                        style="width: 60px; height: 60px; background: var(--gradient-2); border-radius: 15px; display: flex; align-items: center; justify-content: center;">
-                                        <i class="fas fa-landmark fs-3 text-white"></i>
-                                    </div>
-                                    <h4 class="fw-bold mb-0">Government & Local Authorities</h4>
-                                </div>
-                                <p class="text-muted mb-0">Strategic consulting and project management for government
-                                    agencies and local authority organizations with proven methodologies.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="timeline-item" data-aos="fade-right">
-                    <div class="timeline-dot"></div>
-                    <div class="row">
-                        <div class="col-lg-6 pe-lg-5">
-                            <div class="timeline-card p-4">
-                                <div class="d-flex align-items-center mb-3">
-                                    <div class="me-3"
-                                        style="width: 60px; height: 60px; background: var(--gradient-3); border-radius: 15px; display: flex; align-items: center; justify-content: center;">
-                                        <i class="fas fa-city fs-3 text-white"></i>
-                                    </div>
-                                    <h4 class="fw-bold mb-0">Real Estate & Infrastructure</h4>
-                                </div>
-                                <p class="text-muted mb-0">Development strategies, project management, and financial
-                                    advisory for real estate and infrastructure projects of all scales.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="timeline-item" data-aos="fade-left">
-                    <div class="timeline-dot"></div>
-                    <div class="row">
-                        <div class="col-lg-6 offset-lg-6 ps-lg-5">
-                            <div class="timeline-card p-4">
-                                <div class="d-flex align-items-center mb-3">
-                                    <div class="me-3"
-                                        style="width: 60px; height: 60px; background: var(--gradient-4); border-radius: 15px; display: flex; align-items: center; justify-content: center;">
-                                        <i class="fas fa-concierge-bell fs-3 text-white"></i>
-                                    </div>
-                                    <h4 class="fw-bold mb-0">Service Sector</h4>
-                                </div>
-                                <p class="text-muted mb-0">Specialized support for tourism, educational, and healthcare
-                                    service organizations with innovative approaches.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="timeline-item" data-aos="fade-right">
-                    <div class="timeline-dot"></div>
-                    <div class="row">
-                        <div class="col-lg-6 pe-lg-5">
-                            <div class="timeline-card p-4">
-                                <div class="d-flex align-items-center mb-3">
-                                    <div class="me-3"
-                                        style="width: 60px; height: 60px; background: var(--gradient-2); border-radius: 15px; display: flex; align-items: center; justify-content: center;">
-                                        <i class="fas fa-hands-helping fs-3 text-white"></i>
-                                    </div>
-                                    <h4 class="fw-bold mb-0">Non-Governmental Organizations</h4>
-                                </div>
-                                <p class="text-muted mb-0">Strategic planning, project management, and organizational
-                                    development for NGOs and non-profits with sustainable impact.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- About Section -->
-    <section id="about" class="py-5 position-relative overflow-hidden">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-lg-6 mb-5 mb-lg-0" data-aos="fade-right">
-                    <h2 class="display-4 fw-bold text-dark mb-4">Why Choose HOM?</h2>
-                    <p class="lead text-muted mb-5">
-                        House of Management for Studies and Consultations brings together a <strong>flexible staff
-                            base</strong>
-                        and <strong>qualified business partners</strong> to deliver strategic solutions across diverse
-                        industries.
-                    </p>
-
-                    <div class="row g-4">
-                        <div class="col-sm-6">
-                            <div class="d-flex align-items-center p-3 rounded-4 hover-lift"
-                                style="background: rgba(24, 69, 143, 0.1);">
-                                <div class="me-3"
-                                    style="width: 50px; height: 50px; background: var(--gradient-1); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
-                                    <i class="fas fa-users text-white"></i>
-                                </div>
-                                <div>
-                                    <h6 class="fw-bold mb-1">Flexible Staff Base</h6>
-                                    <small class="text-muted">Qualified professionals</small>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-sm-6">
-                            <div class="d-flex align-items-center p-3 rounded-4 hover-lift"
-                                style="background: rgba(24, 69, 143, 0.1);">
-                                <div class="me-3"
-                                    style="width: 50px; height: 50px; background: var(--gradient-2); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
-                                    <i class="fas fa-handshake text-white"></i>
-                                </div>
-                                <div>
-                                    <h6 class="fw-bold mb-1">Business Partners</h6>
-                                    <small class="text-muted">Strategic alliances</small>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-sm-6">
-                            <div class="d-flex align-items-center p-3 rounded-4 hover-lift"
-                                style="background: rgba(24, 69, 143, 0.1);">
-                                <div class="me-3"
-                                    style="width: 50px; height: 50px; background: var(--gradient-3); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
-                                    <i class="fas fa-chart-bar text-white"></i>
-                                </div>
-                                <div>
-                                    <h6 class="fw-bold mb-1">Proactive Approach</h6>
-                                    <small class="text-muted">Anticipate challenges</small>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-sm-6">
-                            <div class="d-flex align-items-center p-3 rounded-4 hover-lift"
-                                style="background: rgba(24, 69, 143, 0.1);">
-                                <div class="me-3"
-                                    style="width: 50px; height: 50px; background: var(--gradient-4); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
-                                    <i class="fas fa-cogs text-white"></i>
-                                </div>
-                                <div>
-                                    <h6 class="fw-bold mb-1">Wide Range Services</h6>
-                                    <small class="text-muted">Comprehensive solutions</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-lg-6" data-aos="fade-left">
-                    <div class="position-relative">
-                        <div class="card border-0 shadow-lg hover-lift" style="background: var(--gradient-1);">
-                            <div class="card-body p-5 text-white text-center">
-                                <div class="mb-4">
-                                    <i class="fas fa-rocket fs-1"></i>
-                                </div>
-                                <h3 class="fw-bold mb-4">Ready to Transform Your Organization?</h3>
-                                <p class="opacity-90 mb-4 fs-5">
-                                    Let's discuss how our flexible team and qualified partners can drive your success.
-                                    Schedule a consultation today.
-                                </p>
-                                <button class="btn btn-light btn-lg fw-semibold w-100 morph-btn pulse-btn"
-                                    style="border-radius: 50px; color: var(--primary-color);">
-                                    <i class="fas fa-calendar-check me-2"></i>Schedule Free Consultation
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Floating Elements -->
-                        <div class="position-absolute top-0 end-0 translate-middle">
-                            <div
-                                style="width: 100px; height: 100px; background: rgba(255,255,255,0.1); border-radius: 50%; animation: float 6s ease-in-out infinite;">
-                            </div>
-                        </div>
-                        <div class="position-absolute bottom-0 start-0 translate-middle">
-                            <div
-                                style="width: 60px; height: 60px; background: rgba(255,255,255,0.1); border-radius: 50%; animation: float 4s ease-in-out infinite reverse;">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Contact Section -->
-    <section id="contact" class="py-5 position-relative"
-        style="background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-8 mx-auto text-center mb-5" data-aos="fade-up">
-                    <h2 class="display-4 fw-bold text-white mb-4">Get In Touch</h2>
-                    <p class="lead text-light">Ready to elevate your organization? Let's start the conversation.</p>
-                </div>
-            </div>
-
-            <div class="row g-4">
-                <div class="col-md-4" data-aos="zoom-in" data-aos-delay="100">
-                    <div class="glass-card text-center p-5 h-100 hover-lift">
-                        <div class="mb-4">
-                            <div
-                                style="width: 80px; height: 80px; background: var(--gradient-1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
-                                <i class="fas fa-envelope fs-3 text-white"></i>
-                            </div>
-                        </div>
-                        <h5 class="fw-bold mb-3 text-white">Email Us</h5>
-                        <p class="text-light mb-0">info@hom-consultations.com</p>
-                    </div>
-                </div>
-
-                <div class="col-md-4" data-aos="zoom-in" data-aos-delay="200">
-                    <div class="glass-card text-center p-5 h-100 hover-lift">
-                        <div class="mb-4">
-                            <div
-                                style="width: 80px; height: 80px; background: var(--gradient-2); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
-                                <i class="fas fa-phone fs-3 text-white"></i>
-                            </div>
-                        </div>
-                        <h5 class="fw-bold mb-3 text-white">Call Us</h5>
-                        <p class="text-light mb-0">+1 (555) 123-4567</p>
-                    </div>
-                </div>
-
-                <div class="col-md-4" data-aos="zoom-in" data-aos-delay="300">
-                    <div class="glass-card text-center p-5 h-100 hover-lift">
-                        <div class="mb-4">
-                            <div
-                                style="width: 80px; height: 80px; background: var(--gradient-3); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
-                                <i class="fas fa-map-marker-alt fs-3 text-white"></i>
-                            </div>
-                        </div>
-                        <h5 class="fw-bold mb-3 text-white">Visit Us</h5>
-                        <p class="text-light mb-0">123 Business District<br>City, State 12345</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="bg-black text-white py-4">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-md-6" data-aos="fade-right">
-                    <div class="d-flex align-items-center">
-                        <img src="{{ asset('assets/images/HOM-logo.png') }}" alt="HOM Logo" class="footer-logo">
-                    </div>
-                </div>
-                <div class="col-md-6 text-md-end mt-3 mt-md-0" data-aos="fade-left">
-                    <small class="text-muted">© {{ date('Y') }} HOM. All rights reserved. | Designed with
-                        ❤️</small>
-                </div>
-            </div>
-        </div>
-    </footer>
+    @include('layouts.footer')
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
