@@ -138,7 +138,7 @@
                     <button class="btn position-relative" type="button" id="notifDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="border-radius: 10px;">
                         <i class="fas fa-bell" style="font-size: 1.2rem; color: var(--primary-color);"></i>
                         @if($unread->count() > 0)
-                            <span class="position-absolute badge rounded-pill bg-danger" style="top: 0%; left: 60%; font-size: 0.5rem;">{{ $unread->count() }}</span>
+                            <span class="position-absolute badge rounded-pill bg-danger" style="top: 0%; left: 60%; font-size: 0.5rem !important; padding: 0.2rem 0.4rem !important;">{{ $unread->count() }}</span>
                         @endif
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end p-2" aria-labelledby="notifDropdown" style="min-width: 320px;">

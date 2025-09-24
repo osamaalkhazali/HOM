@@ -4,10 +4,10 @@
         <div class="flex justify-between h-16">
             <div class="flex items-center">
                 <div class="flex-shrink-0">
-                    <h1 class="text-xl font-bold text-gray-800">
-                        <i class="fas fa-briefcase text-blue-600 mr-2"></i>
-                        Job Portal Admin
-                    </h1>
+                    <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3">
+                        <img src="{{ asset('assets/images/HOM-logo.png') }}" alt="Logo" class="h-10 w-auto">
+                        <span class="text-xl font-bold" style="color: var(--primary-color);">Admin Dashboard</span>
+                    </a>
                 </div>
             </div>
             <div class="flex items-center space-x-4">

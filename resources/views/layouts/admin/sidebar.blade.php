@@ -1,11 +1,12 @@
 <!-- Sidebar -->
-<div class="w-64 bg-white shadow-lg h-full">
+<div class="w-64 bg-white shadow-lg h-full" style="font-family: 'Poppins', sans-serif;">
     <div class="flex flex-col h-full">
         <div class="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
             <div class="flex-1 px-3 space-y-1">
                 <!-- Dashboard -->
                 <a href="{{ route('admin.dashboard') }}"
-                    class="{{ request()->routeIs('admin.dashboard*') ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }} group flex items-center px-2 py-2 text-sm font-medium rounded-md">
+                    class="group flex items-center px-2 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.dashboard*') ? '' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
+                    style="{{ request()->routeIs('admin.dashboard*') ? 'background: rgba(13,110,253,0.08); color: var(--primary-color);' : '' }}">
                     <i class="fas fa-tachometer-alt mr-3"></i>
                     Dashboard
                 </a>
@@ -13,39 +14,45 @@
                 <!-- Jobs Management -->
                 <div class="space-y-1">
                     <button onclick="toggleSubmenu('jobs')"
-                        class="{{ request()->routeIs('admin.jobs*') ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }} group flex items-center w-full px-2 py-2 text-sm font-medium rounded-md">
+                        class="group flex items-center w-full px-2 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.jobs*') ? '' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
+                        style="{{ request()->routeIs('admin.jobs*') ? 'background: rgba(13,110,253,0.06); color: var(--primary-color);' : '' }}">
                         <i class="fas fa-briefcase mr-3"></i>
                         Jobs Management
                         <i class="fas fa-chevron-down ml-auto transform transition-transform" id="jobs-chevron"></i>
                     </button>
                     <div class="ml-6 space-y-1 hidden" id="jobs-submenu">
                         <a href="{{ route('admin.jobs.index') }}"
-                            class="{{ request()->routeIs('admin.jobs.index') && !request()->has('status') ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }} group flex items-center px-2 py-2 text-sm rounded-md">
+                            class="group flex items-center px-2 py-2 text-sm rounded-md {{ request()->routeIs('admin.jobs.index') && !request()->has('status') ? '' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
+                            style="{{ request()->routeIs('admin.jobs.index') && !request()->has('status') ? 'background: rgba(13,110,253,0.08); color: var(--primary-color);' : '' }}">
                             <i class="fas fa-list mr-3"></i>All Jobs
                             <span class="ml-auto bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
                                 {{ \App\Models\Job::count() }}
                             </span>
                         </a>
                         <a href="{{ route('admin.jobs.create') }}"
-                            class="{{ request()->routeIs('admin.jobs.create') ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }} group flex items-center px-2 py-2 text-sm rounded-md">
+                            class="group flex items-center px-2 py-2 text-sm rounded-md {{ request()->routeIs('admin.jobs.create') ? '' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
+                            style="{{ request()->routeIs('admin.jobs.create') ? 'background: rgba(13,110,253,0.08); color: var(--primary-color);' : '' }}">
                             <i class="fas fa-plus mr-3"></i>Add New Job
                         </a>
                         <a href="{{ route('admin.jobs.index', ['status' => 'active']) }}"
-                            class="{{ request()->get('status') === 'active' ? 'bg-green-100 text-green-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }} group flex items-center px-2 py-2 text-sm rounded-md">
+                            class="group flex items-center px-2 py-2 text-sm rounded-md {{ request()->get('status') === 'active' ? '' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
+                            style="{{ request()->get('status') === 'active' ? 'background: rgba(13,110,253,0.06); color: var(--primary-color);' : '' }}">
                             <i class="fas fa-eye mr-3"></i>Active Jobs
                             <span class="ml-auto bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
                                 {{ \App\Models\Job::where('is_active', true)->count() }}
                             </span>
                         </a>
                         <a href="{{ route('admin.jobs.index', ['status' => 'inactive']) }}"
-                            class="{{ request()->get('status') === 'inactive' ? 'bg-yellow-100 text-yellow-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }} group flex items-center px-2 py-2 text-sm rounded-md">
+                            class="group flex items-center px-2 py-2 text-sm rounded-md {{ request()->get('status') === 'inactive' ? '' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
+                            style="{{ request()->get('status') === 'inactive' ? 'background: rgba(13,110,253,0.06); color: var(--primary-color);' : '' }}">
                             <i class="fas fa-pause mr-3"></i>Inactive Jobs
                             <span class="ml-auto bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full">
                                 {{ \App\Models\Job::where('is_active', false)->count() }}
                             </span>
                         </a>
                         <a href="{{ route('admin.jobs.deleted') }}"
-                            class="{{ request()->routeIs('admin.jobs.deleted') ? 'bg-red-100 text-red-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }} group flex items-center px-2 py-2 text-sm rounded-md">
+                            class="group flex items-center px-2 py-2 text-sm rounded-md {{ request()->routeIs('admin.jobs.deleted') ? '' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
+                            style="{{ request()->routeIs('admin.jobs.deleted') ? 'background: rgba(13,110,253,0.06); color: var(--primary-color);' : '' }}">
                             <i class="fas fa-trash mr-3"></i>Deleted Jobs
                             @php $deletedCount = \App\Models\Job::onlyTrashed()->count(); @endphp
                             @if ($deletedCount > 0)
@@ -60,7 +67,8 @@
                 <!-- Applications -->
                 <div class="space-y-1">
                     <button onclick="toggleSubmenu('applications')"
-                        class="{{ request()->routeIs('admin.applications*') ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }} group flex items-center w-full px-2 py-2 text-sm font-medium rounded-md">
+                        class="group flex items-center w-full px-2 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.applications*') ? '' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
+                        style="{{ request()->routeIs('admin.applications*') ? 'background: rgba(13,110,253,0.06); color: var(--primary-color);' : '' }}">
                         <i class="fas fa-file-alt mr-3"></i>
                         Applications
                         <i class="fas fa-chevron-down ml-auto transform transition-transform"
@@ -68,35 +76,40 @@
                     </button>
                     <div id="applications-submenu" class="ml-6 space-y-1 hidden">
                         <a href="{{ route('admin.applications.index') }}"
-                            class="{{ request()->routeIs('admin.applications.index') && !request()->has('status') ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }} group flex items-center px-2 py-2 text-sm rounded-md">
+                            class="group flex items-center px-2 py-2 text-sm rounded-md {{ request()->routeIs('admin.applications.index') && !request()->has('status') ? '' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
+                            style="{{ request()->routeIs('admin.applications.index') && !request()->has('status') ? 'background: rgba(13,110,253,0.08); color: var(--primary-color);' : '' }}">
                             <i class="fas fa-list mr-3"></i>All Applications
                             <span class="ml-auto bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
                                 {{ \App\Models\Application::count() }}
                             </span>
                         </a>
                         <a href="{{ route('admin.applications.index', ['status' => 'pending']) }}"
-                            class="{{ request()->get('status') === 'pending' ? 'bg-yellow-100 text-yellow-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }} group flex items-center px-2 py-2 text-sm rounded-md">
+                            class="group flex items-center px-2 py-2 text-sm rounded-md {{ request()->get('status') === 'pending' ? '' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
+                            style="{{ request()->get('status') === 'pending' ? 'background: rgba(13,110,253,0.06); color: var(--primary-color);' : '' }}">
                             <i class="fas fa-clock mr-3"></i>Pending
                             <span class="ml-auto bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full">
                                 {{ \App\Models\Application::where('status', 'pending')->count() }}
                             </span>
                         </a>
                         <a href="{{ route('admin.applications.index', ['status' => 'reviewed']) }}"
-                            class="{{ request()->get('status') === 'reviewed' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }} group flex items-center px-2 py-2 text-sm rounded-md">
+                            class="group flex items-center px-2 py-2 text-sm rounded-md {{ request()->get('status') === 'reviewed' ? '' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
+                            style="{{ request()->get('status') === 'reviewed' ? 'background: rgba(13,110,253,0.08); color: var(--primary-color);' : '' }}">
                             <i class="fas fa-eye mr-3"></i>Reviewed
                             <span class="ml-auto bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
                                 {{ \App\Models\Application::where('status', 'reviewed')->count() }}
                             </span>
                         </a>
                         <a href="{{ route('admin.applications.index', ['status' => 'shortlisted']) }}"
-                            class="{{ request()->get('status') === 'shortlisted' ? 'bg-green-100 text-green-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }} group flex items-center px-2 py-2 text-sm rounded-md">
+                            class="group flex items-center px-2 py-2 text-sm rounded-md {{ request()->get('status') === 'shortlisted' ? '' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
+                            style="{{ request()->get('status') === 'shortlisted' ? 'background: rgba(13,110,253,0.06); color: var(--primary-color);' : '' }}">
                             <i class="fas fa-star mr-3"></i>Shortlisted
                             <span class="ml-auto bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
                                 {{ \App\Models\Application::where('status', 'shortlisted')->count() }}
                             </span>
                         </a>
                         <a href="{{ route('admin.applications.index', ['status' => 'hired']) }}"
-                            class="{{ request()->get('status') === 'hired' ? 'bg-purple-100 text-purple-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }} group flex items-center px-2 py-2 text-sm rounded-md">
+                            class="group flex items-center px-2 py-2 text-sm rounded-md {{ request()->get('status') === 'hired' ? '' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
+                            style="{{ request()->get('status') === 'hired' ? 'background: rgba(13,110,253,0.06); color: var(--primary-color);' : '' }}">
                             <i class="fas fa-user-check mr-3"></i>Hired
                             <span class="ml-auto bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded-full">
                                 {{ \App\Models\Application::where('status', 'hired')->count() }}
@@ -107,7 +120,8 @@
 
                 <!-- Categories -->
                 <a href="{{ route('admin.categories.index') }}"
-                    class="{{ request()->routeIs('admin.categories*') ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }} group flex items-center px-2 py-2 text-sm font-medium rounded-md">
+                    class="group flex items-center px-2 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.categories*') ? '' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
+                    style="{{ request()->routeIs('admin.categories*') ? 'background: rgba(13,110,253,0.08); color: var(--primary-color);' : '' }}">
                     <i class="fas fa-tags mr-3"></i>
                     Categories
                     <span class="ml-auto bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
@@ -117,7 +131,8 @@
 
                 <!-- Users & Profiles -->
                 <a href="{{ route('admin.users.index') }}"
-                    class="text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-2 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.users.*') ? 'bg-blue-50 text-blue-700' : '' }}">
+                    class="group flex items-center px-2 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.users.*') ? '' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
+                    style="{{ request()->routeIs('admin.users.*') ? 'background: rgba(13,110,253,0.06); color: var(--primary-color);' : '' }}">
                     <i class="fas fa-users mr-3"></i>
                     Users & Profiles
                     <span class="ml-auto bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
@@ -127,14 +142,16 @@
 
                 <!-- Admin Management -->
                 <a href="{{ route('admin.admins.index') }}"
-                    class="text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-2 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.admins.*') ? 'bg-blue-50 text-blue-700' : '' }}">
+                    class="group flex items-center px-2 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.admins.*') ? '' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
+                    style="{{ request()->routeIs('admin.admins.*') ? 'background: rgba(13,110,253,0.06); color: var(--primary-color);' : '' }}">
                     <i class="fas fa-users-cog mr-3"></i>
                     Admin Management
                 </a>
 
                 <!-- Settings -->
                 <a href="{{ route('admin.settings.hom-profile.edit') }}"
-                    class="group flex items-center px-2 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.settings.*') ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                    class="group flex items-center px-2 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.settings.*') ? '' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
+                    style="{{ request()->routeIs('admin.settings.*') ? 'background: rgba(13,110,253,0.06); color: var(--primary-color);' : '' }}">
                     <i class="fas fa-cog mr-3"></i>
                     Settings
                 </a>
