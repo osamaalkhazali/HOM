@@ -1,6 +1,6 @@
 <div align="center">
 
-![HOM Logo](public/assets/images/HOM-logo.png)
+<img src="public/assets/images/HOM-logo.png" alt="HOM Logo" width="300">
 
 # 🌐 HOM - House of Management
 ### *For Studies and Consultations*
@@ -20,10 +20,21 @@
 
 ## ✨ About HOM
 
-**House of Management for Studies and Consultations** is a sophisticated web platform that combines professional consulting services with a comprehensive job portal system. Our platform bridges the gap between management excellence and career opportunities.
+**House of Management for Studies and Consultations (HOM)** is a leading management consultancy that delivers comprehensive financial advisory, commercial strategy, project management, and construction consulting services to organizations across **industry, government, real estate, healthcare, tourism, and NGO sectors**.
 
 ### 🎯 Our Mission
-Empowering organizations and individuals through strategic management solutions and career development opportunities.
+Empowering businesses with strategic excellence through proactive financial advisory, strategic project management, and qualified business partnerships.
+
+### 🏢 Core Expertise
+- **Financial Analysis & Advisory** - Maximum value optimization and risk identification
+- **Project Development & Management** - End-to-end project lifecycle management  
+- **Strategic Business Consulting** - Commercial strategy and market positioning
+- **Construction & Real Estate** - Specialized consulting for construction projects
+- **Organizational Development** - Capacity building and operational excellence
+- **Technology Integration** - Digital transformation and process optimization
+
+### 🌍 Industry Focus
+HOM serves diverse sectors including **Industry, Government, Real Estate, Healthcare, Tourism, and NGO sectors** with tailored solutions delivered through our flexible staff base and qualified business partners.
 
 ---
 
@@ -55,10 +66,12 @@ Empowering organizations and individuals through strategic management solutions 
 </table>
 
 ### 🌟 **Management Consulting Features**
-- 📋 **Service Portfolio** - Comprehensive consulting services
-- 🤝 **Client Management** - Professional client relations
-- 📄 **Document Management** - Secure document handling
-- 🎯 **Project Tracking** - Advanced project management tools
+- 📋 **Financial Analysis & Advisory** - Maximum value optimization and comprehensive risk assessment
+- 🤝 **Strategic Project Management** - End-to-end project lifecycle management and delivery
+- 📄 **Commercial Strategy Development** - Market positioning and business strategy consulting
+- 🎯 **Construction & Real Estate Consulting** - Specialized expertise in construction project management
+- � **Organizational Development** - Capacity building and operational excellence initiatives
+- 💼 **Business Partnership Development** - Strategic alliances and partnership management
 
 ---
 
@@ -69,7 +82,7 @@ Empowering organizations and individuals through strategic management solutions 
 | **Backend** | **Frontend** | **Database** | **Tools** |
 |-------------|--------------|--------------|-----------|
 | ![Laravel](https://img.shields.io/badge/Laravel-FF2D20?style=flat-square&logo=laravel&logoColor=white) Laravel 11 | ![Bootstrap](https://img.shields.io/badge/Bootstrap-7952B3?style=flat-square&logo=bootstrap&logoColor=white) Bootstrap 5 | ![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=flat-square&logo=mysql&logoColor=white) MySQL 8.0+ | ![Vite](https://img.shields.io/badge/Vite-646CFF?style=flat-square&logo=vite&logoColor=white) Vite |
-| ![PHP](https://img.shields.io/badge/PHP-777BB4?style=flat-square&logo=php&logoColor=white) PHP 8.2+ | ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=black) Vanilla JS | ![SQLite](https://img.shields.io/badge/SQLite-003B57?style=flat-square&logo=sqlite&logoColor=white) SQLite Support | ![Composer](https://img.shields.io/badge/Composer-885630?style=flat-square&logo=composer&logoColor=white) Composer |
+| ![PHP](https://img.shields.io/badge/PHP-777BB4?style=flat-square&logo=php&logoColor=white) PHP 8.2+ | ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=black) Vanilla JS | ![Database](https://img.shields.io/badge/Database-Production-003B57?style=flat-square&logo=database&logoColor=white) Optimized | ![Composer](https://img.shields.io/badge/Composer-885630?style=flat-square&logo=composer&logoColor=white) Composer |
 
 </div>
 
