@@ -1,268 +1,411 @@
-# HOM - Job Portal Application
+<div align="center">
 
-A modern job portal application built with Laravel 11 and Bootstrap 5, featuring job listings, user applications, profile management, and admin dashboard.
+![HOM Logo](public/assets/images/HOM-logo.png)
 
-## 🚀 Features
+# 🌐 HOM - House of Management
+### *For Studies and Consultations*
 
-- **Job Management**: Browse, search, and filter job listings
-- **User Profiles**: Complete profile management with CV upload
-- **Application System**: Apply for jobs with CV and cover letters
-- **Admin Dashboard**: Manage jobs, users, and applications
-- **Responsive Design**: Modern UI with Bootstrap 5
-- **File Upload**: CV and resume management
-- **Email Verification**: Secure user registration
+[![Laravel](https://img.shields.io/badge/Laravel-11.x-FF2D20?style=for-the-badge&logo=laravel)](https://laravel.com)
+[![PHP](https://img.shields.io/badge/PHP-8.2+-777BB4?style=for-the-badge&logo=php)](https://php.net)
+[![Bootstrap](https://img.shields.io/badge/Bootstrap-5.3-7952B3?style=for-the-badge&logo=bootstrap)](https://getbootstrap.com)
+[![MySQL](https://img.shields.io/badge/MySQL-8.0+-4479A1?style=for-the-badge&logo=mysql)](https://mysql.com)
+
+*A comprehensive management consulting platform and job portal built with modern web technologies*
+
+[🚀 Live Demo](#) • [📖 Documentation](#installation) • [💬 Support](#support)
+
+</div>
+
+---
+
+## ✨ About HOM
+
+**House of Management for Studies and Consultations** is a sophisticated web platform that combines professional consulting services with a comprehensive job portal system. Our platform bridges the gap between management excellence and career opportunities.
+
+### 🎯 Our Mission
+Empowering organizations and individuals through strategic management solutions and career development opportunities.
+
+---
+
+## 🚀 Key Features
+
+<table>
+<tr>
+<td width="50%">
+
+### 👥 **For Job Seekers**
+- 🔍 **Smart Job Search** - Advanced filtering and search
+- 📄 **Profile Management** - Complete professional profiles
+- 📋 **Application Tracking** - Real-time status updates
+- 🔔 **Smart Notifications** - Email alerts and in-app notifications
+- 💼 **CV Management** - Secure document upload and management
+
+</td>
+<td width="50%">
+
+### 🏢 **For Organizations**
+- 📊 **Admin Dashboard** - Comprehensive management interface
+- 📝 **Job Management** - Create and manage job postings
+- 👤 **User Management** - Advanced user administration
+- 📈 **Analytics** - Detailed reporting and insights
+- 🎯 **Application Processing** - Streamlined hiring workflow
+
+</td>
+</tr>
+</table>
+
+### 🌟 **Management Consulting Features**
+- 📋 **Service Portfolio** - Comprehensive consulting services
+- 🤝 **Client Management** - Professional client relations
+- 📄 **Document Management** - Secure document handling
+- 🎯 **Project Tracking** - Advanced project management tools
+
+---
+
+## �️ Technology Stack
+
+<div align="center">
+
+| **Backend** | **Frontend** | **Database** | **Tools** |
+|-------------|--------------|--------------|-----------|
+| ![Laravel](https://img.shields.io/badge/Laravel-FF2D20?style=flat-square&logo=laravel&logoColor=white) Laravel 11 | ![Bootstrap](https://img.shields.io/badge/Bootstrap-7952B3?style=flat-square&logo=bootstrap&logoColor=white) Bootstrap 5 | ![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=flat-square&logo=mysql&logoColor=white) MySQL 8.0+ | ![Vite](https://img.shields.io/badge/Vite-646CFF?style=flat-square&logo=vite&logoColor=white) Vite |
+| ![PHP](https://img.shields.io/badge/PHP-777BB4?style=flat-square&logo=php&logoColor=white) PHP 8.2+ | ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=black) Vanilla JS | ![SQLite](https://img.shields.io/badge/SQLite-003B57?style=flat-square&logo=sqlite&logoColor=white) SQLite Support | ![Composer](https://img.shields.io/badge/Composer-885630?style=flat-square&logo=composer&logoColor=white) Composer |
+
+</div>
+
+---
 
 ## 📋 Prerequisites
 
-Before you begin, ensure you have the following installed:
+<table>
+<tr>
+<td>
 
-- **PHP 8.2+** with required extensions
-- **Composer** (PHP dependency manager)
-- **Node.js & NPM** (for frontend assets)
-- **MySQL 8.0+** or compatible database
-- **Web Server** (Apache/Nginx) or use Laravel's built-in server
+**🔧 System Requirements**
+- PHP 8.2+ with extensions
+- Composer 2.0+
+- Node.js 18+ & NPM
+- MySQL 8.0+ or SQLite
+- Web Server (Apache/Nginx)
 
-## 🛠️ Installation Steps
+</td>
+<td>
 
-### 1. Clone the Repository
+**📦 PHP Extensions**
+- BCMath, Ctype, JSON
+- Mbstring, OpenSSL, PDO
+- Tokenizer, XML, GD
+- Fileinfo, Curl
 
+</td>
+</tr>
+</table>
+
+---
+
+## � Installation Guide
+
+### **Step 1: Clone Repository**
 ```bash
 git clone https://github.com/osamaalkhazali/HOM.git
 cd HOM
 ```
 
-### 2. Install PHP Dependencies
-
+### **Step 2: Install Dependencies**
 ```bash
+# Install PHP dependencies
 composer install
-```
 
-### 3. Install JavaScript Dependencies
-
-```bash
+# Install JavaScript dependencies
 npm install
 ```
 
-### 4. Environment Configuration
-
-Copy the environment file and configure your settings:
-
+### **Step 3: Environment Setup**
 ```bash
+# Copy environment file
 copy .env.example .env
+
+# Generate application key
+php artisan key:generate
 ```
 
-Edit `.env` file with your database and mail configuration:
+### **Step 4: Configure Environment**
+Edit your `.env` file with the following configuration:
 
 ```env
-APP_NAME="HOM Job Portal"
+APP_NAME="HOM - House of Management"
 APP_ENV=local
-APP_KEY=
+APP_KEY=base64:your-generated-key
 APP_DEBUG=true
 APP_URL=http://localhost:8000
 
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
-DB_DATABASE=hom_jobportal
+DB_DATABASE=hom_platform
 DB_USERNAME=your_username
 DB_PASSWORD=your_password
 
 MAIL_MAILER=smtp
-MAIL_HOST=your_smtp_host
+MAIL_HOST=smtp.gmail.com
 MAIL_PORT=587
-MAIL_USERNAME=your_email
-MAIL_PASSWORD=your_password
+MAIL_USERNAME=your_email@gmail.com
+MAIL_PASSWORD=your_app_password
 MAIL_ENCRYPTION=tls
-MAIL_FROM_ADDRESS=noreply@yoursite.com
-MAIL_FROM_NAME="${APP_NAME}"
+MAIL_FROM_ADDRESS=noreply@hom.com
+MAIL_FROM_NAME="HOM Platform"
 ```
 
-### 5. Generate Application Key
-
+### **Step 5: Database Setup**
 ```bash
-php artisan key:generate
-```
-
-### 6. Database Setup
-
-Create your database and run migrations with seeders:
-
-```bash
+# Run migrations with sample data
 php artisan migrate --seed
-```
 
-### 7. Storage Setup
-
-Create storage symbolic link for file uploads:
-
-```bash
+# Create storage symbolic link
 php artisan storage:link
 ```
 
-### 8. Build Frontend Assets
-
-For development:
+### **Step 6: Build Assets**
 ```bash
+# Development build
 npm run dev
-```
 
-For production:
-```bash
+# Production build
 npm run build
 ```
 
-### 9. Start the Development Server
-
+### **Step 7: Launch Application**
 ```bash
 php artisan serve
 ```
 
-Your application will be available at: `http://localhost:8000`
+🎉 **Your application is now running at:** `http://localhost:8000`
 
-## 👥 Default Accounts
+---
 
-### Admin Account
-- **Email**: `admin@jobportal.com`
-- **Password**: `password123`
-- **Role**: Super Admin
-- **Access**: Full admin dashboard access
+## 👥 Default Access Credentials
 
-### Test User Account
-- **Email**: `john@example.com`
-- **Password**: `password`
-- **Role**: Regular User
-- **Features**: Can browse jobs, apply, manage profile
+<div align="center">
 
-### Additional Test Users
-The system includes 10+ additional test users with the email pattern:
-- `jane@example.com`, `michael@example.com`, etc.
-- All use password: `password`
+### 🔐 **Admin Dashboard Access**
+| Field | Value |
+|-------|--------|
+| **Email** | `admin@hom.com` |
+| **Password** | `password123` |
+| **Role** | Super Administrator |
 
-## 📁 Project Structure
+### 👤 **Test User Account**
+| Field | Value |
+|-------|--------|
+| **Email** | `john@example.com` |
+| **Password** | `password` |
+| **Role** | Job Seeker |
+
+</div>
+
+---
+
+## 🏗️ Project Architecture
 
 ```
 HOM/
-├── app/
-│   ├── Http/Controllers/     # Application controllers
-│   ├── Models/              # Eloquent models
-│   └── ...
-├── database/
-│   ├── migrations/          # Database migrations
-│   └── seeders/            # Database seeders
-├── resources/
-│   ├── views/              # Blade templates
+├── 📁 app/
+│   ├── Http/Controllers/      # Application logic controllers
+│   ├── Models/               # Eloquent data models
+│   ├── Notifications/        # Email & app notifications
+│   └── Providers/           # Service providers
+├── 📁 database/
+│   ├── migrations/          # Database schema migrations
+│   ├── seeders/            # Sample data generators
+│   └── factories/          # Model factories
+├── 📁 resources/
+│   ├── views/              # Blade template files
+│   │   ├── admin/          # Admin panel views
+│   │   ├── auth/           # Authentication pages
+│   │   ├── jobs/           # Job-related pages
+│   │   └── landing/        # Homepage sections
 │   ├── css/                # Stylesheets
 │   └── js/                 # JavaScript files
-├── storage/
-│   └── app/public/         # File uploads (CVs, resumes)
-└── public/                 # Web accessible files
+├── 📁 public/
+│   ├── assets/             # Static assets (images, etc.)
+│   ├── storage/            # Uploaded files symlink
+│   └── hom-favicon.png     # Custom favicon
+└── 📁 storage/
+    └── app/public/         # File uploads (CVs, documents)
 ```
 
-## 🔧 Key Commands
+---
 
-### Development Commands
+## 🎯 Feature Highlights
+
+<table>
+<tr>
+<td align="center" width="33%">
+
+### 🔔 **Smart Notifications**
+Real-time notifications for job applications, status updates, and admin activities with both email and in-app delivery.
+
+</td>
+<td align="center" width="33%">
+
+### � **Advanced Dashboard**
+Comprehensive admin dashboard with analytics, user management, and system monitoring capabilities.
+
+</td>
+<td align="center" width="33%">
+
+### 🔒 **Security First**
+Built with Laravel's security features including CSRF protection, input validation, and secure file uploads.
+
+</td>
+</tr>
+<tr>
+<td align="center">
+
+### 📱 **Responsive Design**
+Mobile-first design with Bootstrap 5, ensuring perfect experience across all devices.
+
+</td>
+<td align="center">
+
+### ⚡ **Performance Optimized**
+Optimized database queries, asset compilation with Vite, and efficient caching strategies.
+
+</td>
+<td align="center">
+
+### 🎨 **Modern UI/UX**
+Clean, professional interface with smooth animations and intuitive user experience.
+
+</td>
+</tr>
+</table>
+
+---
+
+## 📊 System Statistics
+
+<div align="center">
+
+![GitHub repo size](https://img.shields.io/github/repo-size/osamaalkhazali/HOM?style=for-the-badge)
+![GitHub last commit](https://img.shields.io/github/last-commit/osamaalkhazali/HOM?style=for-the-badge)
+![GitHub commit activity](https://img.shields.io/github/commit-activity/m/osamaalkhazali/HOM?style=for-the-badge)
+
+</div>
+
+---
+
+## 🔧 Development Commands
+
+<table>
+<tr>
+<td width="50%">
+
+### **🏃 Development**
 ```bash
 # Start development server
 php artisan serve
 
-# Watch and compile assets
+# Watch assets for changes
 npm run dev
 
 # Run migrations
 php artisan migrate
 
-# Refresh database with fresh data
+# Seed fresh data
 php artisan migrate:fresh --seed
-
-# Clear application cache
-php artisan cache:clear
-php artisan config:clear
-php artisan route:clear
 ```
 
-### Production Commands
+</td>
+<td width="50%">
+
+### **🚀 Production**
 ```bash
 # Optimize for production
+php artisan optimize
+
+# Cache configurations
 php artisan config:cache
 php artisan route:cache
-php artisan view:cache
 
 # Build production assets
 npm run build
 ```
 
-## 📱 Features Overview
+</td>
+</tr>
+</table>
 
-### For Job Seekers
-- **Browse Jobs**: Search and filter job listings
-- **Profile Management**: Complete profile with CV upload
-- **Application Tracking**: Track application status
-- **Email Notifications**: Receive updates on applications
-
-### For Admins
-- **Job Management**: Create, edit, and manage job postings
-- **User Management**: View and manage registered users
-- **Application Monitoring**: Review and process applications
-- **Analytics Dashboard**: View system statistics
-
-## 🛡️ Security Features
-
-- **Email Verification**: Required for account activation
-- **File Upload Validation**: Secure CV/resume uploads
-- **CSRF Protection**: Built-in Laravel security
-- **Input Validation**: Comprehensive form validation
-- **Password Hashing**: Secure password storage
-
-## 📧 Email Configuration
-
-For email functionality (verification, notifications), configure your `.env` file with valid SMTP settings. For development, you can use services like:
-
-- **Mailtrap** (recommended for testing)
-- **Gmail SMTP**
-- **SendGrid**
-- **Mailgun**
-
-## 🐛 Troubleshooting
-
-### Common Issues
-
-**Storage Link Issues:**
+### **🧹 Maintenance Commands**
 ```bash
+# Clear all caches
+php artisan cache:clear
+php artisan config:clear
+php artisan route:clear
+php artisan view:clear
+
+# Storage management
 php artisan storage:link
+php artisan queue:work    # For job queues
 ```
 
-**Permission Issues (Linux/Mac):**
+---
+
+## 📞 Support & Contact
+
+<div align="center">
+
+**Need Help?** We're here to assist you!
+
+[![Email](https://img.shields.io/badge/Email-support%40hom.com-D14836?style=for-the-badge&logo=gmail)](mailto:support@hom.com)
+[![GitHub Issues](https://img.shields.io/badge/GitHub-Issues-181717?style=for-the-badge&logo=github)](https://github.com/osamaalkhazali/HOM/issues)
+[![Documentation](https://img.shields.io/badge/Documentation-Read%20More-blue?style=for-the-badge&logo=read-the-docs)](https://laravel.com/docs)
+
+</div>
+
+### 🆘 **Troubleshooting Guide**
+
+<details>
+<summary><strong>🔧 Common Issues & Solutions</strong></summary>
+
+**Storage Permission Issues:**
 ```bash
 chmod -R 775 storage bootstrap/cache
+chown -R www-data:www-data storage bootstrap/cache
 ```
 
-**Asset Compilation Issues:**
+**Asset Compilation Problems:**
 ```bash
 npm run build
+php artisan view:clear
 ```
 
 **Database Connection Issues:**
 - Verify database credentials in `.env`
-- Ensure MySQL service is running
-- Check database name exists
+- Ensure MySQL/SQLite service is running
+- Check if database exists
 
-## 📞 Support
+**Email Configuration:**
+- Use app-specific passwords for Gmail
+- Configure SMTP settings correctly
+- Test with Mailtrap for development
 
-For issues and questions:
-- Check Laravel documentation: https://laravel.com/docs
-- Review the code for implementation details
-- Ensure all dependencies are properly installed
-
-## 🏗️ Built With
-
-- **Laravel 11** - PHP Framework
-- **Bootstrap 5** - CSS Framework
-- **MySQL** - Database
-- **Vite** - Asset Building
-- **Font Awesome** - Icons
+</details>
 
 ---
 
-**Happy Coding! 🎉**
+## 📄 License & Credits
 
-*This project demonstrates modern web development practices with Laravel and provides a solid foundation for job portal applications.*
+<div align="center">
+
+**© 2025 House of Management for Studies and Consultations**
+
+Built with ❤️ using Laravel Framework
+
+---
+
+### 🌟 **Star this repository if you find it helpful!**
+
+*This project represents modern web development practices and provides a robust foundation for management consulting platforms and job portals.*
+
+</div>
