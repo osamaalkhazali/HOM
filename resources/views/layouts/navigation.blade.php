@@ -1,9 +1,5 @@
 <style>
-    /* CSS Variables */
-    :root {
-        --primary-color: #1e477b;
-        --gradient-1: linear-gradient(135deg, #1e477b, #667eea);
-    }
+    /* Uses shared CSS variables from layouts.styles */
 
     /* Navigation Styles */
     .navbar-custom {
@@ -60,27 +56,7 @@
         height: 24px;
     }
 
-    /* Button Animations */
-    .morph-btn {
-        transition: all 0.3s ease;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .morph-btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(24, 69, 143, 0.3);
-    }
-
-    .pulse-btn {
-        animation: pulse 2s infinite;
-    }
-
-    @keyframes pulse {
-        0% { box-shadow: 0 0 0 0 rgba(24, 69, 143, 0.4); }
-        70% { box-shadow: 0 0 0 10px rgba(24, 69, 143, 0); }
-        100% { box-shadow: 0 0 0 0 rgba(24, 69, 143, 0); }
-    }
+    /* Button animations are provided by shared styles */
 
     /* Dropdown Styling */
     .dropdown-menu {
@@ -137,16 +113,16 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto me-4">
                 <li class="nav-item" data-aos="fade-down" data-aos-delay="100">
-                    <a class="nav-link fw-medium position-relative" href="#services">Services</a>
+                    <a class="nav-link fw-medium position-relative" href="{{ url('/#services') }}">Services</a>
                 </li>
                 <li class="nav-item" data-aos="fade-down" data-aos-delay="200">
-                    <a class="nav-link fw-medium" href="#clients">Clients</a>
+                    <a class="nav-link fw-medium" href="{{ url('/#clients') }}">Clients</a>
                 </li>
                 <li class="nav-item" data-aos="fade-down" data-aos-delay="300">
-                    <a class="nav-link fw-medium" href="#about">About</a>
+                    <a class="nav-link fw-medium" href="{{ url('/#about') }}">About</a>
                 </li>
                 <li class="nav-item" data-aos="fade-down" data-aos-delay="400">
-                    <a class="nav-link fw-medium" href="#contact">Contact</a>
+                    <a class="nav-link fw-medium" href="{{ url('/#contact') }}">Contact</a>
                 </li>
                 <li class="nav-item" data-aos="fade-down" data-aos-delay="500">
                     <a class="nav-link fw-medium" href="{{ route('jobs.index') }}">Jobs</a>

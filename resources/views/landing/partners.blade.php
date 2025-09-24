@@ -268,23 +268,7 @@
         font-size: 1rem;
     }
 
-    /* Call to Action Button Enhancement */
-    .btn-primary {
-        background: linear-gradient(135deg, var(--primary-color) 0%, #667eea 100%);
-        border: none;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        box-shadow: 0 15px 35px rgba(24, 69, 143, 0.3);
-        position: relative;
-        overflow: hidden;
-    }
-
-    .btn-primary:hover {
-        background: linear-gradient(135deg, #667eea 0%, var(--primary-color) 100%);
-        transform: translateY(-3px);
-        box-shadow: 0 20px 45px rgba(24, 69, 143, 0.4);
-    }
+    /* Button uses shared .landing .btn-primary */
 
     /* Responsive Design */
     @media (max-width: 991.98px) {
@@ -367,13 +351,7 @@
         backface-visibility: hidden;
     }
 
-    /* Unified section title styling to match hero headline size and color */
-    #partners .section-title {
-        font-size: clamp(2.2rem, 5vw, 3.5rem);
-        line-height: 1.2;
-        color: var(--primary-color) !important;
-        margin-bottom: 1.5rem;
-    }
+    /* Section title uses shared .landing .section-title */
 </style>
 
 <script>

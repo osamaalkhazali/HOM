@@ -16,18 +16,9 @@
         rel="stylesheet">
     <!-- AOS Animation -->
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    @include('layouts.styles')
 
     <style>
-        :root {
-            --primary-color: #18458f;
-            --primary-dark: #123660;
-            --primary-light: #2a5ba8;
-            --gradient-1: linear-gradient(135deg, #18458f 0%, #667eea 100%);
-            --gradient-2: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            --gradient-3: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            --gradient-4: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-        }
-
         * {
             margin: 0;
             padding: 0;

@@ -1431,13 +1431,7 @@
         }
     }
 
-    /* Unified section title styling to match hero headline size and color */
-    #services .section-title {
-        font-size: clamp(2.2rem, 5vw, 3.5rem);
-        line-height: 1.2;
-        color: var(--primary-color) !important;
-        margin-bottom: 1.5rem;
-    }
+    /* Section title uses shared .landing .section-title */
 </style>
 
 <script>
@@ -1580,6 +1574,8 @@
     let currentService = null;
     let currentProjectIndex = 0;
     let totalProjects = 0;
+    // Prevent auto-scroll on first page load
+    window.__servicesFirstLoad = true;
 
     // Touch/Swipe functionality variables
     let startX = 0;
@@ -1589,9 +1585,11 @@
     let isDragging = false;
     let sliderElement = null;
 
-    // Initialize with first service
+    // Initialize with first service without auto-scrolling
     document.addEventListener('DOMContentLoaded', function() {
+        window.__servicesFirstLoad = true;
         showService('project-development');
+        window.__servicesFirstLoad = false;
     });
 
     function showService(serviceId) {
@@ -1628,8 +1626,10 @@
             selectedCard.classList.add('active');
         }
 
-        // Smooth scroll to service details card
-        scrollToServiceDetails();
+        // Smooth scroll to service details card (skip on first page load)
+        if (!window.__servicesFirstLoad) {
+            scrollToServiceDetails();
+        }
     }
 
     function updateServiceContent(serviceId) {

@@ -1,4 +1,4 @@
-<footer class="text-white pt-5" style="background: var(--primary-color);" role="contentinfo">
+<footer id="contact" class="text-white pt-5" style="background: var(--primary-color);" role="contentinfo">
     <div class="container">
         <!-- Brand row -->
         <div class="row align-items-center mb-4">
@@ -46,16 +46,16 @@
             <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
                 <h6 class="fw-semibold mb-2"><i class="fas fa-link me-2"></i>Useful Links</h6>
                 <ul class="list-unstyled small mb-0">
-                    <li class="mb-2"><i class="fas fa-angle-right me-2 opacity-75"></i><a href="#services"
-                            class="link-light text-decoration-none">Services</a></li>
-                    <li class="mb-2"><i class="fas fa-angle-right me-2 opacity-75"></i><a href="#about"
-                            class="link-light text-decoration-none">Our Focus &amp; Approach</a></li>
-                    <li class="mb-2"><i class="fas fa-angle-right me-2 opacity-75"></i><a href="#clients"
-                            class="link-light text-decoration-none">Clients</a></li>
-                    <li class="mb-2"><i class="fas fa-angle-right me-2 opacity-75"></i><a href="#partners"
-                            class="link-light text-decoration-none">Partners</a></li>
-                    <li><i class="fas fa-angle-right me-2 opacity-75"></i><a href="#top"
-                            class="link-light text-decoration-none">Back to Top</a></li>
+            <li class="mb-2"><i class="fas fa-angle-right me-2 opacity-75"></i><a href="{{ url('/#services') }}"
+                class="link-light text-decoration-none">Services</a></li>
+            <li class="mb-2"><i class="fas fa-angle-right me-2 opacity-75"></i><a href="{{ url('/#about') }}"
+                class="link-light text-decoration-none">Our Focus &amp; Approach</a></li>
+            <li class="mb-2"><i class="fas fa-angle-right me-2 opacity-75"></i><a href="{{ url('/#clients') }}"
+                class="link-light text-decoration-none">Clients</a></li>
+            <li class="mb-2"><i class="fas fa-angle-right me-2 opacity-75"></i><a href="{{ url('/#partners') }}"
+                class="link-light text-decoration-none">Partners</a></li>
+            <li><i class="fas fa-angle-right me-2 opacity-75"></i><a href="{{ url('/#top') }}"
+                class="link-light text-decoration-none">Back to Top</a></li>
                 </ul>
             </div>
         </div>

@@ -326,23 +326,7 @@
         opacity: 0.9;
     }
 
-    /* Call to Action Button Enhancement */
-    .btn-primary {
-        background: linear-gradient(135deg, var(--primary-color) 0%, #1d4ed8 100%);
-        border: none;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        box-shadow: 0 15px 35px rgba(24, 69, 143, 0.3);
-        position: relative;
-        overflow: hidden;
-    }
-
-    .btn-primary:hover {
-        background: linear-gradient(135deg, #1d4ed8 0%, var(--primary-color) 100%);
-        transform: translateY(-3px);
-        box-shadow: 0 20px 45px rgba(24, 69, 143, 0.4);
-    }
+    /* Call to Action Button uses shared .landing .btn-primary */
 
     /* Responsive Design */
     @media (max-width: 991.98px) {
@@ -493,13 +477,7 @@
         backface-visibility: hidden;
     }
 
-    /* Unified section title styling to match hero headline size and color */
-    #clients .section-title {
-        font-size: clamp(2.2rem, 5vw, 3.5rem);
-        line-height: 1.2;
-        color: var(--primary-color) !important;
-        margin-bottom: 1.5rem;
-    }
+    /* Section title uses shared .landing .section-title */
 
     /* Drag / touch enhancements */
     .clients-slider-container {
@@ -672,14 +650,22 @@
             if (e.touches && e.touches.length > 0) {
                 onPointerDown(e.touches[0].clientX);
             }
-        }, { passive: true });
+        }, {
+            passive: true
+        });
         window.addEventListener('touchmove', (e) => {
             if (e.touches && e.touches.length > 0) {
                 onPointerMove(e.touches[0].clientX);
             }
-        }, { passive: true });
-        window.addEventListener('touchend', onPointerUp, { passive: true });
-        window.addEventListener('touchcancel', onPointerUp, { passive: true });
+        }, {
+            passive: true
+        });
+        window.addEventListener('touchend', onPointerUp, {
+            passive: true
+        });
+        window.addEventListener('touchcancel', onPointerUp, {
+            passive: true
+        });
     }
 
     // Initialize when DOM is loaded

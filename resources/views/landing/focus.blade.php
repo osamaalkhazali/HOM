@@ -312,10 +312,5 @@
 </section>
 
 <style>
-    /* Unified section title styling to match hero headline size and color */
-    #about .section-title {
-        font-size: clamp(2.2rem, 5vw, 3.5rem);
-        line-height: 1.2;
-        color: var(--primary-color) !important;
-    }
+    /* Section title uses shared .landing .section-title */
 </style>
