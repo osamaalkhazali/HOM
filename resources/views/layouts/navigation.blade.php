@@ -92,7 +92,7 @@
     }
 
     .dropdown-item:hover {
-        background: var(--gradient-1);
+        background: var(--primary-color);
         color: white !important;
     }
 </style>
@@ -134,7 +134,7 @@
                 <!-- User Dropdown Button -->
                 <div class="dropdown" data-aos="fade-left">
                     <button class="btn morph-btn pulse-btn fw-semibold px-4 py-2 text-white dropdown-toggle"
-                        style="background: var(--gradient-1); border: none; border-radius: 25px;" type="button"
+                        style="background: var(--primary-color); border: none; border-radius: 10px;" type="button"
                         id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                         {{ Auth::user()->name }}
                     </button>
@@ -166,11 +166,11 @@
                 <!-- Guest Login/Register Buttons -->
                 <div class="d-flex gap-2" data-aos="fade-left">
                     <a href="{{ route('login') }}" class="btn btn-outline-primary fw-semibold px-3 py-2"
-                        style="border-radius: 25px; border: 2px solid var(--primary-color); color: var(--primary-color);">
+                        style="border-radius: 10px; border: 2px solid var(--primary-color); color: var(--primary-color);">
                         Login
                     </a>
                     <button class="btn morph-btn pulse-btn fw-semibold px-4 py-2 text-white"
-                        style="background: var(--gradient-1); border: none; border-radius: 25px;"
+                        style="background: var(--primary-color); border: none; border-radius: 10px;"
                         onclick="window.location.href='{{ route('register') }}'">
                         Get Started
                     </button>
