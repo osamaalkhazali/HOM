@@ -8,6 +8,10 @@ use App\Models\Job;
 use App\Models\Category;
 use App\Models\SubCategory;
 use App\Models\Application;
+use App\Models\Admin;
+use App\Notifications\ApplicationSubmitted;
+use App\Notifications\NewApplicationReceived;
+use Illuminate\Support\Facades\Notification;
 
 class JobController extends Controller
 {
@@ -176,13 +180,28 @@ class JobController extends Controller
         }
 
         // Create the application
-        Application::create([
+        $application = Application::create([
             'job_id' => $job->id,
             'user_id' => Auth::id(),
             'cv_path' => $cvPath,
             'cover_letter' => $request->cover_letter,
             'status' => 'pending',
         ]);
+
+        // Send notifications (user and admins)
+        try {
+            // Eager load relations for notification payloads
+            $application->load(['job', 'user']);
+
+            // Notify the user
+            Notification::send($user, new ApplicationSubmitted($application));
+
+            // Notify all active admins
+            $admins = Admin::active()->get();
+            Notification::send($admins, new NewApplicationReceived($application));
+        } catch (\Throwable $e) {
+            report($e);
+        }
 
         return redirect()->route('jobs.show', $job)
             ->with('success', 'Your application has been submitted successfully!');
@@ -193,7 +212,9 @@ class JobController extends Controller
      */
     public function myApplications(Request $request)
     {
-        $query = Auth::user()->applications()->with(['job.subCategory.category']);
+        $userId = Auth::id();
+        $query = Application::with(['job.subCategory.category'])
+            ->where('user_id', $userId);
 
         // Filter by search
         if ($request->filled('search')) {

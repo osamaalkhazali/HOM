@@ -131,6 +131,41 @@
 
             <!-- Authentication Section -->
             @auth
+                <!-- Notifications Bell -->
+                <div class="dropdown me-3" data-aos="fade-left">
+                    @php($user = auth()->user())
+                    @php($unread = \Illuminate\Notifications\DatabaseNotification::where('notifiable_id', $user->id)->where('notifiable_type', get_class($user))->whereNull('read_at')->latest()->limit(10)->get())
+                    <button class="btn position-relative" type="button" id="notifDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="border-radius: 10px;">
+                        <i class="fas fa-bell" style="font-size: 1.2rem; color: var(--primary-color);"></i>
+                        @if($unread->count() > 0)
+                            <span class="position-absolute badge rounded-pill bg-danger" style="top: 0%; left: 60%; font-size: 0.5rem;">{{ $unread->count() }}</span>
+                        @endif
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end p-2" aria-labelledby="notifDropdown" style="min-width: 320px;">
+                        <li class="px-2 py-1 text-muted small">Notifications</li>
+                        @forelse($unread as $notification)
+                            <li>
+                                <a class="dropdown-item d-flex align-items-start gap-2" href="{{ route('notifications.open', $notification->id) }}">
+                                    <i class="fas fa-circle mt-1" style="font-size: 0.6rem; color: var(--primary-color);"></i>
+                                    <div>
+                                        <div class="fw-semibold">{{ $notification->data['title'] ?? 'Notification' }}</div>
+                                        <div class="small text-muted">{{ $notification->data['message'] ?? '' }}</div>
+                                    </div>
+                                </a>
+                            </li>
+                        @empty
+                            <li><span class="dropdown-item text-muted">No new notifications</span></li>
+                        @endforelse
+                        <li><hr class="dropdown-divider"></li>
+                        <li class="d-flex gap-2 px-2">
+                            <form method="POST" action="{{ route('notifications.readAll') }}">
+                                @csrf
+                                <button class="btn btn-sm btn-outline-secondary">Mark all as read</button>
+                            </form>
+                            <a href="{{ route('notifications.index') }}" class="btn btn-sm btn-outline-primary ms-auto">View all</a>
+                        </li>
+                    </ul>
+                </div>
                 <!-- User Dropdown Button -->
                 <div class="dropdown" data-aos="fade-left">
                     <button class="btn morph-btn pulse-btn fw-semibold px-4 py-2 text-white dropdown-toggle"

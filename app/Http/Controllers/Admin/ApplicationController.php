@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Application;
 use App\Models\Job;
 use Illuminate\Http\Request;
+use App\Notifications\ApplicationStatusChanged;
+use Illuminate\Support\Facades\Notification;
 
 class ApplicationController extends Controller
 {
@@ -116,7 +118,18 @@ class ApplicationController extends Controller
       'status' => 'required|in:pending,reviewed,shortlisted,rejected,hired'
     ]);
 
+    $oldStatus = $application->status;
     $application->update($validated);
+
+    // Notify the applicant about status change
+    try {
+      $application->load(['job', 'user']);
+      if ($application->user) {
+        Notification::send($application->user, new ApplicationStatusChanged($application, $oldStatus, $application->status));
+      }
+    } catch (\Throwable $e) {
+      report($e);
+    }
 
     return redirect()->back()->with('success', 'Application status updated successfully');
   }

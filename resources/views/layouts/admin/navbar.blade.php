@@ -12,11 +12,39 @@
             </div>
             <div class="flex items-center space-x-4">
                 <div class="relative">
-                    <button class="bg-gray-100 p-2 rounded-full text-gray-600 hover:text-gray-800">
-                        <i class="fas fa-bell"></i>
-                        <span
-                            class="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-400 ring-2 ring-white"></span>
+                    @php($admin = Auth::guard('admin')->user())
+                    @php($unread = $admin ? \Illuminate\Notifications\DatabaseNotification::where('notifiable_id', $admin->id)->where('notifiable_type', get_class($admin))->whereNull('read_at')->latest()->limit(10)->get() : collect())
+                    <button class="btn position-relative" type="button" onclick="toggleAdminNotif()" style="border-radius: 10px;">
+                        <i class="fas fa-bell" style="font-size: 1.2rem; color: var(--primary-color);"></i>
+                        @if($unread && $unread->count() > 0)
+                            <span style="position: absolute; top: 0%; left: 60%; background: #dc3545; color: #fff; border-radius: 9999px; padding: 2px 6px; font-size: 0.5rem; line-height: 1;">{{ $unread->count() }}</span>
+                        @endif
                     </button>
+                    <div id="adminNotifDropdown" class="hidden absolute right-0 mt-2 w-80 bg-white rounded-md shadow-lg py-2 z-10">
+                        <div class="px-4 py-1 text-gray-500 text-sm">Notifications</div>
+                        @if($unread && $unread->count())
+                            @foreach($unread as $notification)
+                                <a href="{{ route('admin.notifications.open', $notification->id) }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    <div class="flex items-start gap-2">
+                                        <i class="fas fa-circle mt-1" style="font-size: 0.6rem; color: var(--primary-color);"></i>
+                                        <div>
+                                            <div class="font-medium">{{ $notification->data['title'] ?? 'Notification' }}</div>
+                                            <div class="text-gray-500">{{ $notification->data['message'] ?? '' }}</div>
+                                        </div>
+                                    </div>
+                                </a>
+                            @endforeach
+                        @else
+                            <div class="px-4 py-2 text-sm text-gray-500">No new notifications</div>
+                        @endif
+                        <div class="border-t mt-2 px-3 py-2 flex gap-2">
+                            <form method="POST" action="{{ route('admin.notifications.readAll') }}">
+                                @csrf
+                                <button class="px-3 py-1 text-sm bg-gray-100 rounded hover:bg-gray-200">Mark all as read</button>
+                            </form>
+                            <a href="{{ route('admin.notifications.index') }}" class="ml-auto px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded hover:bg-blue-200">View all</a>
+                        </div>
+                    </div>
                 </div>
                 <div class="flex items-center space-x-2">
                     <img class="h-8 w-8 rounded-full"
@@ -50,13 +78,24 @@
         dropdown.classList.toggle('hidden');
     }
 
+    function toggleAdminNotif() {
+        const dd = document.getElementById('adminNotifDropdown');
+        dd.classList.toggle('hidden');
+    }
+
     // Close dropdown when clicking outside
     document.addEventListener('click', function(event) {
         const dropdown = document.getElementById('dropdown');
         const button = event.target.closest('button[onclick="toggleDropdown()"]');
 
-        if (!button && !dropdown.contains(event.target)) {
+        if (!button && dropdown && !dropdown.contains(event.target)) {
             dropdown.classList.add('hidden');
+        }
+
+        const notifBtn = event.target.closest('button[onclick="toggleAdminNotif()"]');
+        const notifDropdown = document.getElementById('adminNotifDropdown');
+        if (!notifBtn && notifDropdown && !notifDropdown.contains(event.target)) {
+            notifDropdown.classList.add('hidden');
         }
     });
 </script>

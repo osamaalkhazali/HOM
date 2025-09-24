@@ -12,6 +12,8 @@ use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ProfileManagementController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\SettingController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\Admin\AdminNotificationController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -110,6 +112,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Settings (HOM Profile PDF)
         Route::get('/settings/hom-profile', [SettingController::class, 'editHomProfile'])->name('settings.hom-profile.edit');
         Route::post('/settings/hom-profile', [SettingController::class, 'updateHomProfile'])->name('settings.hom-profile.update');
+
+        // Admin notifications
+        Route::get('/notifications', [AdminNotificationController::class, 'index'])->name('notifications.index');
+        Route::post('/notifications/read-all', [AdminNotificationController::class, 'readAll'])->name('notifications.readAll');
+        Route::get('/notifications/open/{id}', [AdminNotificationController::class, 'open'])->name('notifications.open');
     });
 });
 
@@ -120,6 +127,11 @@ Route::middleware('auth')->group(function () {
 
     // User applications routes
     Route::get('/applications', [JobController::class, 'myApplications'])->name('applications.index');
+
+    // User notifications
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/read-all', [NotificationController::class, 'readAll'])->name('notifications.readAll');
+    Route::get('/notifications/open/{id}', [NotificationController::class, 'open'])->name('notifications.open');
 });
 
 require __DIR__ . '/auth.php';
