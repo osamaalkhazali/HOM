@@ -35,6 +35,9 @@ class DashboardController extends Controller
     // Check if user has uploaded CV
     $hasCv = $user->profile && $user->profile->cv_path;
 
-    return view('dashboard', compact('recentApplications', 'stats', 'hasCv'));
+    // Get user profile for dashboard display
+    $profile = $user->profile;
+
+    return view('dashboard', compact('user', 'recentApplications', 'stats', 'hasCv', 'profile'));
   }
 }

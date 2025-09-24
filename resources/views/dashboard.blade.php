@@ -38,6 +38,119 @@
                 </div>
             @endif
 
+            <!-- Profile Overview -->
+            <div class="panel mb-4 shadow-soft">
+                <div class="panel-header d-flex justify-content-between align-items-center">
+                    <h5 class="panel-title mb-0"><i class="fas fa-user me-2"></i>Profile Overview</h5>
+                    <a href="{{ route('profile.edit') }}" class="btn btn-sm btn-primary">
+                        <i class="fas fa-user-edit me-1"></i>Edit Profile
+                    </a>
+                </div>
+                <div class="panel-body">
+                    <div class="row g-4">
+                        <!-- Basic Info -->
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <div class="avatar-lg profile-avatar mb-3">
+                                    <i class="fas fa-user fa-lg text-white"></i>
+                                </div>
+                                <h5 class="fw-bold mb-1">{{ $user->name }}</h5>
+                                <div class="text-muted mb-2">{{ $user->email }}</div>
+                                @if (!empty($user->phone))
+                                    <div class="text-muted small mb-2">
+                                        <i class="fas fa-phone me-1"></i>{{ $user->phone }}
+                                    </div>
+                                @endif
+                                @if ($profile && !empty($profile->headline))
+                                    <div class="badge bg-primary text-white">{{ $profile->headline }}</div>
+                                @endif
+                                @if($profile && !empty($profile->linkedin_url))
+                                    <div class="mt-2">
+                                        <a href="{{ $profile->linkedin_url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                            <i class="fab fa-linkedin me-1"></i>LinkedIn
+                                        </a>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+
+                        <!-- Professional Details -->
+                        <div class="col-md-8">
+                            <div class="row g-3">
+                                <div class="col-sm-6">
+                                    <div class="info-item">
+                                        <div class="info-label">
+                                            <i class="fas fa-map-marker-alt me-2 text-primary"></i>Location
+                                        </div>
+                                        <div class="info-value">{{ $profile->location ?? 'Not specified' }}</div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="info-item">
+                                        <div class="info-label">
+                                            <i class="fas fa-briefcase me-2 text-primary"></i>Current Position
+                                        </div>
+                                        <div class="info-value">{{ $profile->current_position ?? 'Not specified' }}</div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="info-item">
+                                        <div class="info-label">
+                                            <i class="fas fa-clock me-2 text-primary"></i>Experience
+                                        </div>
+                                        <div class="info-value">{{ $profile->experience_years ?? 'Not specified' }}</div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="info-item">
+                                        <div class="info-label">
+                                            <i class="fas fa-file-pdf me-2 text-primary"></i>Resume
+                                        </div>
+                                        <div class="info-value">
+                                            @if($profile && !empty($profile->cv_path))
+                                                <a href="{{ Storage::url($profile->cv_path) }}" target="_blank" class="text-success">
+                                                    <i class="fas fa-download me-1"></i>View CV
+                                                </a>
+                                            @else
+                                                <span class="text-muted">Not uploaded</span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Skills -->
+                            @if($profile && !empty($profile->skills))
+                                <div class="mt-3">
+                                    <div class="info-label mb-2">
+                                        <i class="fas fa-tools me-2 text-primary"></i>Skills
+                                    </div>
+                                    <div class="d-flex flex-wrap gap-2">
+                                        @php
+                                            $skills = array_filter(array_map('trim', explode(',', $profile->skills)));
+                                        @endphp
+                                        @foreach($skills as $skill)
+                                            <span class="badge bg-light text-dark border">{{ $skill }}</span>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endif
+
+                            <!-- Links -->
+                            <div class="row g-2 mt-2">
+                                @if($profile && !empty($profile->website))
+                                    <div class="col-auto">
+                                        <a href="{{ $profile->website }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-globe me-1"></i>Website
+                                        </a>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="row g-4">
                 <!-- Recent Applications -->
                 <div class="col-lg-8">
@@ -181,38 +294,6 @@
 
                 <!-- Sidebar -->
                 <div class="col-lg-4">
-                    <!-- Profile Summary (moved to top) -->
-                    <div class="panel mb-4 profile-card shadow-soft">
-                        <div class="panel-body">
-                            @if (Auth::user()->email_verified_at)
-                                <span class="badge bg-success verified-badge"><i class="fas fa-shield-check me-1"></i>Verified</span>
-                            @endif
-                            <div class="text-center mb-3">
-                                <div class="avatar-lg profile-avatar mb-2">
-                                    <i class="fas fa-user fa-lg text-white"></i>
-                                </div>
-                                <h5 class="fw-bold mb-0">{{ Auth::user()->name }}</h5>
-                                <div class="text-muted small">{{ Auth::user()->email }}</div>
-                            </div>
-
-                            <div class="row g-0 text-center meta">
-                                <div class="col-6 py-2">
-                                    <div class="label">Joined</div>
-                                    <div class="value">{{ Auth::user()->created_at->format('M Y') }}</div>
-                                </div>
-                                <div class="col-6 py-2 border-start">
-                                    <div class="label">Last Login</div>
-                                    <div class="value">{{ now()->format('M d') }}</div>
-                                </div>
-                            </div>
-
-                            <div class="d-flex justify-content-center gap-2 mt-3">
-                                <a href="{{ route('applications.index') }}" class="btn btn-sm btn-outline-primary">My Applications</a>
-                                <a href="{{ route('profile.edit') }}" class="btn btn-sm btn-primary">Edit Profile</a>
-                            </div>
-                        </div>
-                    </div>
-
                     <!-- Status Summary (from stats) -->
                     <div class="panel mb-4 shadow-soft">
                         <div class="panel-header">
