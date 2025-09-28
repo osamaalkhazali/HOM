@@ -1,17 +1,13 @@
 <!-- Hero Section -->
-<section class="hero-section position-relative min-vh-100 d-flex align-items-center">
+<section class="hero-section position-relative  d-flex align-items-center">
     <!-- Background Image -->
     <div class="hero-bg-overlay"></div>
 
     <!-- Hero Content -->
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-8 col-xl-8">
+    <div class="container h-100">
+        <div class="row h-100">
+            <div class="col-lg-8 col-xl-8 h-100">
                 <div class="hero-content py-5" data-aos="fade-up">
-                    <!-- Badge -->
-                    <div class="hero-badge mb-3" data-aos="fade-up" data-aos-delay="200">
-                        <span class="badge-text">Leading Management Consultancy</span>
-                    </div>
 
                     <!-- Main Headline -->
                     <h1 class="hero-headline mb-3" data-aos="fade-up" data-aos-delay="400">
@@ -27,39 +23,11 @@
                         across <strong>industry, government, real estate, healthcare, tourism, and NGO sectors</strong>.
                     </p>
 
-                    <!-- Key Features -->
-                    <div class="hero-features mb-4" data-aos="fade-up" data-aos-delay="800">
-                        <div class="row g-2">
-                            <div class="col-md-6">
-                                <div class="feature-item">
-                                    <i class="fas fa-check-circle me-2" style="color: var(--primary-color);"></i>
-                                    <span>Proactive Financial Advisory</span>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="feature-item">
-                                    <i class="fas fa-check-circle me-2" style="color: var(--primary-color);"></i>
-                                    <span>Strategic Project Management</span>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="feature-item">
-                                    <i class="fas fa-check-circle me-2" style="color: var(--primary-color);"></i>
-                                    <span>Qualified Business Partners</span>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="feature-item">
-                                    <i class="fas fa-check-circle me-2" style="color: var(--primary-color);"></i>
-                                    <span>Flexible Staff Solutions</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+
 
                     <!-- CTA Buttons -->
                     <div class="hero-cta mb-4" data-aos="fade-up" data-aos-delay="1000">
-                        <div class="d-flex flex-column flex-sm-row gap-2">
+                        <div class="d-flex flex-column flex-sm-row gap-3">
                             <button class="btn btn-primary cta-primary"
                                 onclick="document.querySelector('#services').scrollIntoView({behavior: 'smooth'});">
                                 <i class="fas fa-rocket me-2"></i>
@@ -73,23 +41,9 @@
                         </div>
                     </div>
 
-                    <!-- Trust Indicators -->
-                    <div class="hero-trust" data-aos="fade-up" data-aos-delay="1200">
-                        <div class="d-flex align-items-center gap-4 flex-wrap">
-                            <div class="trust-item">
-                                <span class="trust-number">150+</span>
-                                <span class="trust-label">Projects Delivered</span>
-                            </div>
-                            <div class="trust-item">
-                                <span class="trust-number">15+</span>
-                                <span class="trust-label">Years Experience</span>
-                            </div>
-                            <div class="trust-item">
-                                <span class="trust-number">98%</span>
-                                <span class="trust-label">Client Satisfaction</span>
-                            </div>
-                        </div>
-                    </div>
+
+
+
                 </div>
             </div>
         </div>
@@ -122,7 +76,13 @@
     .hero-content {
         position: relative;
         z-index: 5;
-        padding: 2rem 0;
+        padding: 3rem 0; /* add more breathing room */
+        min-height: 100vh; /* fill viewport height */
+        height: 100%; /* fill parent when available */
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+        justify-content: center; /* vertically center content */
     }
 
     .hero-badge {
@@ -144,7 +104,7 @@
         font-weight: 800;
         line-height: 1.2;
         color: #2c3e50;
-        margin-bottom: 1.5rem;
+        margin-bottom: 2.25rem; /* increase spacing below headline */
     }
 
     .text-gradient {
@@ -159,6 +119,7 @@
         line-height: 1.6;
         color: #6c757d;
         max-width: 600px;
+        margin-bottom: 2rem; /* add extra space before CTA */
     }
 
     .hero-features .feature-item {
@@ -227,6 +188,7 @@
             background-color: #ffffff;
             /* solid color */
             background-attachment: scroll;
+            min-height: auto !important; /* don't force 100vh on mobile */
         }
 
         .hero-bg-overlay {
@@ -235,12 +197,24 @@
         }
 
         .hero-content {
-            padding-top: 100px;
-            padding-bottom: 2rem;
+            padding-top: 56px;
+            padding-bottom: 1.25rem;
+            min-height: auto; /* don't force full height on smaller screens */
+            height: auto;
+            justify-content: flex-start;
+            gap: 1rem;
         }
 
         .hero-headline {
-            font-size: clamp(1.5rem, 4vw, 2.2rem);
+            font-size: clamp(3rem, 7vw, 4rem);
+            margin-bottom: 1.1rem;
+        }
+        .hero-description {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+        }
+        .hero-cta {
+            margin-bottom: 1rem !important;
         }
 
         .hero-trust .d-flex {

@@ -14,7 +14,7 @@
         </div>
 
         <!-- Focus Areas Grid -->
-        <div class="row g-4 mb-5 justify-content-center">
+        <div class="row g-4 mb-5 justify-content-center between">
             <!-- Financial Analysis -->
             <div class="col-lg-4 col-md-6" style="max-width: 360px;" data-aos="zoom-in" data-aos-delay="100">
                 <div class="card border-0 shadow h-100 hover-lift" style="border-radius: 10px; background: #ffffff;">
@@ -313,4 +313,8 @@
 
 <style>
     /* Section title uses shared .landing .section-title */
+    .between
+    {
+        justify-content: space-between !important;
+    }
 </style>

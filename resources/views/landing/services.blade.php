@@ -15,7 +15,7 @@
 
         <!-- Services Navigation -->
         <div class="mb-5" id="service-nav">
-            <div class="row g-4 justify-content-center">
+            <div class="row  g-4 d-flex justify-content-center between">
                 <!-- Project Development Service -->
                 <div class="col-lg-2 col-md-4 col-sm-6">
                     <div class="service-card position-relative overflow-hidden selected"
@@ -113,6 +113,10 @@
 </section>
 
 <style>
+    .between{
+        justify-content: space-between !important;
+    }
+
     /* Services Section Styling - Professional Design */
     #services {
         background-image: linear-gradient(135deg, rgba(0, 0, 0, 0.4) 0%, rgba(24, 69, 143, 0.3) 100%),

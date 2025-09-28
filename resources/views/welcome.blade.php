@@ -345,7 +345,7 @@
             }
 
             .hero-section {
-                padding: 8rem 0 4rem;
+                padding: 5rem 0 0rem;
                 text-align: center;
             }
 
