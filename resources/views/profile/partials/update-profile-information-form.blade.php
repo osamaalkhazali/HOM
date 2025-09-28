@@ -20,7 +20,7 @@
             <div class="col-md-6 mb-3">
                 <label for="name" class="form-label fw-medium">{{ __('Name') }}</label>
                 <input type="text" class="form-control form-control-lg" id="name" name="name"
-                    value="{{ old('name', $user->name) }}" required autocomplete="name"
+                    value="{{ old('name', $user->name) }}" autocomplete="name"
                     style="border-radius: 15px; border: 2px solid #e9ecef;">
                 @if ($errors->get('name'))
                     <div class="text-danger small mt-1">
@@ -34,7 +34,7 @@
             <div class="col-md-6 mb-3">
                 <label for="email" class="form-label fw-medium">{{ __('Email') }}</label>
                 <input type="email" class="form-control form-control-lg" id="email" name="email"
-                    value="{{ old('email', $user->email) }}" required autocomplete="username"
+                    value="{{ old('email', $user->email) }}" autocomplete="username"
                     style="border-radius: 15px; border: 2px solid #e9ecef;">
                 @if ($errors->get('email'))
                     <div class="text-danger small mt-1">

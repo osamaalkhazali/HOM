@@ -30,17 +30,23 @@ class ProfileManagementController extends Controller
       });
     }
 
-    // Filter by experience years
+    // Filter by experience years (string ranges)
     if ($request->filled('experience')) {
-      if ($request->experience === '0-2') {
-        $query->whereBetween('experience_years', [0, 2]);
-      } elseif ($request->experience === '3-5') {
-        $query->whereBetween('experience_years', [3, 5]);
-      } elseif ($request->experience === '6-10') {
-        $query->whereBetween('experience_years', [6, 10]);
-      } elseif ($request->experience === '10+') {
-        $query->where('experience_years', '>', 10);
-      }
+      $map = [
+        '0-1' => ['0-1'],
+        '0-2' => ['0-1', '2-3'], // keep compatibility if UI sends 0-2
+        '2-3' => ['2-3'],
+        '3-5' => ['4-5'], // compatibility mapping
+        '4-5' => ['4-5'],
+        '6-10' => ['6-10'],
+        '10+' => ['10+'],
+      ];
+      $values = $map[$request->experience] ?? [$request->experience];
+      $query->where(function ($q) use ($values) {
+        foreach ($values as $val) {
+          $q->orWhere('experience_years', $val);
+        }
+      });
     }
 
     // Filter by location
@@ -61,6 +67,7 @@ class ProfileManagementController extends Controller
     $sortBy = $request->get('sort', 'created_at');
     $sortDirection = $request->get('direction', 'desc');
 
+    // Sorting: for string ranges, default sorting lexicographically is OK or we can map order later
     $allowedSorts = ['created_at', 'experience_years', 'current_position', 'location'];
     if (in_array($sortBy, $allowedSorts)) {
       $query->orderBy($sortBy, $sortDirection);
