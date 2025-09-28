@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('linkedin_url', 255)->nullable();
             $table->string('education', 255)->nullable(); // University/School name
             $table->string('current_position', 160)->nullable(); // Current job title
-            $table->integer('experience_years')->nullable(); // Years of experience
+            $table->string('experience_years', 10)->nullable(); // Years of experience (store ranges like '0-1','2-3','4-5','6-10','10+')
             $table->text('skills')->nullable(); // Skills (comma separated or JSON)
             $table->text('about')->nullable();
             $table->string('cv_path', 255)->nullable();
