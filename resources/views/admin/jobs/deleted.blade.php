@@ -262,7 +262,7 @@
 
                 <!-- Pagination -->
                 <div class="px-6 py-4 border-t border-gray-200">
-                    {{ $jobs->links() }}
+                    {{ $jobs->links('admin.partials.pagination') }}
                 </div>
             @else
                 <div class="px-6 py-12 text-center">

@@ -200,7 +200,7 @@
     <!-- Pagination -->
     @if ($categories->hasPages())
         <div class="mt-6">
-            {{ $categories->links() }}
+            {{ $categories->links('admin.partials.pagination') }}
         </div>
     @endif
 

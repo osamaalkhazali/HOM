@@ -269,7 +269,7 @@
         <!-- Pagination -->
         @if ($jobs->hasPages())
             <div class="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
-                {{ $jobs->links() }}
+                {{ $jobs->links('admin.partials.pagination') }}
             </div>
         @endif
     </div>

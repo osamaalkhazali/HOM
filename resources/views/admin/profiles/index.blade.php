@@ -252,7 +252,7 @@
     <!-- Pagination -->
     @if ($profiles->hasPages())
         <div class="mt-6">
-            {{ $profiles->links() }}
+            {{ $profiles->links('admin.partials.pagination') }}
         </div>
     @endif
 @endsection

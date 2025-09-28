@@ -24,6 +24,6 @@
             @endforelse
         </div>
         <div class="mt-4">
-            {{ $notifications->links() }}
+            {{ $notifications->links('admin.partials.pagination') }}
         </div>
     @endsection

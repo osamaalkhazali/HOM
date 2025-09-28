@@ -21,6 +21,86 @@
     <!-- AOS Animation -->
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     @include('layouts.styles')
+    <style>
+        /* Site pagination styling to match admin look (Bootstrap-5 markup) */
+        .pagination {
+            display: inline-flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            align-items: center;
+            justify-content: center;
+            padding-left: 0;
+            margin: 0;
+            list-style: none;
+        }
+
+        .pagination .page-item { list-style: none; }
+
+        .pagination .page-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 34px;
+            height: 34px;
+            padding: 0 0.5rem;
+            background-color: #ffffff;
+            border: 1px solid #e5e7eb; /* gray-200 */
+            color: #1f2937; /* gray-800 */
+            border-radius: 8px;
+            text-decoration: none;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            transition: all .2s ease;
+            font-size: .875rem;
+        }
+
+        .pagination .page-link:hover {
+            border-color: rgba(24,69,143,0.5);
+            color: var(--primary-color, #18458f);
+            box-shadow: 0 4px 12px rgba(24,69,143,0.12);
+            transform: translateY(-1px);
+        }
+
+        .pagination .page-item.active .page-link {
+            background: var(--primary-color, #18458f);
+            color: #fff;
+            border-color: var(--primary-color, #18458f);
+            box-shadow: 0 4px 12px rgba(24,69,143,0.18);
+        }
+
+        .pagination .page-item.disabled .page-link {
+            opacity: .5;
+            pointer-events: none;
+        }
+
+        /* Center the pagination nav */
+        nav[role="navigation"] {
+            display: flex;
+            justify-content: center;
+        }
+
+        /* Space between summary and buttons (matches admin) */
+        nav[role="navigation"] > div {
+            display: flex !important;
+            align-items: center;
+            justify-content: center;
+            gap: 1.25rem; /* space between summary and page buttons */
+            flex-wrap: nowrap; /* keep on one line on desktop */
+        }
+
+        /* Optional: style summary text and add a tiny extra margin */
+        nav[role="navigation"] > div > div:first-child {
+            color: #6b7280; /* gray-500 */
+            font-size: .95rem;
+            margin-right: .25rem;
+        }
+
+        nav[role="navigation"] ul.pagination { margin: 0; }
+
+        /* Allow wrapping on small screens to prevent overflow */
+        @media (max-width: 575.98px) {
+            nav[role="navigation"] > div { flex-wrap: wrap; }
+        }
+    </style>
 </head>
 
 <body id="top" class="app">

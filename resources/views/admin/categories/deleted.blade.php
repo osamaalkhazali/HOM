@@ -144,7 +144,7 @@
     <!-- Pagination -->
     @if ($deletedCategories->hasPages())
         <div class="mt-6">
-            {{ $deletedCategories->links() }}
+            {{ $deletedCategories->links('admin.partials.pagination') }}
         </div>
     @endif
 
