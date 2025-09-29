@@ -9,7 +9,6 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\JobController as AdminJobController;
 use App\Http\Controllers\Admin\ApplicationController;
 use App\Http\Controllers\Admin\CategoryController;
-use App\Http\Controllers\Admin\ProfileManagementController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\NotificationController;
@@ -50,6 +49,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         // User management routes
         Route::get('/users', [UserController::class, 'index'])->name('users.index');
+        Route::get('/users/deleted', [UserController::class, 'deleted'])->name('users.deleted');
+        Route::post('/users/{id}/restore', [UserController::class, 'restore'])->name('users.restore');
+        Route::delete('/users/{id}/force-delete', [UserController::class, 'forceDelete'])->name('users.force-delete');
         Route::get('/users/{user}', [UserController::class, 'show'])->name('users.show');
         Route::patch('/users/{user}/toggle-status', [UserController::class, 'toggleStatus'])->name('users.toggle-status');
         Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
@@ -93,10 +95,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/categories/{id}/restore', [CategoryController::class, 'restore'])->name('categories.restore');
         Route::delete('/categories/{id}/force-delete', [CategoryController::class, 'forceDelete'])->name('categories.force-delete');
 
-        // Profile management routes
-        Route::get('/profiles', [ProfileManagementController::class, 'index'])->name('profiles.index');
-        Route::get('/profiles/{profile}', [ProfileManagementController::class, 'show'])->name('profiles.show');
-        Route::delete('/profiles/{profile}', [ProfileManagementController::class, 'destroy'])->name('profiles.destroy');
+
 
         // Admin management routes (Super Admin only)
         Route::get('/admins', [AdminController::class, 'index'])->name('admins.index');

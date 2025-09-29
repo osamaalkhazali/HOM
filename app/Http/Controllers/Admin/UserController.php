@@ -99,4 +99,66 @@ class UserController extends Controller
     $user->delete();
     return redirect()->route('admin.users.index')->with('success', 'User deleted successfully');
   }
+
+  /**
+   * Display deleted users
+   */
+  public function deleted(Request $request)
+  {
+    // Debug: Let's see if this method is being called
+    \Log::info('UserController@deleted method called');
+
+    $query = User::onlyTrashed()->with(['profile', 'applications']);
+
+    // Search functionality for deleted users
+    if ($request->filled('search')) {
+      $search = $request->search;
+      $query->where(function ($q) use ($search) {
+        $q->where('name', 'like', "%{$search}%")
+          ->orWhere('email', 'like', "%{$search}%")
+          ->orWhere('phone', 'like', "%{$search}%");
+      });
+    }
+
+    // Sorting
+    $sortBy = $request->get('sort', 'deleted_at');
+    $sortDirection = $request->get('direction', 'desc');
+
+    $allowedSorts = ['name', 'email', 'created_at', 'deleted_at'];
+    if (in_array($sortBy, $allowedSorts)) {
+      $query->orderBy($sortBy, $sortDirection);
+    }
+
+    $users = $query->paginate(15)->withQueryString();
+
+    return view('admin.users.deleted', compact('users'));
+  }
+
+  /**
+   * Restore a deleted user
+   */
+  public function restore($id)
+  {
+    $user = User::onlyTrashed()->findOrFail($id);
+    $user->restore();
+
+    return redirect()->back()->with('success', 'User restored successfully');
+  }
+
+  /**
+   * Permanently delete a user
+   */
+  public function forceDelete($id)
+  {
+    $user = User::onlyTrashed()->findOrFail($id);
+
+    // Delete user's profile if it exists
+    if ($user->profile) {
+      $user->profile->forceDelete();
+    }
+
+    $user->forceDelete();
+
+    return redirect()->back()->with('success', 'User permanently deleted');
+  }
 }

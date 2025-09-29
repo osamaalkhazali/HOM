@@ -138,15 +138,33 @@
                 </a>
 
                 <!-- Users & Profiles -->
-                <a href="{{ route('admin.users.index') }}"
-                    class="group flex items-center px-2 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.users.*') ? '' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
-                    style="{{ request()->routeIs('admin.users.*') ? 'background: rgba(13,110,253,0.06); color: var(--primary-color);' : '' }}">
-                    <i class="fas fa-users mr-3"></i>
-                    Users & Profiles
-                    <span class="ml-auto bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
-                        {{ \App\Models\User::count() }}
-                    </span>
-                </a>
+                <div class="space-y-1">
+                    <button onclick="toggleSubmenu('users')"
+                        class="group flex items-center w-full px-2 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.users*') ? '' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
+                        style="{{ request()->routeIs('admin.users*') ? 'background: rgba(13,110,253,0.06); color: var(--primary-color);' : '' }}">
+                        <i class="fas fa-users mr-3"></i>
+                        Users & Profiles
+                        <i class="fas fa-chevron-down ml-auto transform transition-transform" id="users-chevron"></i>
+                    </button>
+                    <div class="ml-6 space-y-1 hidden" id="users-submenu">
+                        <a href="{{ route('admin.users.index') }}"
+                            class="group flex items-center px-2 py-2 text-sm rounded-md {{ request()->routeIs('admin.users.index') ? '' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
+                            style="{{ request()->routeIs('admin.users.index') ? 'background: rgba(13,110,253,0.08); color: var(--primary-color);' : '' }}">
+                            <i class="fas fa-list mr-3"></i>All Users
+                            <span class="ml-auto bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+                                {{ \App\Models\User::count() }}
+                            </span>
+                        </a>
+                        <a href="{{ route('admin.users.deleted') }}"
+                            class="group flex items-center px-2 py-2 text-sm rounded-md {{ request()->routeIs('admin.users.deleted') ? '' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
+                            style="{{ request()->routeIs('admin.users.deleted') ? 'background: rgba(13,110,253,0.08); color: var(--primary-color);' : '' }}">
+                            <i class="fas fa-trash mr-3"></i>Deleted Users
+                            <span class="ml-auto bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full">
+                                {{ \App\Models\User::onlyTrashed()->count() }}
+                            </span>
+                        </a>
+                    </div>
+                </div>
 
                 <!-- Admin Management -->
                 <a href="{{ route('admin.admins.index') }}"
@@ -216,6 +234,17 @@
                 categoriesSubmenu.classList.remove('hidden');
                 categoriesChevron.classList.remove('fa-chevron-down');
                 categoriesChevron.classList.add('fa-chevron-up');
+            }
+        @endif
+
+        // Users - expand if we're on any users page
+        @if (request()->routeIs('admin.users.*'))
+            const usersSubmenu = document.getElementById('users-submenu');
+            const usersChevron = document.getElementById('users-chevron');
+            if (usersSubmenu && usersSubmenu.classList.contains('hidden')) {
+                usersSubmenu.classList.remove('hidden');
+                usersChevron.classList.remove('fa-chevron-down');
+                usersChevron.classList.add('fa-chevron-up');
             }
         @endif
     });
