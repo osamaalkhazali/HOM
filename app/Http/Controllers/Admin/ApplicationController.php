@@ -17,7 +17,9 @@ class ApplicationController extends Controller
   public function index(Request $request)
   {
     $query = Application::with([
-      'user',
+      'user' => function ($q) {
+        $q->withTrashed();
+      },
       'job' => function ($q) {
         $q->withTrashed();
       },
@@ -29,7 +31,8 @@ class ApplicationController extends Controller
       $search = $request->search;
       $query->where(function ($q) use ($search) {
         $q->whereHas('user', function ($userQuery) use ($search) {
-          $userQuery->where('name', 'like', "%{$search}%")
+          $userQuery->withTrashed()
+            ->where('name', 'like', "%{$search}%")
             ->orWhere('email', 'like', "%{$search}%");
         })->orWhereHas('job', function ($jobQuery) use ($search) {
           $jobQuery->where('title', 'like', "%{$search}%")
@@ -85,6 +88,9 @@ class ApplicationController extends Controller
   public function show(Application $application)
   {
     $application->load([
+      'user' => function ($q) {
+        $q->withTrashed();
+      },
       'user.profile',
       'job' => function ($q) {
         $q->withTrashed();
@@ -100,6 +106,9 @@ class ApplicationController extends Controller
   public function edit(Application $application)
   {
     $application->load([
+      'user' => function ($q) {
+        $q->withTrashed();
+      },
       'user.profile',
       'job' => function ($q) {
         $q->withTrashed();

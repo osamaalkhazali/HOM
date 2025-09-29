@@ -227,16 +227,34 @@
                                     <div class="flex items-center">
                                         <div class="flex-shrink-0 h-10 w-10">
                                             <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-                                                <span class="text-sm font-medium text-blue-600">
-                                                    {{ substr($application->user->name, 0, 2) }}
-                                                </span>
+                                                @if($application->user)
+                                                    <span class="text-sm font-medium text-blue-600">
+                                                        {{ substr($application->user->name, 0, 2) }}
+                                                    </span>
+                                                @else
+                                                    <i class="fas fa-user-times text-gray-400"></i>
+                                                @endif
                                             </div>
                                         </div>
                                         <div class="ml-4">
-                                            <div class="text-sm font-medium text-gray-900">{{ $application->user->name }}</div>
-                                            <div class="text-sm text-gray-500">{{ $application->user->email }}</div>
-                                            @if($application->user->profile && $application->user->profile->phone)
-                                                <div class="text-xs text-gray-400">{{ $application->user->profile->phone }}</div>
+                                            @if($application->user)
+                                                <div class="text-sm font-medium text-gray-900 flex items-center gap-2">
+                                                    {{ $application->user->name }}
+                                                    @if($application->user->deleted_at)
+                                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-red-100 text-red-700 border border-red-200">
+                                                            <i class="fas fa-user-slash mr-1"></i>Deleted User
+                                                        </span>
+                                                    @endif
+                                                </div>
+                                                <div class="text-sm text-gray-500">{{ $application->user->email }}</div>
+                                                @if($application->user->profile && $application->user->profile->phone)
+                                                    <div class="text-xs text-gray-400">{{ $application->user->profile->phone }}</div>
+                                                @endif
+                                            @else
+                                                <div class="text-sm font-medium text-gray-500">
+                                                    <i class="fas fa-user-times mr-1"></i>Deleted Account
+                                                </div>
+                                                <div class="text-sm text-gray-400">User permanently removed</div>
                                             @endif
                                         </div>
                                     </div>
@@ -317,7 +335,7 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     @php
-                                        $cvPath = $application->cv_path ?? optional($application->user->profile)->cv_path;
+                                        $cvPath = $application->cv_path ?? ($application->user ? optional($application->user->profile)->cv_path : null);
                                     @endphp
                                     @if($cvPath)
                                         <a href="{{ Storage::url($cvPath) }}" target="_blank"

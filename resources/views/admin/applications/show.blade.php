@@ -119,13 +119,31 @@
                         <div class="flex items-start space-x-4">
                             <div class="flex-shrink-0">
                                 <div class="h-16 w-16 rounded-full bg-blue-100 flex items-center justify-center">
-                                    <i class="fas fa-user text-blue-600 text-xl"></i>
+                                    @if($application->user)
+                                        <i class="fas fa-user text-blue-600 text-xl"></i>
+                                    @else
+                                        <i class="fas fa-user-times text-gray-400 text-xl"></i>
+                                    @endif
                                 </div>
                             </div>
                             <div class="flex-1">
-                                <h4 class="text-xl font-semibold text-gray-900">{{ $application->user->name }}</h4>
-                                <p class="text-gray-600">{{ $application->user->email }}</p>
-                                @if ($application->user->profile)
+                                @if($application->user)
+                                    <h4 class="text-xl font-semibold text-gray-900 flex items-center gap-2">
+                                        {{ $application->user->name }}
+                                        @if($application->user->deleted_at)
+                                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700 border border-red-200">
+                                                <i class="fas fa-user-slash mr-1"></i>Deleted User
+                                            </span>
+                                        @endif
+                                    </h4>
+                                    <p class="text-gray-600">{{ $application->user->email }}</p>
+                                @else
+                                    <h4 class="text-xl font-semibold text-gray-500">
+                                        <i class="fas fa-user-times mr-2"></i>Deleted Account
+                                    </h4>
+                                    <p class="text-gray-400">User permanently removed</p>
+                                @endif
+                                @if ($application->user && $application->user->profile)
                                     <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                                         @if ($application->user->profile->phone)
                                             <div>
@@ -175,6 +193,14 @@
                                             </div>
                                         </div>
                                     @endif
+                                @elseif($application->user)
+                                    <div class="mt-4">
+                                        <p class="text-sm text-gray-500">No profile information available</p>
+                                    </div>
+                                @else
+                                    <div class="mt-4">
+                                        <p class="text-sm text-gray-400 italic">All user data permanently removed</p>
+                                    </div>
                                 @endif
                             </div>
                         </div>
@@ -300,7 +326,7 @@
 
                 <!-- Resume/CV -->
                 @php
-                    $cvPath = $application->cv_path ?? optional($application->user->profile)->cv_path;
+                    $cvPath = $application->cv_path ?? ($application->user ? optional($application->user->profile)->cv_path : null);
                 @endphp
                 @if ($cvPath)
                     <div class="bg-white rounded-lg shadow">
