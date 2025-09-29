@@ -19,15 +19,6 @@ class CategorySeeder extends Seeder
       'Marketing & Sales',
       'Education & Training',
       'Engineering',
-      'Human Resources',
-      'Design & Creative',
-      'Business & Management',
-      'Customer Service',
-      'Legal & Compliance',
-      'Manufacturing',
-      'Retail & E-commerce',
-      'Real Estate',
-      'Transportation & Logistics',
     ];
 
     foreach ($categories as $categoryName) {

@@ -111,9 +111,9 @@ class ProfileSeeder extends Seeder
         // Get all users
         $users = User::all();
 
-        // Create profiles for roughly 70% of users
+        // Create profiles for roughly 50% of users
         $profileCount = 0;
-        $targetProfiles = (int) ($users->count() * 0.7);
+        $targetProfiles = (int) ($users->count() * 0.5);
 
         foreach ($users->take($targetProfiles) as $user) {
             Profile::create([

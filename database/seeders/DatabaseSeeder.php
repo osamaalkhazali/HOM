@@ -28,12 +28,12 @@ class DatabaseSeeder extends Seeder
         $this->command->line('');
         $this->command->info('📊 Summary:');
         $this->command->line('   - Admins: Created sample admin accounts');
-        $this->command->line('   - Categories: Created job categories');
+        $this->command->line('   - Categories: Created 6 job categories');
         $this->command->line('   - SubCategories: Created subcategories for each category');
-        $this->command->line('   - Users: Created test users + factory users');
-        $this->command->line('   - Profiles: Created profiles with education/work data');
-        $this->command->line('   - Jobs: Created realistic job postings');
-        $this->command->line('   - Applications: Created sample applications');
+        $this->command->line('   - Users: Created 8 test users (4 specific + 4 factory)');
+        $this->command->line('   - Profiles: Created profiles for ~50% of users');
+        $this->command->line('   - Jobs: Created 1-2 jobs per subcategory');
+        $this->command->line('   - Applications: Created 1-3 applications per job');
         $this->command->line('');
         $this->command->info('🔐 Login credentials:');
         $this->command->line('   Admin: admin@jobportal.com / password123');

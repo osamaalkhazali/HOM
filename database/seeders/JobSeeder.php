@@ -145,8 +145,8 @@ class JobSeeder extends Seeder
     $jobCount = 0;
 
     foreach ($subCategories as $subCategory) {
-      // Create 2-5 jobs per subcategory
-      $jobsToCreate = fake()->numberBetween(2, 5);
+      // Create 1-2 jobs per subcategory
+      $jobsToCreate = fake()->numberBetween(1, 2);
 
       for ($i = 0; $i < $jobsToCreate; $i++) {
         $level = $levels[array_rand($levels)];

@@ -25,15 +25,12 @@ class ApplicationSeeder extends Seeder
     $statuses = ['pending', 'reviewed', 'shortlisted', 'rejected', 'hired'];
     $applicationCount = 0;
 
-    // Create applications for each job
-    foreach ($jobs as $job) {
-      // Each job gets 1-8 applications
-      $applicationsForJob = fake()->numberBetween(1, 8);
+    // Create exactly 3 applications per user
+    foreach ($users as $user) {
+      // Get 3 random jobs for this user (avoid duplicates)
+      $selectedJobs = $jobs->random(min(3, $jobs->count()));
 
-      // Get random users for this job (avoid duplicates)
-      $selectedUsers = $users->random(min($applicationsForJob, $users->count()));
-
-      foreach ($selectedUsers as $user) {
+      foreach ($selectedJobs as $job) {
         $status = $statuses[array_rand($statuses)];
 
         Application::create([
@@ -49,6 +46,6 @@ class ApplicationSeeder extends Seeder
       }
     }
 
-    $this->command->info("Created {$applicationCount} job applications successfully!");
+    $this->command->info("Created {$applicationCount} job applications (3 per user) successfully!");
   }
 }
