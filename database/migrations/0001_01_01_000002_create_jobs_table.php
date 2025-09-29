@@ -25,7 +25,7 @@ return new class extends Migration
             $table->enum('level', ['entry', 'mid', 'senior', 'executive'])->index();
             $table->date('deadline')->index();
             $table->boolean('is_active')->default(true)->index();
-            $table->enum('status', ['active', 'inactive', 'draft'])->default('active')->after('is_active');
+            $table->enum('status', ['active', 'inactive', 'draft'])->default('active');
             $table->foreignId('posted_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
             $table->softDeletes();

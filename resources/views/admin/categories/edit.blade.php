@@ -21,7 +21,7 @@
     <div class="bg-white rounded-lg shadow">
         <form method="POST" action="{{ route('admin.categories.update', $category) }}" class="p-6">
             @csrf
-            @method('PUT')
+            @method('PATCH')
 
             <!-- Category Name -->
             <div class="mb-6">
