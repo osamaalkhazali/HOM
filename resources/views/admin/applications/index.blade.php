@@ -159,8 +159,10 @@
                     <form method="POST" action="{{ route('admin.applications.bulk-update-status') }}" class="inline">
                         @csrf
                         <input type="hidden" name="application_ids" id="bulk-ids">
-                        <select name="status" onchange="if(this.value && confirm('Update status for selected applications?')) this.form.submit()"
-                                class="border border-gray-300 rounded px-3 py-1 text-sm">
+                        <select name="status"
+                                class="border border-gray-300 rounded px-3 py-1 text-sm"
+                                data-confirm-change="Update status for selected applications?"
+                                data-confirm-variant="warning">
                             <option value="">Change Status</option>
                             <option value="pending">Mark as Pending</option>
                             <option value="reviewed">Mark as Reviewed</option>
@@ -169,12 +171,15 @@
                             <option value="hired">Mark as Hired</option>
                         </select>
                     </form>
-                    <form method="POST" action="{{ route('admin.applications.bulk-delete') }}" class="inline">
+                    <form method="POST" action="{{ route('admin.applications.bulk-delete') }}" class="inline"
+                          data-confirm="Are you sure you want to delete selected applications?"
+                          data-confirm-variant="danger"
+                          data-confirm-confirm="Delete"
+                          data-confirm-cancel="Cancel">
                         @csrf
                         @method('DELETE')
                         <input type="hidden" name="application_ids" id="bulk-delete-ids">
                         <button type="submit"
-                                onclick="return confirm('Are you sure you want to delete selected applications?')"
                                 class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm transition-colors">
                             <i class="fas fa-trash mr-1"></i>Delete Selected
                         </button>
@@ -292,11 +297,6 @@
                                                     <i class="fas fa-map-marker-alt mr-1"></i>{{ $application->job->location }}
                                                 </span>
                                             @endif
-                                            @if(!empty($application->job->salary))
-                                                <span class="text-xs text-gray-400 ml-3">
-                                                    <i class="fas fa-dollar-sign mr-1"></i>${{ number_format($application->job->salary) }}
-                                                </span>
-                                            @endif
                                         @endif
                                     </div>
                                 </td>
@@ -380,11 +380,14 @@
                                         </form>
 
                                         <!-- Delete Application -->
-                                        <form method="POST" action="{{ route('admin.applications.destroy', $application) }}" class="inline">
+                                        <form method="POST" action="{{ route('admin.applications.destroy', $application) }}" class="inline"
+                                              data-confirm="Are you sure you want to delete this application?"
+                                              data-confirm-variant="danger"
+                                              data-confirm-confirm="Delete"
+                                              data-confirm-cancel="Cancel">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit"
-                                                    onclick="return confirm('Are you sure you want to delete this application?')"
                                                     class="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 p-2 rounded"
                                                     title="Delete Application">
                                                 <i class="fas fa-trash"></i>

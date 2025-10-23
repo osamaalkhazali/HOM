@@ -13,7 +13,18 @@ use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Admin\AdminNotificationController;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+
+Route::post('/locale', function (Request $request) {
+    $validated = $request->validate([
+        'locale' => 'required|in:' . implode(',', config('app.available_locales')),
+    ]);
+
+    session(['locale' => $validated['locale']]);
+
+    return back();
+})->name('locale.switch');
 
 Route::get('/', function () {
     return view('welcome');
@@ -66,6 +77,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/jobs/{job}', [AdminJobController::class, 'show'])->name('jobs.show');
         Route::get('/jobs/{job}/edit', [AdminJobController::class, 'edit'])->name('jobs.edit');
         Route::patch('/jobs/{job}', [AdminJobController::class, 'update'])->name('jobs.update');
+        Route::patch('/jobs/{job}/toggle-status', [AdminJobController::class, 'toggleStatus'])->name('jobs.toggle-status');
         Route::delete('/jobs/{job}', [AdminJobController::class, 'destroy'])->name('jobs.destroy');
         Route::patch('/jobs/{id}/restore', [AdminJobController::class, 'restore'])->name('jobs.restore');
         Route::delete('/jobs/{id}/force-delete', [AdminJobController::class, 'forceDelete'])->name('jobs.force-delete');

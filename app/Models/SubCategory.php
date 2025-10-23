@@ -5,10 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Models\Concerns\HasLocalizedAttributes;
 
 class SubCategory extends Model
 {
-  use HasFactory, SoftDeletes;
+  use HasFactory, SoftDeletes, HasLocalizedAttributes;
+
+  protected $appends = [
+    'admin_label',
+  ];
 
   /**
    * The attributes that are mass assignable.
@@ -18,6 +23,7 @@ class SubCategory extends Model
   protected $fillable = [
     'category_id',
     'name',
+    'name_ar',
   ];
 
   /**
@@ -34,5 +40,27 @@ class SubCategory extends Model
   public function jobs()
   {
     return $this->hasMany(Job::class);
+  }
+
+  public function getDisplayNameAttribute(): ?string
+  {
+    return $this->getLocalizedValue('name');
+  }
+
+  public function getAdminLabelAttribute(): string
+  {
+    return $this->formatBilingualLabel('name');
+  }
+
+  protected function formatBilingualLabel(string $attribute): string
+  {
+    $english = $this->getAttribute("{$attribute}_en") ?? $this->getAttribute($attribute) ?? '';
+    $arabic = $this->getAttribute("{$attribute}_ar") ?? '';
+
+    if ($english && $arabic && $english !== $arabic) {
+      return "{$english} ({$arabic})";
+    }
+
+    return $english ?: $arabic ?: '';
   }
 }

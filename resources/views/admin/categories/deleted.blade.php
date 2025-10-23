@@ -95,28 +95,38 @@
                                 </div>
                             </div>
                         </div>
+                        @php
+                            $restoreMessage = 'Are you sure you want to restore "' . $category->name . '"?';
+                            $permanentMessage = $category->sub_categories_count > 0
+                                ? 'WARNING: Permanently deleting "' . $category->name . '" will also remove its ' . $category->sub_categories_count . ' subcategory(ies). This action cannot be undone. Continue?'
+                                : 'WARNING: Permanently deleting "' . $category->name . '" cannot be undone. Continue?';
+                        @endphp
                         <div class="flex items-center space-x-2">
                             <!-- Restore Button -->
                             <form method="POST" action="{{ route('admin.categories.restore', $category->id) }}"
-                                class="inline">
+                                class="inline"
+                                data-confirm="{{ $restoreMessage }}"
+                                data-confirm-variant="success"
+                                data-confirm-confirm="Restore">
                                 @csrf
                                 <button type="submit"
                                     class="bg-green-600 text-white px-3 py-2 rounded-md text-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
-                                    title="Restore Category"
-                                    onclick="return confirm('Are you sure you want to restore \'{{ $category->name }}\'?')">
+                                    title="Restore Category">
                                     <i class="fas fa-undo mr-1"></i>Restore
                                 </button>
                             </form>
 
                             <!-- Permanent Delete Button -->
                             <form method="POST" action="{{ route('admin.categories.force-delete', $category->id) }}"
-                                class="inline">
+                                class="inline"
+                                data-confirm="{{ $permanentMessage }}"
+                                data-confirm-variant="danger"
+                                data-confirm-confirm="Delete Forever">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit"
                                     class="bg-red-600 text-white px-3 py-2 rounded-md text-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
-                                    title="Permanently Delete"
-                                    onclick="return confirmPermanentDelete('{{ $category->name }}', {{ $category->sub_categories_count }})">
+                                    title="Permanently Delete">
                                     <i class="fas fa-trash-alt mr-1"></i>Delete Forever
                                 </button>
                             </form>
@@ -147,17 +157,8 @@
             {{ $deletedCategories->links('admin.partials.pagination') }}
         </div>
     @endif
-
     <script>
-        function confirmPermanentDelete(categoryName, subCategoriesCount) {
-            if (subCategoriesCount > 0) {
-                return confirm(
-                    `⚠️ WARNING: You are about to permanently delete "${categoryName}" and its ${subCategoriesCount} subcategory(ies). This action CANNOT be undone! Are you absolutely sure?`
-                    );
-            }
-            return confirm(
-                `⚠️ WARNING: You are about to permanently delete "${categoryName}". This action CANNOT be undone! Are you absolutely sure?`
-                );
-        }
+        // Confirmation handled by the shared HOM confirm modal.
     </script>
 @endsection
+

@@ -5,10 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Models\Concerns\HasLocalizedAttributes;
 
 class Job extends Model
 {
-  use HasFactory, SoftDeletes;
+  use HasFactory, SoftDeletes, HasLocalizedAttributes;
 
   /**
    * The attributes that are mass assignable.
@@ -17,12 +18,16 @@ class Job extends Model
    */
   protected $fillable = [
     'title',
+    'title_ar',
     'description',
+    'description_ar',
     'category_id',
     'sub_category_id',
     'company',
+    'company_ar',
     'salary',
     'location',
+    'location_ar',
     'level',
     'deadline',
     'posted_by',
@@ -63,6 +68,16 @@ class Job extends Model
   public function postedBy()
   {
     return $this->belongsTo(User::class, 'posted_by');
+  }
+
+  public function questions()
+  {
+    return $this->hasMany(JobQuestion::class)->orderBy('display_order');
+  }
+
+  public function documents()
+  {
+    return $this->hasMany(JobDocument::class)->orderBy('display_order');
   }
 
   /**
@@ -160,5 +175,25 @@ class Job extends Model
   public function isDraft()
   {
     return $this->status === 'draft';
+  }
+
+  public function getTitleLocalizedAttribute(): ?string
+  {
+    return $this->getLocalizedValue('title');
+  }
+
+  public function getDescriptionLocalizedAttribute(): ?string
+  {
+    return $this->getLocalizedValue('description');
+  }
+
+  public function getCompanyLocalizedAttribute(): ?string
+  {
+    return $this->getLocalizedValue('company');
+  }
+
+  public function getLocationLocalizedAttribute(): ?string
+  {
+    return $this->getLocalizedValue('location');
   }
 }

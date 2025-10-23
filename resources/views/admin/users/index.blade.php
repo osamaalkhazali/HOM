@@ -244,7 +244,11 @@
                                     </form>
                                     <form method="POST" action="{{ route('admin.users.destroy', $user) }}"
                                         class="inline"
-                                        onsubmit="return confirm('Are you sure you want to delete this user and their profile?')">
+                                        data-confirm="{{ __('site.confirm.actions.users.delete_soft.message', [], 'en') }}"
+                                        data-confirm-title="{{ __('site.confirm.delete.title', [], 'en') }}"
+                                        data-confirm-variant="danger"
+                                        data-confirm-confirm="{{ __('site.confirm.actions.users.delete_soft.confirm', [], 'en') }}"
+                                        data-confirm-cancel="{{ __('site.confirm.cancel', [], 'en') }}">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="text-red-600 hover:text-red-900 p-1 rounded"

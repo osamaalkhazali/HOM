@@ -130,8 +130,20 @@
                                 class="text-yellow-600 hover:text-yellow-900 p-2 rounded" title="Edit Category">
                                 <i class="fas fa-edit"></i>
                             </a>
+                            @php
+                                $deleteMessage = $totalJobs > 0
+                                    ? __('site.confirm.actions.categories.delete_with_jobs.message', ['name' => $category->name, 'count' => $totalJobs], 'en')
+                                    : __('site.confirm.actions.categories.delete_with_children.message', ['name' => $category->name], 'en');
+                                $deleteConfirm = $totalJobs > 0
+                                    ? __('site.confirm.actions.categories.delete_with_jobs.confirm', [], 'en')
+                                    : __('site.confirm.actions.categories.delete_with_children.confirm', [], 'en');
+                            @endphp
                             <form method="POST" action="{{ route('admin.categories.destroy', $category) }}" class="inline"
-                                onsubmit="return confirmDelete('{{ $category->name }}', {{ $totalJobs }})">
+                                data-confirm="{{ $deleteMessage }}"
+                                data-confirm-title="{{ __('site.confirm.delete.title', [], 'en') }}"
+                                data-confirm-variant="danger"
+                                data-confirm-confirm="{{ $deleteConfirm }}"
+                                data-confirm-cancel="{{ __('site.confirm.cancel', [], 'en') }}">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="text-red-600 hover:text-red-900 p-2 rounded"
@@ -204,16 +216,4 @@
         </div>
     @endif
 
-    <script>
-        // Simple confirmation dialog
-        function confirmDelete(categoryName, jobCount) {
-            if (jobCount > 0) {
-                return confirm(
-                    `Are you sure you want to delete "${categoryName}"? This category has ${jobCount} job(s) that will need to be moved or deleted first.`
-                    );
-            }
-            return confirm(
-                `Are you sure you want to delete "${categoryName}"? This will also delete all its subcategories.`);
-        }
-    </script>
 @endsection

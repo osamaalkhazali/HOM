@@ -199,11 +199,6 @@
                                                             <div class="d-flex align-items-center mb-1">
                                                                 <i class="fas fa-layer-group me-2"></i>{{ ucfirst($application->job->level) }}
                                                             </div>
-                                                            @if ($application->job->salary && $application->job->salary > 0)
-                                                                <div class="d-flex align-items-center mb-1">
-                                                                    <i class="fas fa-dollar-sign me-2"></i>${{ number_format($application->job->salary) }}
-                                                                </div>
-                                                            @endif
                                                             <div class="d-flex align-items-center">
                                                                 <i class="fas fa-clock me-2"></i>Deadline: {{ \Carbon\Carbon::parse($application->job->deadline)->format('M d, Y') }}
                                                                 @if ($application->job->isExpired())

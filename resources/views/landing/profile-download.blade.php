@@ -2,6 +2,7 @@
 <section class="py-4">
     <div class="container">
         @php
+            $profileText = trans('site.profile');
             $customProfilePath = \App\Models\Setting::where('key', 'hom_profile_pdf_path')->value('value');
             $profilePdfUrl = $customProfilePath
                 ? Storage::url($customProfilePath)
@@ -15,13 +16,13 @@
                         <i class="fas fa-file-pdf fa-lg"></i>
                     </div>
                     <div>
-                        <h6 class="mb-0">Download Company Profile (PDF)</h6>
-                        <small class="text-muted">Learn more about HOM services and capabilities</small>
+                        <h6 class="mb-0">{{ $profileText['title'] }}</h6>
+                        <small class="text-muted">{{ $profileText['subtitle'] }}</small>
                     </div>
                 </div>
                 <a href="{{ $profilePdfUrl }}" class="btn btn-primary btn-lg" style="border-radius: 10px;"
                     target="_blank" rel="noopener">
-                    <i class="fas fa-download me-2"></i>Download PDF
+                    <i class="fas fa-download me-2"></i>{{ $profileText['button'] }}
                 </a>
             </div>
         </div>

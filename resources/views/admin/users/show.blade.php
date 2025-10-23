@@ -101,7 +101,11 @@
                         </form>
                     </div>
                     <form method="POST" action="{{ route('admin.users.destroy', $user) }}" class="mt-2"
-                        onsubmit="return confirm('Are you sure you want to delete this user and their profile? This action cannot be undone.')">
+                        data-confirm="{{ __('site.confirm.actions.users.delete_force.message', [], 'en') }}"
+                        data-confirm-title="{{ __('site.confirm.delete.title', [], 'en') }}"
+                        data-confirm-variant="danger"
+                        data-confirm-confirm="{{ __('site.confirm.actions.users.delete_force.confirm', [], 'en') }}"
+                        data-confirm-cancel="{{ __('site.confirm.cancel', [], 'en') }}">
                         @csrf
                         @method('DELETE')
                         <button type="submit"

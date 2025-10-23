@@ -1,5 +1,9 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+@php
+    $locale = app()->getLocale();
+    $isRtl = $locale === 'ar';
+@endphp
+<html lang="{{ str_replace('_', '-', $locale) }}" dir="{{ $isRtl ? 'rtl' : 'ltr' }}">
 
 <head>
     <meta charset="utf-8">
@@ -12,12 +16,15 @@
     <link rel="shortcut icon" type="image/png" href="{{ asset('hom-favicon.png') }}">
 
     <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap{{ $isRtl ? '.rtl' : '' }}.min.css" rel="stylesheet">
     <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
+    @if ($isRtl)
+        <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    @endif
     <!-- AOS Animation -->
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     @include('layouts.styles')
@@ -103,7 +110,7 @@
     </style>
 </head>
 
-<body id="top" class="app">
+<body id="top" class="app {{ $isRtl ? 'rtl' : 'ltr' }}">
     @include('layouts.navigation')
 
     <!-- Page Content -->
@@ -129,6 +136,7 @@
 
     @include('layouts.footer')
 
+    @include('components.confirm-modal')
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- AOS Animation JS -->

@@ -7,6 +7,7 @@ use App\Models\Job;
 use App\Models\Category;
 use App\Models\SubCategory;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class JobController extends Controller
 {
@@ -22,9 +23,13 @@ class JobController extends Controller
       $search = $request->search;
       $query->where(function ($q) use ($search) {
         $q->where('title', 'like', "%{$search}%")
+          ->orWhere('title_ar', 'like', "%{$search}%")
           ->orWhere('company', 'like', "%{$search}%")
+          ->orWhere('company_ar', 'like', "%{$search}%")
           ->orWhere('location', 'like', "%{$search}%")
-          ->orWhere('description', 'like', "%{$search}%");
+          ->orWhere('location_ar', 'like', "%{$search}%")
+          ->orWhere('description', 'like', "%{$search}%")
+          ->orWhere('description_ar', 'like', "%{$search}%");
       });
     }
 
@@ -58,19 +63,11 @@ class JobController extends Controller
       $query->whereDate('created_at', '<=', $request->date_to);
     }
 
-    // Filter by salary range
-    if ($request->filled('min_salary')) {
-      $query->where('salary', '>=', $request->min_salary);
-    }
-    if ($request->filled('max_salary')) {
-      $query->where('salary', '<=', $request->max_salary);
-    }
-
     // Sorting
     $sortBy = $request->get('sort', 'created_at');
     $sortDirection = $request->get('direction', 'desc');
 
-    $allowedSorts = ['title', 'company', 'salary', 'location', 'level', 'created_at', 'deadline'];
+    $allowedSorts = ['title', 'company', 'location', 'level', 'created_at', 'deadline'];
     if (in_array($sortBy, $allowedSorts)) {
       $query->orderBy($sortBy, $sortDirection);
     }
@@ -98,33 +95,39 @@ class JobController extends Controller
     // Validate basic fields first
     $validated = $request->validate([
       'title' => 'required|string|max:255',
+      'title_ar' => 'nullable|string|max:255',
       'description' => 'required|string',
+      'description_ar' => 'nullable|string',
       'category_id' => 'required|exists:categories,id',
       'sub_category_id' => 'nullable|exists:sub_categories,id',
       'company' => 'required|string|max:255',
-      'salary_type' => 'required|in:negotiable,fixed',
+      'company_ar' => 'nullable|string|max:255',
       'location' => 'required|string|max:255',
+      'location_ar' => 'nullable|string|max:255',
       'level' => 'required|in:entry,mid,senior,executive',
       'deadline' => 'required|date|after:today',
-      'status' => 'required|in:active,inactive,draft'
+      'status' => 'required|in:active,inactive,draft',
+      'questions' => 'nullable|array',
+      'questions.*.question' => 'nullable|string|max:500',
+      'questions.*.question_ar' => 'nullable|string|max:500',
+      'questions.*.is_required' => 'nullable|boolean',
+      'documents' => 'nullable|array',
+      'documents.*.name' => 'nullable|string|max:255',
+      'documents.*.name_ar' => 'nullable|string|max:255',
+      'documents.*.is_required' => 'nullable|boolean',
     ]);
 
-    // Handle salary based on type
-    if ($validated['salary_type'] === 'fixed') {
-      $salaryValidation = $request->validate([
-        'salary' => 'required|numeric|min:1'
-      ]);
-      $validated['salary'] = $salaryValidation['salary'];
-    } else {
-      $validated['salary'] = 0; // Set to 0 for negotiable
-    }
-
-    // Remove salary_type from validated data as it's not a database field
-    unset($validated['salary_type']);
+    $questionsInput = $validated['questions'] ?? [];
+    $documentsInput = $validated['documents'] ?? [];
+    unset($validated['questions'], $validated['documents']);
 
     $validated['posted_by'] = auth('admin')->id();
 
-    Job::create($validated);
+    DB::transaction(function () use ($validated, $questionsInput, $documentsInput) {
+      $job = Job::create($validated);
+      $this->syncJobQuestions($job, $questionsInput);
+      $this->syncJobDocuments($job, $documentsInput);
+    });
 
     return redirect()->route('admin.jobs.index')->with('success', 'Job created successfully');
   }
@@ -134,7 +137,7 @@ class JobController extends Controller
    */
   public function show(Job $job)
   {
-    $job->load(['category', 'subCategory', 'postedBy', 'applications.user']);
+    $job->load(['category', 'subCategory', 'postedBy', 'applications.user', 'questions', 'documents']);
     return view('admin.jobs.show', compact('job'));
   }
 
@@ -143,6 +146,7 @@ class JobController extends Controller
    */
   public function edit(Job $job)
   {
+    $job->load(['questions', 'documents']);
     $categories = Category::with('subCategories')->get();
     return view('admin.jobs.edit', compact('job', 'categories'));
   }
@@ -155,31 +159,37 @@ class JobController extends Controller
     // Validate basic fields first
     $validated = $request->validate([
       'title' => 'required|string|max:255',
+      'title_ar' => 'nullable|string|max:255',
       'description' => 'required|string',
+      'description_ar' => 'nullable|string',
       'category_id' => 'required|exists:categories,id',
       'sub_category_id' => 'nullable|exists:sub_categories,id',
       'company' => 'required|string|max:255',
-      'salary_type' => 'required|in:negotiable,fixed',
+      'company_ar' => 'nullable|string|max:255',
       'location' => 'required|string|max:255',
+      'location_ar' => 'nullable|string|max:255',
       'level' => 'required|in:entry,mid,senior,executive',
       'deadline' => 'required|date',
-      'status' => 'required|in:active,inactive,draft'
+      'status' => 'required|in:active,inactive,draft',
+      'questions' => 'nullable|array',
+      'questions.*.question' => 'nullable|string|max:500',
+      'questions.*.question_ar' => 'nullable|string|max:500',
+      'questions.*.is_required' => 'nullable|boolean',
+      'documents' => 'nullable|array',
+      'documents.*.name' => 'nullable|string|max:255',
+      'documents.*.name_ar' => 'nullable|string|max:255',
+      'documents.*.is_required' => 'nullable|boolean',
     ]);
 
-    // Handle salary based on type
-    if ($validated['salary_type'] === 'fixed') {
-      $salaryValidation = $request->validate([
-        'salary' => 'required|numeric|min:1'
-      ]);
-      $validated['salary'] = $salaryValidation['salary'];
-    } else {
-      $validated['salary'] = 0; // Set to 0 for negotiable
-    }
+    $questionsInput = $validated['questions'] ?? [];
+    $documentsInput = $validated['documents'] ?? [];
+    unset($validated['questions'], $validated['documents']);
 
-    // Remove salary_type from validated data as it's not a database field
-    unset($validated['salary_type']);
-
-    $job->update($validated);
+    DB::transaction(function () use ($job, $validated, $questionsInput, $documentsInput) {
+      $job->update($validated);
+      $this->syncJobQuestions($job, $questionsInput);
+      $this->syncJobDocuments($job, $documentsInput);
+    });
 
     return redirect()->route('admin.jobs.index')->with('success', 'Job updated successfully');
   }
@@ -205,8 +215,11 @@ class JobController extends Controller
       $search = $request->search;
       $query->where(function ($q) use ($search) {
         $q->where('title', 'like', "%{$search}%")
+          ->orWhere('title_ar', 'like', "%{$search}%")
           ->orWhere('company', 'like', "%{$search}%")
-          ->orWhere('location', 'like', "%{$search}%");
+          ->orWhere('company_ar', 'like', "%{$search}%")
+          ->orWhere('location', 'like', "%{$search}%")
+          ->orWhere('location_ar', 'like', "%{$search}%");
       });
     }
 
@@ -275,5 +288,85 @@ class JobController extends Controller
     Job::onlyTrashed()->forceDelete();
 
     return redirect()->route('admin.jobs.deleted')->with('success', 'All jobs permanently deleted');
+  }
+
+  /**
+   * Sync job questions with incoming request data.
+   */
+  protected function syncJobQuestions(Job $job, array $questions): void
+  {
+    $job->questions()->delete();
+
+    $payload = collect($questions)
+      ->filter(function ($item) {
+        $question = trim($item['question'] ?? '');
+        $questionAr = trim($item['question_ar'] ?? '');
+        return $question !== '' || $questionAr !== '';
+      })
+      ->values()
+      ->map(function ($item, $index) {
+        return [
+          'question' => trim($item['question'] ?? ''),
+          'question_ar' => trim($item['question_ar'] ?? '') ?: null,
+          'is_required' => isset($item['is_required']) ? (bool)$item['is_required'] : false,
+          'display_order' => $index,
+        ];
+      });
+
+    if ($payload->isNotEmpty()) {
+      $job->questions()->createMany($payload->toArray());
+    }
+  }
+
+  /**
+   * Sync job required documents with incoming request data.
+   */
+  protected function syncJobDocuments(Job $job, array $documents): void
+  {
+    $job->documents()->delete();
+
+    $payload = collect($documents)
+      ->filter(function ($item) {
+        $name = trim($item['name'] ?? '');
+        $nameAr = trim($item['name_ar'] ?? '');
+        return $name !== '' || $nameAr !== '';
+      })
+      ->values()
+      ->map(function ($item, $index) {
+        return [
+          'name' => trim($item['name'] ?? ''),
+          'name_ar' => trim($item['name_ar'] ?? '') ?: null,
+          'is_required' => isset($item['is_required']) ? (bool)$item['is_required'] : false,
+          'display_order' => $index,
+        ];
+      });
+
+    if ($payload->isNotEmpty()) {
+      $job->documents()->createMany($payload->toArray());
+    }
+  }
+
+  /**
+   * Toggle the status of the specified job between active and inactive.
+   */
+  public function toggleStatus(Job $job)
+  {
+    $newStatus = match ($job->status) {
+      'active' => 'inactive',
+      'inactive' => 'active',
+      default => 'active',
+    };
+
+    $job->status = $newStatus;
+    $job->is_active = $newStatus === 'active';
+    $job->save();
+
+    $message = match ($newStatus) {
+      'active' => 'Job activated successfully.',
+      'inactive' => 'Job deactivated successfully.',
+      default => 'Job status updated successfully.',
+    };
+
+    return back()->with('success', $message);
   }
 }

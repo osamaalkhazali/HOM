@@ -1,4 +1,4 @@
-@extends('layouts.admin.app')
+﻿@extends('layouts.admin.app')
 
 @section('title', 'Edit Category')
 
@@ -57,17 +57,23 @@
                         @foreach ($category->subCategories as $index => $subCategory)
                             @php $jobCount = $subCategory->jobs->count(); @endphp
                             <div
-                                class="existing-subcategory-item flex items-center space-x-2 p-3 bg-gray-50 rounded-lg border">
+                                class="existing-subcategory-item flex items-start gap-2 p-3 bg-gray-50 rounded-lg border">
                                 <!-- Hidden ID for existing subcategories -->
                                 <input type="hidden" name="existing_subcategories[{{ $index }}][id]"
                                     value="{{ $subCategory->id }}">
 
-                                <!-- Editable name field -->
+                                <!-- Editable name fields -->
                                 <div class="flex-1">
                                     <input type="text" name="existing_subcategories[{{ $index }}][name]"
                                         value="{{ old('existing_subcategories.' . $index . '.name', $subCategory->name) }}"
                                         class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        placeholder="Subcategory name">
+                                        placeholder="Subcategory name (EN)">
+                                </div>
+                                <div class="flex-1">
+                                    <input type="text" name="existing_subcategories[{{ $index }}][name_ar]"
+                                        value="{{ old('existing_subcategories.' . $index . '.name_ar', $subCategory->name_ar) }}"
+                                        class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        placeholder="Arabic name (optional)">
                                 </div>
 
                                 <!-- Job count indicator -->
@@ -129,16 +135,51 @@
     <script>
         let newSubcategoryIndex = 0;
 
+        function openHomConfirmModal(config = {}) {
+            if (window.homConfirm && typeof window.homConfirm.open === 'function') {
+                return window.homConfirm.open(config);
+            }
+
+            console.warn('Confirmation modal is not available.');
+            return Promise.resolve();
+        }
+
+        function confirmWithModal(message, options = {}) {
+            return openHomConfirmModal({
+                title: options.title || 'Please Confirm',
+                message,
+                confirmText: options.confirmText || 'Confirm',
+                cancelText: options.cancelText || 'Cancel',
+                hideCancel: Boolean(options.hideCancel),
+                variant: options.variant || 'danger',
+            });
+        }
+
+        function showInfoModal(message, options = {}) {
+            return openHomConfirmModal({
+                title: options.title || 'Notice',
+                message,
+                confirmText: options.confirmText || 'Got it',
+                hideCancel: true,
+                variant: options.variant || 'info',
+            }).catch(() => undefined);
+        }
+
         function addNewSubcategory() {
             const container = document.getElementById('subcategories-container');
             const newItem = document.createElement('div');
             newItem.className =
-                'new-subcategory-item flex items-center space-x-2 p-3 bg-green-50 rounded-lg border border-green-200';
+                'new-subcategory-item flex items-center gap-2 p-3 bg-green-50 rounded-lg border border-green-200';
             newItem.innerHTML = `
                 <div class="flex-1">
                     <input type="text" name="new_subcategories[]"
                         class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-                        placeholder="New subcategory name">
+                        placeholder="Subcategory name (EN)">
+                </div>
+                <div class="flex-1">
+                    <input type="text" name="new_subcategories_ar[]"
+                        class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                        placeholder="Arabic name (optional)">
                 </div>
                 <div class="flex items-center space-x-2">
                     <span class="text-xs text-green-700 bg-green-100 px-2 py-1 rounded-full">New</span>
@@ -149,7 +190,7 @@
                 </button>
             `;
             container.appendChild(newItem);
-            newItem.querySelector('input').focus();
+            newItem.querySelector('input[name="new_subcategories[]"]').focus();
             newSubcategoryIndex++;
         }
 
@@ -159,33 +200,41 @@
 
         function removeExistingSubcategory(button, jobCount) {
             if (jobCount > 0) {
-                alert('Cannot delete subcategory with existing jobs. Please move or delete the jobs first.');
+                showInfoModal('Cannot delete subcategory with existing jobs. Please move or delete the jobs first.', {
+                    variant: 'warning',
+                    confirmText: 'Understood',
+                });
                 return;
             }
 
-            if (confirm('Are you sure you want to delete this subcategory?')) {
-                const item = button.closest('.existing-subcategory-item');
+            confirmWithModal('Are you sure you want to delete this subcategory?', {
+                confirmText: 'Delete',
+                cancelText: 'Cancel',
+                variant: 'danger',
+            })
+                .then(() => {
+                    const item = button.closest('.existing-subcategory-item');
+                    if (!item) {
+                        return;
+                    }
 
-                // Add a hidden input to mark for deletion
-                const deleteInput = document.createElement('input');
-                deleteInput.type = 'hidden';
-                deleteInput.name = 'delete_subcategories[]';
-                deleteInput.value = item.querySelector('input[name*="[id]"]').value;
-                item.appendChild(deleteInput);
+                    const deleteInput = document.createElement('input');
+                    deleteInput.type = 'hidden';
+                    deleteInput.name = 'delete_subcategories[]';
+                    deleteInput.value = item.querySelector('input[name*="[id]"]').value;
+                    item.appendChild(deleteInput);
 
-                // Hide the item visually
-                item.style.display = 'none';
-                item.style.opacity = '0.5';
+                    item.style.display = 'none';
+                    item.style.opacity = '0.5';
 
-                // Add deletion indicator
-                const deletionIndicator = document.createElement('div');
-                deletionIndicator.className = 'text-xs text-red-600 bg-red-100 px-2 py-1 rounded mb-2';
-                deletionIndicator.innerHTML = '<i class="fas fa-trash mr-1"></i>Marked for deletion';
-                item.parentNode.insertBefore(deletionIndicator, item);
-            }
+                    const deletionIndicator = document.createElement('div');
+                    deletionIndicator.className = 'text-xs text-red-600 bg-red-100 px-2 py-1 rounded mb-2';
+                    deletionIndicator.innerHTML = '<i class="fas fa-trash mr-1"></i>Marked for deletion';
+                    item.parentNode.insertBefore(deletionIndicator, item);
+                })
+                .catch(() => undefined);
         }
 
-        // Initialize with one new subcategory field if no existing subcategories
         document.addEventListener('DOMContentLoaded', function() {
             const container = document.getElementById('subcategories-container');
             const hasExisting = container.querySelector('.existing-subcategory-item');
@@ -195,3 +244,13 @@
         });
     </script>
 @endsection
+
+
+
+
+
+
+
+
+
+

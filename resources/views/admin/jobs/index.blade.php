@@ -37,7 +37,7 @@
                             @foreach ($categories as $category)
                                 <option value="{{ $category->id }}"
                                     {{ request('category') == $category->id ? 'selected' : '' }}>
-                                    {{ $category->name }}
+                                    {{ $category->admin_label ?: $category->name }}
                                 </option>
                             @endforeach
                         </select>
@@ -61,33 +61,17 @@
                         <select name="level" id="level"
                             class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                             <option value="">All Levels</option>
-                            <option value="entry" {{ request('level') === 'entry' ? 'selected' : '' }}>Entry Level</option>
-                            <option value="mid" {{ request('level') === 'mid' ? 'selected' : '' }}>Mid Level</option>
-                            <option value="senior" {{ request('level') === 'senior' ? 'selected' : '' }}>Senior Level
-                            </option>
-                            <option value="executive" {{ request('level') === 'executive' ? 'selected' : '' }}>Executive
-                            </option>
+                            @foreach (['entry', 'mid', 'senior', 'executive'] as $levelKey)
+                                <option value="{{ $levelKey }}" {{ request('level') === $levelKey ? 'selected' : '' }}>
+                                    {{ trans('site.jobs.levels.' . $levelKey, [], 'en') }}
+                                    ({{ trans('site.jobs.levels.' . $levelKey, [], 'ar') }})
+                                </option>
+                            @endforeach
                         </select>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <!-- Salary Range -->
-                    <div class="flex space-x-2">
-                        <div class="flex-1">
-                            <label for="min_salary" class="block text-sm font-medium text-gray-700 mb-1">Min Salary</label>
-                            <input type="number" name="min_salary" id="min_salary" value="{{ request('min_salary') }}"
-                                placeholder="0"
-                                class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        </div>
-                        <div class="flex-1">
-                            <label for="max_salary" class="block text-sm font-medium text-gray-700 mb-1">Max Salary</label>
-                            <input type="number" name="max_salary" id="max_salary" value="{{ request('max_salary') }}"
-                                placeholder="999999"
-                                class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        </div>
-                    </div>
-
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <!-- Sort -->
                     <div>
                         <label for="sort" class="block text-sm font-medium text-gray-700 mb-1">Sort By</label>
@@ -99,7 +83,6 @@
                                 <option value="title" {{ request('sort') === 'title' ? 'selected' : '' }}>Title</option>
                                 <option value="company" {{ request('sort') === 'company' ? 'selected' : '' }}>Company
                                 </option>
-                                <option value="salary" {{ request('sort') === 'salary' ? 'selected' : '' }}>Salary</option>
                                 <option value="deadline" {{ request('sort') === 'deadline' ? 'selected' : '' }}>Deadline
                                 </option>
                             </select>
@@ -143,8 +126,7 @@
                             Location</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Salary &
-                            Level</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Level</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status
                         </th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -173,23 +155,17 @@
                             </td>
                             <td class="px-6 py-4">
                                 @if ($job->category)
-                                    <div class="text-sm text-gray-900">{{ $job->category->name }}</div>
+                                    <div class="text-sm text-gray-900">{{ $job->category->admin_label ?: $job->category->name }}</div>
                                 @endif
                                 @if ($job->subCategory)
-                                    <div class="text-xs text-gray-500">{{ $job->subCategory->name }}</div>
+                                    <div class="text-xs text-gray-500">{{ $job->subCategory->admin_label ?: $job->subCategory->name }}</div>
                                 @endif
                             </td>
                             <td class="px-6 py-4">
-                                <div class="text-sm font-medium text-gray-900">
-                                    @if ($job->salary && $job->salary > 0)
-                                        ${{ number_format($job->salary) }}
-                                    @else
-                                        Negotiable
-                                    @endif
-                                </div>
                                 <span
                                     class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800 capitalize">
-                                    {{ $job->level }}
+                                    {{ trans('site.jobs.levels.' . $job->level, [], 'en') }}
+                                    ({{ trans('site.jobs.levels.' . $job->level, [], 'ar') }})
                                 </span>
                             </td>
                             <td class="px-6 py-4">
@@ -240,7 +216,11 @@
                                         <i class="fas fa-edit"></i>
                                     </a>
                                     <form method="POST" action="{{ route('admin.jobs.destroy', $job) }}" class="inline"
-                                        onsubmit="return confirm('Are you sure you want to delete this job?')">
+                                        data-confirm="{{ __('site.confirm.actions.jobs.delete_soft.message', [], 'en') }}"
+                                        data-confirm-title="{{ __('site.confirm.delete.title', [], 'en') }}"
+                                        data-confirm-variant="danger"
+                                        data-confirm-confirm="{{ __('site.confirm.actions.jobs.delete_soft.confirm', [], 'en') }}"
+                                        data-confirm-cancel="{{ __('site.confirm.cancel', [], 'en') }}">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="text-red-600 hover:text-red-900 p-1 rounded"

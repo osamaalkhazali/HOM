@@ -11,7 +11,9 @@ use App\Models\Application;
 use App\Models\Admin;
 use App\Notifications\ApplicationSubmitted;
 use App\Notifications\NewApplicationReceived;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Storage;
 
 class JobController extends Controller
 {
@@ -134,8 +136,11 @@ class JobController extends Controller
                 ->with('error', 'You have already applied for this job.');
         }
 
-        // Check if user has uploaded CV to profile
-        $hasCv = Auth::user()->profile && Auth::user()->profile->cv_path;
+        // Load job-specific requirements
+        $job->loadMissing(['questions', 'documents']);
+
+        $profile = Auth::user()->profile;
+        $hasCv = $profile && $profile->cv_path;
 
         return view('jobs.apply', compact('job', 'hasCv'));
     }
@@ -163,45 +168,93 @@ class JobController extends Controller
                 ->with('error', 'You have already applied for this job.');
         }
 
+        $job->load(['questions', 'documents']);
+
         $user = Auth::user();
-        $hasCv = $user->profile && $user->profile->cv_path;
+        $profile = $user->profile;
+        $hasCv = $profile && $profile->cv_path;
 
-        // Validate based on CV option
-        $rules = [];
+        $rules = [
+            'questions' => 'nullable|array',
+            'documents' => 'nullable|array',
+        ];
         if (!$hasCv || $request->cv_option === 'upload') {
-            $rules['resume'] = 'required|file|mimes:pdf,doc,docx|max:5120'; // 5MB max
+            $rules['resume'] = 'required|file|mimes:pdf,doc,docx|max:5120';
         }
 
-        $request->validate($rules);
+        foreach ($job->questions as $question) {
+            $rules['questions.' . $question->id] = $question->is_required ? 'required|string|max:5000' : 'nullable|string|max:5000';
+        }
 
-        // Determine CV path
+        foreach ($job->documents as $document) {
+            $rules['documents.' . $document->id] = $document->is_required ? 'required|file|mimes:pdf,doc,docx|max:5120' : 'nullable|file|mimes:pdf,doc,docx|max:5120';
+        }
+
+        $validated = $request->validate($rules);
+
         $cvPath = null;
+        $uploadedResume = false;
         if ($hasCv && $request->cv_option === 'profile') {
-            // Use CV from profile
-            $cvPath = $user->profile->cv_path;
+            $cvPath = $profile->cv_path;
         } elseif ($request->hasFile('resume')) {
-            // Store the uploaded resume file
             $cvPath = $request->file('resume')->store('resumes', 'public');
+            $uploadedResume = true;
         }
 
-        // Create the application
-        $application = Application::create([
-            'job_id' => $job->id,
-            'user_id' => Auth::id(),
-            'cv_path' => $cvPath,
-            'cover_letter' => $request->cover_letter,
-            'status' => 'pending',
-        ]);
+        $storedFiles = [];
 
-        // Send notifications (user and admins)
+        DB::beginTransaction();
+
         try {
-            // Eager load relations for notification payloads
+            $application = Application::create([
+                'job_id' => $job->id,
+                'user_id' => Auth::id(),
+                'cv_path' => $cvPath,
+                'cover_letter' => $request->cover_letter,
+                'status' => 'pending',
+            ]);
+
+            foreach ($job->questions as $question) {
+                $answer = trim($request->input('questions.' . $question->id, ''));
+                if ($answer !== '') {
+                    $application->questionAnswers()->create([
+                        'job_question_id' => $question->id,
+                        'answer' => $answer,
+                    ]);
+                }
+            }
+
+            foreach ($job->documents as $document) {
+                if ($request->hasFile('documents.' . $document->id)) {
+                    $file = $request->file('documents.' . $document->id);
+                    $path = $file->store('applications/documents', 'public');
+                    $storedFiles[] = $path;
+
+                    $application->documents()->create([
+                        'job_document_id' => $document->id,
+                        'file_path' => $path,
+                        'original_name' => $file->getClientOriginalName(),
+                    ]);
+                }
+            }
+
+            DB::commit();
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            foreach ($storedFiles as $path) {
+                Storage::disk('public')->delete($path);
+            }
+            if ($uploadedResume && $cvPath) {
+                Storage::disk('public')->delete($cvPath);
+            }
+            throw $e;
+        }
+
+        try {
             $application->load(['job', 'user']);
 
-            // Notify the user
             Notification::send($user, new ApplicationSubmitted($application));
 
-            // Notify all active admins
             $admins = Admin::active()->get();
             Notification::send($admins, new NewApplicationReceived($application));
         } catch (\Throwable $e) {
@@ -264,3 +317,5 @@ class JobController extends Controller
         return view('applications.index', compact('applications'));
     }
 }
+
+

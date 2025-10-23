@@ -1,14 +1,14 @@
 <!-- Services Section -->
+@php($services = trans('site.services'))
 <section id="services" class="py-5 position-relative section-with-bg">
     <div class="section-bg-overlay"></div>
     <div class="container">
         <!-- Section Header -->
         <div class="row">
             <div class="col-lg-8 mx-auto text-center mb-5" data-aos="fade-up">
-                <h2 class="section-title fw-bold mb-4">Our Core Services</h2>
+                <h2 class="section-title fw-bold mb-4">{{ $services['title'] }}</h2>
                 <p class="lead text-muted">
-                    Comprehensive expertise delivered through our <strong>flexible staff base</strong> and
-                    <strong>qualified business partners</strong>
+                    {!! $services['subtitle_html'] !!}
                 </p>
             </div>
         </div>
@@ -16,90 +16,24 @@
         <!-- Services Navigation -->
         <div class="mb-5" id="service-nav">
             <div class="row  g-4 d-flex justify-content-center between">
-                <!-- Project Development Service -->
-                <div class="col-lg-2 col-md-4 col-sm-6">
-                    <div class="service-card position-relative overflow-hidden selected"
-                        onclick="showService('project-development')" data-service="project-development">
-                        <div class="service-card-progress"></div>
-                        <div class="p-4 text-center">
-                            <div class="service-icon-wrapper mb-3">
-                                <div
-                                    class="service-icon bg-blue text-white d-flex align-items-center justify-content-center mx-auto">
-                                    <i class="fas fa-project-diagram"></i>
+                @foreach ($services['tabs'] as $index => $tab)
+                    <div class="col-lg-2 col-md-4 col-sm-6">
+                        <div class="service-card position-relative overflow-hidden {{ $index === 0 ? 'selected' : '' }}"
+                            onclick="showService('{{ $tab['id'] }}')" data-service="{{ $tab['id'] }}"
+                            data-aos="zoom-in" data-aos-delay="{{ 100 + ($index * 100) }}">
+                            <div class="service-card-progress"></div>
+                            <div class="p-4 text-center">
+                                <div class="service-icon-wrapper mb-3">
+                                    <div
+                                        class="service-icon {{ $tab['color_class'] ?? 'bg-blue' }} text-white d-flex align-items-center justify-content-center mx-auto">
+                                        <i class="{{ $tab['icon'] }}"></i>
+                                    </div>
                                 </div>
+                                <h5 class="fw-bold text-dark mb-0">{{ $tab['label'] }}</h5>
                             </div>
-                            <h5 class="fw-bold text-dark mb-0">Project Development</h5>
                         </div>
                     </div>
-                </div>
-
-                <!-- Project Management Service -->
-                <div class="col-lg-2 col-md-4 col-sm-6">
-                    <div class="service-card position-relative overflow-hidden"
-                        onclick="showService('project-management')" data-service="project-management">
-                        <div class="service-card-progress"></div>
-                        <div class="p-4 text-center">
-                            <div class="service-icon-wrapper mb-3">
-                                <div
-                                    class="service-icon bg-green text-white d-flex align-items-center justify-content-center mx-auto">
-                                    <i class="fas fa-tasks"></i>
-                                </div>
-                            </div>
-                            <h5 class="fw-bold text-dark mb-0">Project Management</h5>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Engineering Services -->
-                <div class="col-lg-2 col-md-4 col-sm-6">
-                    <div class="service-card position-relative overflow-hidden"
-                        onclick="showService('engineering-services')" data-service="engineering-services">
-                        <div class="service-card-progress"></div>
-                        <div class="p-4 text-center">
-                            <div class="service-icon-wrapper mb-3">
-                                <div
-                                    class="service-icon bg-purple text-white d-flex align-items-center justify-content-center mx-auto">
-                                    <i class="fas fa-cogs"></i>
-                                </div>
-                            </div>
-                            <h5 class="fw-bold text-dark mb-0">Engineering Services</h5>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Administrative Studies -->
-                <div class="col-lg-2 col-md-4 col-sm-6">
-                    <div class="service-card position-relative overflow-hidden"
-                        onclick="showService('administrative-studies')" data-service="administrative-studies">
-                        <div class="service-card-progress"></div>
-                        <div class="p-4 text-center">
-                            <div class="service-icon-wrapper mb-3">
-                                <div
-                                    class="service-icon bg-orange text-white d-flex align-items-center justify-content-center mx-auto">
-                                    <i class="fas fa-chart-line"></i>
-                                </div>
-                            </div>
-                            <h5 class="fw-bold text-dark mb-0">Administrative Studies</h5>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Feasibility Studies -->
-                <div class="col-lg-2 col-md-4 col-sm-6">
-                    <div class="service-card position-relative overflow-hidden"
-                        onclick="showService('feasibility-studies')" data-service="feasibility-studies">
-                        <div class="service-card-progress"></div>
-                        <div class="p-4 text-center">
-                            <div class="service-icon-wrapper mb-3">
-                                <div
-                                    class="service-icon bg-red text-white d-flex align-items-center justify-content-center mx-auto">
-                                    <i class="fas fa-search-dollar"></i>
-                                </div>
-                            </div>
-                            <h5 class="fw-bold text-dark mb-0">Feasibility Studies</h5>
-                        </div>
-                    </div>
-                </div>
+                @endforeach
             </div>
         </div>
 
@@ -128,6 +62,21 @@
         position: relative;
         overflow: hidden;
     }
+
+    .service-description {
+        font-size: 0.95rem;
+        line-height: 1.7;
+    }
+
+    .service-team {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.35rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.78rem;
+        letter-spacing: 0.01em;
+    }
+
 
     .section-bg-overlay {
         position: absolute;
@@ -453,6 +402,7 @@
     .projects-slider-container {
         position: relative;
         margin-top: 1.5rem;
+        direction: ltr;
     }
 
     .slider-navigation {
@@ -463,6 +413,7 @@
         transform: translateY(-50%);
         z-index: 10;
         pointer-events: none;
+        direction: ltr;
     }
 
     .nav-button {
@@ -499,6 +450,7 @@
         right: -24px;
     }
 
+
     .slider-viewport {
         overflow: hidden;
         background: linear-gradient(135deg, rgba(248, 250, 252, 0.8), rgba(255, 255, 255, 0.9));
@@ -511,6 +463,7 @@
         -moz-user-select: none;
         -ms-user-select: none;
         touch-action: pan-y pinch-zoom;
+        direction: ltr;
     }
 
     .slider-viewport:active {
@@ -520,6 +473,7 @@
     .slider-track {
         display: flex;
         transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        direction: ltr;
     }
 
     .project-slide-card {
@@ -1047,6 +1001,7 @@
             right: -20px;
         }
 
+
         .project-content-wrapper {
             flex-direction: column;
             gap: 1.5rem;
@@ -1255,6 +1210,7 @@
             right: -18px;
         }
 
+
         .slider-indicators {
             margin-top: 1rem;
             gap: 6px;
@@ -1346,6 +1302,7 @@
         .next-btn {
             right: -16px;
         }
+
 
         .project-slide-card {
             padding: 0.75rem;
@@ -1439,141 +1396,8 @@
 </style>
 
 <script>
-    const serviceData = {
-        'project-development': {
-            title: 'Project Development Services',
-            icon: 'fas fa-project-diagram',
-            iconColor: 'bg-blue',
-            textColor: 'text-primary',
-            status: 'Active',
-            projects: [{
-                name: 'PET Recycling Plant - Qatar',
-                description: '<strong>Project Description:</strong> USD 12 Million grass root recycling plant for plastics packaging in Qatar.<br><br><strong>HOM Services:</strong> Project Development: Feasibility study, company formation, land selection, technology selection, project budgeting, Fund management, and strategy building.<br><br><strong>Progress:</strong> Scope completed on time.',
-                image: '/assets/images/projects/project-development-project-1.png'
-            }],
-            description: 'End-to-end project development solutions from conception to completion, including planning, design, execution, and delivery management.',
-            team: 'Project Managers: 3, Engineers: 5, Architects: 2, Consultants: 4'
-        },
-        'project-management': {
-            title: 'Project Management Services',
-            icon: 'fas fa-tasks',
-            iconColor: 'bg-green',
-            textColor: 'text-success',
-            status: 'Scaling',
-            projects: [{
-                    tag: 'Industrial Sector',
-                    name: 'Jordan Bromine Co. Ltd. (JBC) - Jordan',
-                    description: '<strong>Project Description:</strong> 18 Million UD$ Expansion of the existing chemical manufacturing plant.<br><br><strong>HOM Services:</strong> Project Management, cost control, construction supervision, commissioning and startup.<br><br><strong>Achievements:</strong> completed successfully with 10% saving on budget and two months earlier than plan, HOM received an incentive money award for appreciation.',
-                    image: '/assets/images/projects/project-management-project-1.png'
-                },
-                {
-                    tag: 'Industrial Sector',
-                    name: 'Jordan India Fertilizers Co. Ltd. (JIFCO) - Jordan',
-                    description: '<strong>Project Description:</strong> 700 Million UD$ fertilizers manufacturing plant.<br><br><strong>HOM Services:</strong> The project schedule and budget has out run beyond plans, HOM has been appointed to diagnose the construction deficiencies and propose recovery plans for delays to reach the completion of the project successfully. Review handing over procedures, construction method statements and commissioning planning.<br><br><strong>Achievements:</strong> Completed.',
-                    image: '/assets/images/projects/project-management-project-2.png'
-                },
-                {
-                    tag: 'Tourism Sector',
-                    name: 'Lagoon Hotel and Resort Project, Dead Sea - Jordan',
-                    description: '<strong>Project Description:</strong> 30 Million UD$ artificial lagoon and 5 stars resort and spa.<br><br><strong>HOM Services:</strong> Project management and Construction management<br><br><strong>Achievements:</strong> Completed on time and budget.',
-                    image: '/assets/images/projects/project-management-project-3.png'
-                },
-                {
-                    tag: 'Renewable Energy Sector',
-                    name: 'Photovoltaic Power Generation Project - Jordan',
-                    description: '<strong>Project Description:</strong> 1.3 Million UD$ photovoltaic power generation project for domestic applications, car Parking roof mounted, fully integrated, 500KW capacity.<br><br><strong>HOM Services:</strong> Project management and Construction management<br><br><strong>Achievements:</strong> construction successfully completed.',
-                    image: '/assets/images/projects/project-management-project-4.png'
-                }
-            ],
-            description: 'Strategic project oversight and management services ensuring timely delivery, budget compliance, and quality standards.',
-            team: 'Senior PMs: 2, Coordinators: 4, Analysts: 3, Quality Managers: 2'
-        },
-        'engineering-services': {
-            title: 'Engineering Services',
-            icon: 'fas fa-cogs',
-            iconColor: 'bg-purple',
-            textColor: 'text-purple',
-            status: 'Growing',
-            projects: [{
-                    tag: 'Industrial Sector',
-                    name: 'Al-Biariq Fertilizers Co., Yanbu – Saudi Arabia',
-                    description: '<strong>Project Description:</strong> SOP fertilizers plant to produce 22,000 MT/Year SOP and 25,000 MT/Year HCl, with two reactors Manheim technology and related utilities and equipment, in addition to NPK physical blending plant and accessories.<br><br><strong>HOM Services:</strong> Pre-startup evaluation, commissioning plan preparation including cost, raw material, tools/equipment and staff requirements assessment, short term and long term expansions and future opportunities.<br><br><strong>Achievements:</strong> Completed and reported successfully on time',
-                    images: ['/assets/images/projects/engineering-services-project-1-1.png',
-                        '/assets/images/projects/engineering-services-project-1-2.png',
-                        '/assets/images/projects/engineering-services-project-1-3.png'
-                    ]
-                },
-                {
-                    tag: 'Industrial Sector',
-                    name: 'Almarai Poultry Co., Hail – Saudi Arabia',
-                    description: '<strong>Project Description:</strong> 30 Million UD$ Electricity transmission, distribution and connection to national grid for Almarai poultry project, Hail – KSA.<br><br><strong>HOM Services:</strong> Technical specifications, conceptual design and tender documents for MV electrical transmission and distribution for the project (with association with Riyadh Engineering Center).<br><br><strong>Achievements:</strong> Completed successfully on time.',
-                    images: ['/assets/images/projects/engineering-services-project-2-1.png',
-                        '/assets/images/projects/engineering-services-project-2-2.png'
-                    ]
-                },
-                {
-                    tag: 'Industrial Sector',
-                    name: 'National Chlorine Industries Co. – Jordan',
-                    description: '<strong>Project Description:</strong> Technical assessment and evaluation study for alternative energy sources including Cogeneration, Solar and Hybrid off-grid systems compared with current connection to national power grid.<br><br><strong>HOM Services:</strong> Analysis of technical and commercial proposals for different power supply systems, financial assessment for each system for 25 years project lifetime, evaluation and recommendations.<br><br><strong>Achievements:</strong> Completed successfully on time.',
-                    images: ['/assets/images/projects/engineering-services-project-3-1.png',
-                        '/assets/images/projects/engineering-services-project-3-2.png'
-                    ]
-                },
-                {
-                    tag: 'Industrial Sector',
-                    name: 'Jordan Bromine Co. Ltd., Safi - Jordan',
-                    description: '<strong>Project Description:</strong> Evaluate JBC energy options for future demand and saving opportunities in terms:<br>• Continue for Utility Supply for All Electricity Needs (current case)<br>• Solar Power Generation: Enter into a long term power purchase agreement for electricity supply from a new solar generation facility ("Solar PPA") and continue to receive utility supply for the balance of electricity needs.<br>• On-Site Cogeneration: Enter into a long term power purchase agreement ("Cogen PPA") for electricity supply and steam from a new on-site cogeneration facility and continue to receive backup electricity service from the utility<br><br><strong>HOM Services:</strong> Data collection, Offer soliciting for each option, technical and financial evaluation of options, recommendations and reporting. (with association with Energy Edge Consulting - USA).<br><br><strong>Achievements:</strong> Completed successfully on time.',
-                    images: ['/assets/images/projects/engineering-services-project-4.png']
-                },
-                {
-                    tag: 'Industrial Sector',
-                    name: 'New Parking Area for Chlorine ISO Tanks – Jordan Bromine Co. – Jordan',
-                    description: '<strong>Project Description:</strong> 600 square meters steel building for Chlorine ISO Tank Parking area at Jordan Bromine Co. Plant.<br><br><strong>HOM Services:</strong> Design, Engineering, Project Specification and Tender Document preparation for the Project.<br><br><strong>Achievements:</strong> Completed successfully on time.',
-                    images: ['/assets/images/projects/engineering-services-project-5.png']
-                },
-                {
-                    tag: 'Real Estate Sector',
-                    name: 'Al Maabar Jordan Real Estate Development Co. – Jordan',
-                    description: '<strong>Project Description:</strong> 1. St. Regis – Amman: Two 16-story tower hotel with 260 luxurious guest rooms project in Amman. 2. Marsa Zayed project – Aqaba: $10 billion project, the biggest real estate and tourism project take place in the history of Jordan.<br><br><strong>HOM Services:</strong> Analysis, estimate review and verification of electrical load and value engineering for both projects.<br><br><strong>Achievements:</strong> Completed successfully on time.',
-                    images: ['/assets/images/projects/engineering-services-project-6-1.png',
-                        '/assets/images/projects/engineering-services-project-6-2.png'
-                    ]
-                }
-            ],
-            description: 'Technical engineering solutions across civil, mechanical, electrical, and environmental disciplines with innovative approaches.',
-            team: 'Civil Engineers: 4, Mechanical Engineers: 3, Electrical Engineers: 2, Environmental Engineers: 2'
-        },
-        'administrative-studies': {
-            title: 'Administrative Studies',
-            icon: 'fas fa-chart-line',
-            iconColor: 'bg-orange',
-            textColor: 'text-warning',
-            status: 'Consulting',
-            projects: [{
-                tag: 'Industrial Sector',
-                name: 'S’HAIL GROUP – Qatar',
-                description: '<strong>Project Description:</strong> Study and analyze the laws and regulations adopted by several countries to protect the local industries and national producers. In particular the protection of recycling industry and measures provided to support waste generated in the country as national resources.<br><br><strong>HOM Services:</strong> Collect data, analysis, report and set group of recommendations to protect recycling industry in Qatar.<br><br><strong>Achievements:</strong> Completed successfully on very short time.',
-                images: ['/assets/images/projects/administrative-studies-project-1.png']
-            }],
-            description: 'In-depth administrative and organizational studies providing strategic insights and operational improvement recommendations.',
-            team: 'Business Analysts: 3, Consultants: 4, Researchers: 2, Data Specialists: 2'
-        },
-        'feasibility-studies': {
-            title: 'Feasibility Studies',
-            icon: 'fas fa-search-dollar',
-            iconColor: 'bg-red',
-            textColor: 'text-danger',
-            status: 'Research',
-            projects: [{
-                name: 'Our Experience',
-                description: 'HOM has strong experience in preparation of financial assessments and feasibility studies for new projects and evaluation of investment opportunities, the following list shows samples of performed feasibility assessments in various sectors and wide range of scale.',
-                image: '/assets/images/projects/feasibility-studies.png',
-                fullWidth: true
-            }],
-            description: 'Comprehensive feasibility studies including market analysis, financial modeling, risk assessment, and investment recommendations.',
-            team: 'Market Researchers: 3, Financial Analysts: 2, Risk Assessors: 2, Industry Experts: 3'
-        }
-    };
+    const serviceData = @json($services['data']);
+    const defaultService = "{{ $services['tabs'][0]['id'] ?? '' }}";
 
     let currentService = null;
     let currentProjectIndex = 0;
@@ -1592,7 +1416,9 @@
     // Initialize with first service without auto-scrolling
     document.addEventListener('DOMContentLoaded', function() {
         window.__servicesFirstLoad = true;
-        showService('project-development');
+        if (defaultService && serviceData[defaultService]) {
+            showService(defaultService);
+        }
         window.__servicesFirstLoad = false;
     });
 
@@ -1710,6 +1536,16 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <div class="row g-3 align-items-start mb-4">
+            <div class="col-lg-8">
+                ${data.description ? `<p class="service-description text-muted mb-2">${data.description}</p>` : ''}
+                ${data.team ? `<div class="service-team badge bg-light text-primary fw-semibold">${data.team}</div>` : ''}
+            </div>
+            <div class="col-lg-4 text-lg-end">
+                ${data.status ? `<span class="badge bg-primary text-white px-3 py-2">${data.status}</span>` : ''}
             </div>
         </div>
 
@@ -1981,3 +1817,8 @@
         requestAnimationFrame(adjustImageHeightsToText);
     });
 </script>
+
+
+
+
+

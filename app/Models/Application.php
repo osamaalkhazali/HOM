@@ -36,6 +36,16 @@ class Application extends Model
      */
     public function user()
     {
-        return $this->belongsTo(User::class);
-    }
+    return $this->belongsTo(User::class);
+  }
+
+  public function questionAnswers()
+  {
+    return $this->hasMany(ApplicationQuestionAnswer::class);
+  }
+
+  public function documents()
+  {
+    return $this->hasMany(ApplicationDocument::class);
+  }
 }

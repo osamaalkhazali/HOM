@@ -1,13 +1,13 @@
 <!-- Our Business Partners Section -->
 <section id="partners" class="py-5 bg-light">
     <div class="container">
+        @php($partners = trans('site.partners'))
         <!-- Section Header -->
         <div class="row">
             <div class="col-lg-10 mx-auto text-center mb-5" data-aos="fade-up">
-                <h2 class="section-title fw-bold mb-4">Our Business Partners</h2>
+                <h2 class="section-title fw-bold mb-4">{{ $partners['title'] }}</h2>
                 <p class="lead text-muted">
-                    We collaborate with <strong>industry leaders</strong> and <strong>innovative companies</strong>
-                    to deliver comprehensive solutions and drive mutual success.
+                    {!! $partners['subtitle_html'] !!}
                 </p>
             </div>
         </div>

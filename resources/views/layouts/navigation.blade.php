@@ -38,6 +38,47 @@
         color: var(--primary-color) !important;
     }
 
+    .nav-links {
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    .nav-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-left: 1.5rem;
+    }
+
+    .mx-lg-auto {
+        @if($isRtl)
+            margin-left: 0 !important;
+            margin-right: auto !important;
+        @else
+            margin-right: 0 !important;
+            margin-left: auto !important;
+        @endif
+    }
+
+    .nav-actions > * {
+        display: flex;
+        align-items: center;
+    }
+
+    .nav-actions .btn {
+        white-space: nowrap;
+    }
+
+    .nav-action-guest {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
     /* Navbar Toggler */
     .navbar-toggler {
         border: none !important;
@@ -95,8 +136,72 @@
         background: var(--primary-color);
         color: white !important;
     }
+
+    .language-toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        border-radius: 999px;
+        border: 1px solid rgba(24, 69, 143, 0.35);
+        color: var(--primary-color);
+        background: rgba(24, 69, 143, 0.08);
+        padding: 0.35rem 0.85rem;
+        font-weight: 600;
+        letter-spacing: 0.05em;
+        transition: all 0.25s ease;
+    }
+
+    .language-toggle:hover {
+        color: #fff;
+        background: var(--primary-color);
+        border-color: var(--primary-color);
+        transform: translateY(-1px);
+        box-shadow: 0 8px 18px rgba(24, 69, 143, 0.2);
+    }
+
+    .language-toggle__abbr {
+        font-size: 0.75rem;
+    }
+
+    .language-toggle__icon {
+        font-size: 0.75rem;
+    }
+
+    @media (max-width: 991.98px) {
+        .nav-links {
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .nav-actions {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 0.75rem;
+        }
+
+        .nav-actions > *,
+        .nav-action-guest,
+        .nav-action-profile,
+        .nav-action-notif,
+        .nav-action-locale {
+            justify-content: center;
+            width: 100%;
+        }
+
+        .nav-action-guest {
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+    }
 </style>
 
+@php
+    $locale = app()->getLocale();
+    $isRtl = $locale === 'ar';
+    $toggleLocale = $isRtl ? 'en' : 'ar';
+    $toggleLabel = $isRtl ? __('site.nav.language.short_en') : __('site.nav.language.short_ar');
+@endphp
 <nav class="navbar navbar-expand-lg navbar-custom fixed-top" id="mainNav">
     <div class="container">
         <!-- Brand/Logo -->
@@ -111,106 +216,116 @@
 
         <!-- Navigation Menu -->
         <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ms-auto me-4">
+            <ul class="navbar-nav nav-links mx-lg-auto mb-3 mb-lg-0">
                 <li class="nav-item" data-aos="fade-down" data-aos-delay="100">
-                    <a class="nav-link fw-medium position-relative" href="{{ url('/#services') }}">Services</a>
+                    <a class="nav-link fw-medium position-relative" href="{{ url('/#services') }}">{{ __('site.nav.services') }}</a>
                 </li>
                 <li class="nav-item" data-aos="fade-down" data-aos-delay="200">
-                    <a class="nav-link fw-medium" href="{{ url('/#clients') }}">Clients</a>
+                    <a class="nav-link fw-medium" href="{{ url('/#clients') }}">{{ __('site.nav.clients') }}</a>
                 </li>
                 <li class="nav-item" data-aos="fade-down" data-aos-delay="300">
-                    <a class="nav-link fw-medium" href="{{ url('/#about') }}">About</a>
+                    <a class="nav-link fw-medium" href="{{ url('/#about') }}">{{ __('site.nav.about') }}</a>
                 </li>
                 <li class="nav-item" data-aos="fade-down" data-aos-delay="400">
-                    <a class="nav-link fw-medium" href="{{ url('/#contact') }}">Contact</a>
+                    <a class="nav-link fw-medium" href="{{ url('/#contact') }}">{{ __('site.nav.contact') }}</a>
                 </li>
                 <li class="nav-item" data-aos="fade-down" data-aos-delay="500">
-                    <a class="nav-link fw-medium" href="{{ route('jobs.index') }}">Jobs</a>
+                    <a class="nav-link fw-medium" href="{{ route('jobs.index') }}">{{ __('site.nav.jobs') }}</a>
                 </li>
             </ul>
 
-            <!-- Authentication Section -->
-            @auth
-                <!-- Notifications Bell -->
-                <div class="dropdown me-3" data-aos="fade-left">
+            <div class="nav-actions">
+                @auth
                     @php($user = auth()->user())
                     @php($unread = \Illuminate\Notifications\DatabaseNotification::where('notifiable_id', $user->id)->where('notifiable_type', get_class($user))->whereNull('read_at')->latest()->limit(10)->get())
-                    <button class="btn position-relative" type="button" id="notifDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="border-radius: 10px;">
-                        <i class="fas fa-bell" style="font-size: 1.2rem; color: var(--primary-color);"></i>
-                        @if($unread->count() > 0)
-                            <span class="position-absolute badge rounded-pill bg-danger" style="top: 0%; left: 60%; font-size: 0.5rem !important; padding: 0.2rem 0.4rem !important;">{{ $unread->count() }}</span>
-                        @endif
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end p-2" aria-labelledby="notifDropdown" style="min-width: 320px;">
-                        <li class="px-2 py-1 text-muted small">Notifications</li>
-                        @forelse($unread as $notification)
+
+                    <div class="dropdown nav-action-notif" data-aos="fade-left">
+                        <button class="btn position-relative" type="button" id="notifDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="border-radius: 10px;">
+                            <i class="fas fa-bell" style="font-size: 1.2rem; color: var(--primary-color);"></i>
+                            @if($unread->count() > 0)
+                                <span class="position-absolute badge rounded-pill bg-danger" style="top: 0%; left: 60%; font-size: 0.5rem !important; padding: 0.2rem 0.4rem !important;">{{ $unread->count() }}</span>
+                            @endif
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end p-2" aria-labelledby="notifDropdown" style="min-width: 320px;">
+                            <li class="px-2 py-1 text-muted small">{{ __('site.nav.notifications') }}</li>
+                            @forelse($unread as $notification)
+                                <li>
+                                    <a class="dropdown-item d-flex align-items-start gap-2" href="{{ route('notifications.open', $notification->id) }}">
+                                        <i class="fas fa-circle mt-1" style="font-size: 0.6rem; color: var(--primary-color);"></i>
+                                        <div>
+                                            <div class="fw-semibold">{{ $notification->data['title'] ?? 'Notification' }}</div>
+                                            <div class="small text-muted">{{ $notification->data['message'] ?? '' }}</div>
+                                        </div>
+                                    </a>
+                                </li>
+                            @empty
+                                <li><span class="dropdown-item text-muted">{{ __('site.nav.no_notifications') }}</span></li>
+                            @endforelse
+                            <li><hr class="dropdown-divider"></li>
+                            <li class="d-flex gap-2 px-2">
+                                <form method="POST" action="{{ route('notifications.readAll') }}">
+                                    @csrf
+                                    <button class="btn btn-sm btn-outline-secondary">{{ __('site.nav.mark_all_read') }}</button>
+                                </form>
+                                <a href="{{ route('notifications.index') }}" class="btn btn-sm btn-outline-primary ms-auto">{{ __('site.nav.view_all') }}</a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="dropdown nav-action-profile" data-aos="fade-left">
+                        <button class="btn morph-btn pulse-btn fw-semibold px-4 py-2 text-white dropdown-toggle"
+                            style="background: var(--primary-color); border: none; border-radius: 10px;" type="button"
+                            id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            {{ Auth::user()->name }}
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                             <li>
-                                <a class="dropdown-item d-flex align-items-start gap-2" href="{{ route('notifications.open', $notification->id) }}">
-                                    <i class="fas fa-circle mt-1" style="font-size: 0.6rem; color: var(--primary-color);"></i>
-                                    <div>
-                                        <div class="fw-semibold">{{ $notification->data['title'] ?? 'Notification' }}</div>
-                                        <div class="small text-muted">{{ $notification->data['message'] ?? '' }}</div>
-                                    </div>
+                                <a class="dropdown-item" href="{{ route('dashboard') }}">
+                                    {{ __('site.nav.dashboard') }}
                                 </a>
                             </li>
-                        @empty
-                            <li><span class="dropdown-item text-muted">No new notifications</span></li>
-                        @endforelse
-                        <li><hr class="dropdown-divider"></li>
-                        <li class="d-flex gap-2 px-2">
-                            <form method="POST" action="{{ route('notifications.readAll') }}">
-                                @csrf
-                                <button class="btn btn-sm btn-outline-secondary">Mark all as read</button>
-                            </form>
-                            <a href="{{ route('notifications.index') }}" class="btn btn-sm btn-outline-primary ms-auto">View all</a>
-                        </li>
-                    </ul>
-                </div>
-                <!-- User Dropdown Button -->
-                <div class="dropdown" data-aos="fade-left">
-                    <button class="btn morph-btn pulse-btn fw-semibold px-4 py-2 text-white dropdown-toggle"
-                        style="background: var(--primary-color); border: none; border-radius: 10px;" type="button"
-                        id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                        {{ Auth::user()->name }}
+                            <li>
+                                <a class="dropdown-item" href="{{ route('profile.edit') }}">
+                                    {{ __('site.nav.profile') }}
+                                </a>
+                            </li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li>
+                                <form method="POST" action="{{ route('logout') }}">
+                                    @csrf
+                                    <button type="submit" class="dropdown-item">
+                                        {{ __('site.nav.logout') }}
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                @else
+                    <div class="nav-action-guest" data-aos="fade-left">
+                        <a href="{{ route('login') }}" class="btn btn-outline-primary fw-semibold px-3 py-2"
+                            style="border-radius: 10px; border: 2px solid var(--primary-color); color: var(--primary-color);">
+                            {{ __('site.nav.login') }}
+                        </a>
+                        <button class="btn morph-btn pulse-btn fw-semibold px-4 py-2 text-white"
+                            style="background: var(--primary-color); border: none; border-radius: 10px;"
+                            onclick="window.location.href='{{ route('register') }}'">
+                            {{ __('site.nav.register') }}
+                        </button>
+                    </div>
+                @endauth
+
+                <form method="POST" action="{{ route('locale.switch') }}" class="nav-action-locale">
+                    @csrf
+                    <input type="hidden" name="locale" value="{{ $toggleLocale }}">
+                    <button type="submit" class="language-toggle btn btn-sm" aria-label="{{ __('site.nav.language.label') }}"
+                        title="{{ __('site.nav.language.label') }}">
+                        <span class="language-toggle__abbr">{{ strtoupper($toggleLocale) }}</span>
+                        <span class="language-toggle__icon"><i class="fas fa-globe"></i></span>
                     </button>
-                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                        <li>
-                            <a class="dropdown-item" href="{{ route('dashboard') }}">
-                                Dashboard
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="{{ route('profile.edit') }}">
-                                Profile
-                            </a>
-                        </li>
-                        <li>
-                            <hr class="dropdown-divider">
-                        </li>
-                        <li>
-                            <form method="POST" action="{{ route('logout') }}">
-                                @csrf
-                                <button type="submit" class="dropdown-item">
-                                    Logout
-                                </button>
-                            </form>
-                        </li>
-                    </ul>
-                </div>
-            @else
-                <!-- Guest Login/Register Buttons -->
-                <div class="d-flex gap-2" data-aos="fade-left">
-                    <a href="{{ route('login') }}" class="btn btn-outline-primary fw-semibold px-3 py-2"
-                        style="border-radius: 10px; border: 2px solid var(--primary-color); color: var(--primary-color);">
-                        Login
-                    </a>
-                    <button class="btn morph-btn pulse-btn fw-semibold px-4 py-2 text-white"
-                        style="background: var(--primary-color); border: none; border-radius: 10px;"
-                        onclick="window.location.href='{{ route('register') }}'">
-                        Get Started
-                    </button>
-                </div>
-            @endauth
+                </form>
+            </div>
         </div>
     </div>
 </nav>

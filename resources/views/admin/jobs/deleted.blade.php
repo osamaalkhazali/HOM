@@ -12,19 +12,28 @@
             </div>
             <div class="flex space-x-3">
                 @if ($jobs->total() > 0)
-                    <form method="POST" action="{{ route('admin.jobs.restore-all') }}" class="inline">
+                    <form method="POST" action="{{ route('admin.jobs.restore-all') }}" class="inline"
+                        data-confirm="{{ __('site.confirm.actions.jobs.restore_all.message', [], 'en') }}"
+                        data-confirm-title="{{ __('site.confirm.restore.title', [], 'en') }}"
+                        data-confirm-variant="success"
+                        data-confirm-confirm="{{ __('site.confirm.actions.jobs.restore_all.confirm', [], 'en') }}"
+                        data-confirm-cancel="{{ __('site.confirm.cancel', [], 'en') }}">
                         @csrf
                         @method('PATCH')
-                        <button type="submit" onclick="return confirm('Are you sure you want to restore all deleted jobs?')"
+                        <button type="submit"
                             class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors">
                             <i class="fas fa-undo mr-2"></i>Restore All
                         </button>
                     </form>
-                    <form method="POST" action="{{ route('admin.jobs.force-delete-all') }}" class="inline">
+                    <form method="POST" action="{{ route('admin.jobs.force-delete-all') }}" class="inline"
+                        data-confirm="{{ __('site.confirm.actions.jobs.delete_all.message', [], 'en') }}"
+                        data-confirm-title="{{ __('site.confirm.delete.title', [], 'en') }}"
+                        data-confirm-variant="danger"
+                        data-confirm-confirm="{{ __('site.confirm.actions.jobs.delete_all.confirm', [], 'en') }}"
+                        data-confirm-cancel="{{ __('site.confirm.cancel', [], 'en') }}">
                         @csrf
                         @method('DELETE')
                         <button type="submit"
-                            onclick="return confirm('Are you sure you want to permanently delete all jobs? This action cannot be undone!')"
                             class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors">
                             <i class="fas fa-trash mr-2"></i>Delete All Permanently
                         </button>
@@ -99,7 +108,7 @@
                             @foreach ($categories as $category)
                                 <option value="{{ $category->id }}"
                                     {{ request('category') == $category->id ? 'selected' : '' }}>
-                                    {{ $category->name }}
+                                    {{ $category->admin_label ?: $category->name }}
                                 </option>
                             @endforeach
                         </select>
@@ -195,10 +204,6 @@
                                                         <i class="fas fa-map-marker-alt mr-1"></i>{{ $job->location }}
                                                     </span>
                                                     <span class="text-xs text-gray-500">
-                                                        <i
-                                                            class="fas fa-dollar-sign mr-1"></i>${{ number_format($job->salary) }}
-                                                    </span>
-                                                    <span class="text-xs text-gray-500">
                                                         <i class="fas fa-layer-group mr-1"></i>{{ ucfirst($job->level) }}
                                                     </span>
                                                 </div>
@@ -206,8 +211,8 @@
                                         </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm text-gray-900">{{ $job->category?->name ?? 'No Category' }}</div>
-                                        <div class="text-sm text-gray-500">{{ $job->subCategory?->name ?? 'No Subcategory' }}</div>
+                                        <div class="text-sm text-gray-900">{{ $job->category?->admin_label ?? $job->category?->name ?? 'No Category' }}</div>
+                                        <div class="text-sm text-gray-500">{{ $job->subCategory?->admin_label ?? $job->subCategory?->name ?? 'No Subcategory' }}</div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="flex items-center">
@@ -229,11 +234,15 @@
                                         <div class="flex items-center justify-end space-x-2">
                                             <!-- Restore Job -->
                                             <form method="POST" action="{{ route('admin.jobs.restore', $job->id) }}"
-                                                class="inline">
+                                                class="inline"
+                                                data-confirm="{{ __('site.confirm.actions.jobs.restore.message', [], 'en') }}"
+                                                data-confirm-title="{{ __('site.confirm.restore.title', [], 'en') }}"
+                                                data-confirm-variant="success"
+                                                data-confirm-confirm="{{ __('site.confirm.actions.jobs.restore.confirm', [], 'en') }}"
+                                                data-confirm-cancel="{{ __('site.confirm.cancel', [], 'en') }}">
                                                 @csrf
                                                 @method('PATCH')
                                                 <button type="submit"
-                                                    onclick="return confirm('Are you sure you want to restore this job?')"
                                                     class="text-green-600 hover:text-green-900 bg-green-50 hover:bg-green-100 px-2 py-1 rounded"
                                                     title="Restore Job">
                                                     <i class="fas fa-undo"></i>
@@ -242,11 +251,15 @@
 
                                             <!-- Permanently Delete -->
                                             <form method="POST"
-                                                action="{{ route('admin.jobs.force-delete', $job->id) }}" class="inline">
+                                                action="{{ route('admin.jobs.force-delete', $job->id) }}" class="inline"
+                                                data-confirm="{{ __('site.confirm.actions.jobs.delete_force.message', [], 'en') }}"
+                                                data-confirm-title="{{ __('site.confirm.delete.title', [], 'en') }}"
+                                                data-confirm-variant="danger"
+                                                data-confirm-confirm="{{ __('site.confirm.actions.jobs.delete_force.confirm', [], 'en') }}"
+                                                data-confirm-cancel="{{ __('site.confirm.cancel', [], 'en') }}">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit"
-                                                    onclick="return confirm('Are you sure you want to permanently delete this job? This action cannot be undone!')"
                                                     class="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 px-2 py-1 rounded"
                                                     title="Delete Permanently">
                                                     <i class="fas fa-trash-alt"></i>

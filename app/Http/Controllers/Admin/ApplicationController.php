@@ -95,7 +95,9 @@ class ApplicationController extends Controller
       'job' => function ($q) {
         $q->withTrashed();
       },
-      'job.subCategory.category'
+      'job.subCategory.category',
+      'questionAnswers.question',
+      'documents.jobDocument'
     ]);
     return view('admin.applications.show', compact('application'));
   }
@@ -113,7 +115,9 @@ class ApplicationController extends Controller
       'job' => function ($q) {
         $q->withTrashed();
       },
-      'job.subCategory.category'
+      'job.subCategory.category',
+      'questionAnswers.question',
+      'documents.jobDocument'
     ]);
     return view('admin.applications.edit', compact('application'));
   }

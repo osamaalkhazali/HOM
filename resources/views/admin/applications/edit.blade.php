@@ -260,10 +260,6 @@
                                 <span>{{ $application->job->location }}</span>
                             </div>
                             <div class="flex items-center">
-                                <i class="fas fa-dollar-sign text-gray-400 mr-2 w-4"></i>
-                                <span>${{ number_format($application->job->salary) }}</span>
-                            </div>
-                            <div class="flex items-center">
                                 <i class="fas fa-layer-group text-gray-400 mr-2 w-4"></i>
                                 <span>{{ ucfirst($application->job->level) }}</span>
                             </div>

@@ -1,10 +1,10 @@
 <section>
     <header class="mb-4">
         <h5 class="fw-bold mb-2" style="color: var(--primary-color);">
-            <i class="fas fa-user me-2"></i>{{ __('Profile Information') }}
+            <i class="fas fa-user me-2"></i>{{ __('site.profile_form.profile_information.title') }}
         </h5>
         <p class="text-muted small">
-            {{ __("Update your account's profile information and email address.") }}
+            {{ __('site.profile_form.profile_information.description') }}
         </p>
     </header>
 
@@ -18,7 +18,7 @@
 
         <div class="row">
             <div class="col-md-6 mb-3">
-                <label for="name" class="form-label fw-medium">{{ __('Name') }}</label>
+                <label for="name" class="form-label fw-medium">{{ __('site.profile_form.profile_information.fields.name') }}</label>
                 <input type="text" class="form-control form-control-lg" id="name" name="name"
                     value="{{ old('name', $user->name) }}" autocomplete="name"
                     style="border-radius: 15px; border: 2px solid #e9ecef;">
@@ -32,7 +32,7 @@
             </div>
 
             <div class="col-md-6 mb-3">
-                <label for="email" class="form-label fw-medium">{{ __('Email') }}</label>
+                <label for="email" class="form-label fw-medium">{{ __('site.profile_form.profile_information.fields.email') }}</label>
                 <input type="email" class="form-control form-control-lg" id="email" name="email"
                     value="{{ old('email', $user->email) }}" autocomplete="username"
                     style="border-radius: 15px; border: 2px solid #e9ecef;">
@@ -47,10 +47,11 @@
         </div>
 
         <div class="mb-3">
-            <label for="headline" class="form-label fw-medium">{{ __('Professional Headline') }}</label>
+            <label for="headline" class="form-label fw-medium">{{ __('site.profile_form.profile_information.fields.headline.label') }}</label>
             <input type="text" class="form-control form-control-lg" id="headline" name="headline"
                 value="{{ old('headline', $user->profile->headline ?? '') }}"
-                placeholder="e.g., Senior Software Developer" style="border-radius: 15px; border: 2px solid #e9ecef;">
+                placeholder="{{ __('site.profile_form.profile_information.fields.headline.placeholder') }}"
+                style="border-radius: 15px; border: 2px solid #e9ecef;">
             @if ($errors->get('headline'))
                 <div class="text-danger small mt-1">
                     @foreach ($errors->get('headline') as $error)
@@ -62,9 +63,10 @@
 
         <div class="row">
             <div class="col-md-6 mb-3">
-                <label for="location" class="form-label fw-medium">{{ __('Location') }}</label>
+                <label for="location" class="form-label fw-medium">{{ __('site.profile_form.profile_information.fields.location.label') }}</label>
                 <input type="text" class="form-control form-control-lg" id="location" name="location"
-                    value="{{ old('location', $user->profile->location ?? '') }}" placeholder="City, Country"
+                    value="{{ old('location', $user->profile->location ?? '') }}"
+                    placeholder="{{ __('site.profile_form.profile_information.fields.location.placeholder') }}"
                     style="border-radius: 15px; border: 2px solid #e9ecef;">
                 @if ($errors->get('location'))
                     <div class="text-danger small mt-1">
@@ -76,10 +78,11 @@
             </div>
 
             <div class="col-md-6 mb-3">
-                <label for="current_position" class="form-label fw-medium">{{ __('Current Position') }}</label>
+                <label for="current_position" class="form-label fw-medium">{{ __('site.profile_form.profile_information.fields.current_position.label') }}</label>
                 <input type="text" class="form-control form-control-lg" id="current_position" name="current_position"
                     value="{{ old('current_position', $user->profile->current_position ?? '') }}"
-                    placeholder="Current job title" style="border-radius: 15px; border: 2px solid #e9ecef;">
+                    placeholder="{{ __('site.profile_form.profile_information.fields.current_position.placeholder') }}"
+                    style="border-radius: 15px; border: 2px solid #e9ecef;">
                 @if ($errors->get('current_position'))
                     <div class="text-danger small mt-1">
                         @foreach ($errors->get('current_position') as $error)
@@ -92,25 +95,30 @@
 
         <div class="row">
             <div class="col-md-6 mb-3">
-                <label for="experience_years" class="form-label fw-medium">{{ __('Years of Experience') }}</label>
+                <label for="experience_years" class="form-label fw-medium">{{ __('site.profile_form.profile_information.fields.experience.label') }}</label>
                 <select class="form-select form-select-lg" id="experience_years" name="experience_years"
                     style="border-radius: 15px; border: 2px solid #e9ecef;">
-                    <option value="">Select experience level</option>
+                    <option value="">{{ __('site.profile_form.profile_information.fields.experience.placeholder') }}</option>
                     <option value="0-1"
                         {{ old('experience_years', $user->profile->experience_years ?? '') == '0-1' ? 'selected' : '' }}>
-                        0-1 years</option>
-                    <option value="2-3"
-                        {{ old('experience_years', $user->profile->experience_years ?? '') == '2-3' ? 'selected' : '' }}>
-                        2-3 years</option>
-                    <option value="4-5"
-                        {{ old('experience_years', $user->profile->experience_years ?? '') == '4-5' ? 'selected' : '' }}>
-                        4-5 years</option>
-                    <option value="6-10"
-                        {{ old('experience_years', $user->profile->experience_years ?? '') == '6-10' ? 'selected' : '' }}>
-                        6-10 years</option>
+                        {{ __('site.profile_form.profile_information.fields.experience.options.0-1') }}
+                    </option>
+                    <option value="2-4"
+                        {{ old('experience_years', $user->profile->experience_years ?? '') == '2-4' ? 'selected' : '' }}>
+                        {{ __('site.profile_form.profile_information.fields.experience.options.2-4') }}
+                    </option>
+                    <option value="5-7"
+                        {{ old('experience_years', $user->profile->experience_years ?? '') == '5-7' ? 'selected' : '' }}>
+                        {{ __('site.profile_form.profile_information.fields.experience.options.5-7') }}
+                    </option>
+                    <option value="8-10"
+                        {{ old('experience_years', $user->profile->experience_years ?? '') == '8-10' ? 'selected' : '' }}>
+                        {{ __('site.profile_form.profile_information.fields.experience.options.8-10') }}
+                    </option>
                     <option value="10+"
                         {{ old('experience_years', $user->profile->experience_years ?? '') == '10+' ? 'selected' : '' }}>
-                        10+ years</option>
+                        {{ __('site.profile_form.profile_information.fields.experience.options.10+') }}
+                    </option>
                 </select>
                 @if ($errors->get('experience_years'))
                     <div class="text-danger small mt-1">
@@ -122,9 +130,10 @@
             </div>
 
             <div class="col-md-6 mb-3">
-                <label for="website" class="form-label fw-medium">{{ __('Website/Portfolio') }}</label>
+                <label for="website" class="form-label fw-medium">{{ __('site.profile_form.profile_information.fields.website.label') }}</label>
                 <input type="url" class="form-control form-control-lg" id="website" name="website"
-                    value="{{ old('website', $user->profile->website ?? '') }}" placeholder="https://your-website.com"
+                    value="{{ old('website', $user->profile->website ?? '') }}"
+                    placeholder="{{ __('site.profile_form.profile_information.fields.website.placeholder') }}"
                     style="border-radius: 15px; border: 2px solid #e9ecef;">
                 @if ($errors->get('website'))
                     <div class="text-danger small mt-1">
@@ -137,10 +146,10 @@
         </div>
 
         <div class="mb-3">
-            <label for="linkedin_url" class="form-label fw-medium">{{ __('LinkedIn Profile') }}</label>
+            <label for="linkedin_url" class="form-label fw-medium">{{ __('site.profile_form.profile_information.fields.linkedin.label') }}</label>
             <input type="url" class="form-control form-control-lg" id="linkedin_url" name="linkedin_url"
                 value="{{ old('linkedin_url', $user->profile->linkedin_url ?? '') }}"
-                placeholder="https://linkedin.com/in/your-profile"
+                placeholder="{{ __('site.profile_form.profile_information.fields.linkedin.placeholder') }}"
                 style="border-radius: 15px; border: 2px solid #e9ecef;">
             @if ($errors->get('linkedin_url'))
                 <div class="text-danger small mt-1">
@@ -152,9 +161,10 @@
         </div>
 
         <div class="mb-3">
-            <label for="education" class="form-label fw-medium">{{ __('Education') }}</label>
+            <label for="education" class="form-label fw-medium">{{ __('site.profile_form.profile_information.fields.education.label') }}</label>
             <textarea class="form-control" id="education" name="education" rows="3"
-                placeholder="Degree, University/Institution, Year" style="border-radius: 15px; border: 2px solid #e9ecef;">{{ old('education', $user->profile->education ?? '') }}</textarea>
+                placeholder="{{ __('site.profile_form.profile_information.fields.education.placeholder') }}"
+                style="border-radius: 15px; border: 2px solid #e9ecef;">{{ old('education', $user->profile->education ?? '') }}</textarea>
             @if ($errors->get('education'))
                 <div class="text-danger small mt-1">
                     @foreach ($errors->get('education') as $error)
@@ -165,12 +175,13 @@
         </div>
 
         <div class="mb-3">
-            <label for="skills" class="form-label fw-medium">{{ __('Skills') }}</label>
+            <label for="skills" class="form-label fw-medium">{{ __('site.profile_form.profile_information.fields.skills.label') }}</label>
             <textarea class="form-control" id="skills" name="skills" rows="3"
-                placeholder="List your key skills separated by commas" style="border-radius: 15px; border: 2px solid #e9ecef;">{{ old('skills', $user->profile->skills ?? '') }}</textarea>
-            <div class="form-text">Tip: Separate skills with commas, e.g., <em>PHP, Laravel, MySQL</em></div>
+                placeholder="{{ __('site.profile_form.profile_information.fields.skills.placeholder') }}"
+                style="border-radius: 15px; border: 2px solid #e9ecef;">{{ old('skills', $user->profile->skills ?? '') }}</textarea>
+            <div class="form-text">{{ __('site.profile_form.profile_information.fields.skills.tip', ['example' => 'PHP, Laravel, MySQL']) }}</div>
             <div class="mt-2">
-                <small class="text-muted d-block mb-1">Preview</small>
+                <small class="text-muted d-block mb-1">{{ __('site.profile_form.profile_information.fields.skills.preview_label') }}</small>
                 <div id="skills-preview" class="d-flex flex-wrap gap-2"></div>
             </div>
             @if ($errors->get('skills'))
@@ -183,9 +194,9 @@
         </div>
 
         <div class="mb-3">
-            <label for="about" class="form-label fw-medium">{{ __('About / Bio') }}</label>
+            <label for="about" class="form-label fw-medium">{{ __('site.profile_form.profile_information.fields.about.label') }}</label>
             <textarea class="form-control" id="about" name="about" rows="4"
-                placeholder="Tell us about yourself, your experience, and career goals"
+                placeholder="{{ __('site.profile_form.profile_information.fields.about.placeholder') }}"
                 style="border-radius: 15px; border: 2px solid #e9ecef;">{{ old('about', $user->profile->about ?? '') }}</textarea>
             @if ($errors->get('about'))
                 <div class="text-danger small mt-1">
@@ -197,22 +208,22 @@
         </div>
 
         <div class="mb-4">
-            <label for="cv" class="form-label fw-medium">{{ __('CV/Resume') }}</label>
+            <label for="cv" class="form-label fw-medium">{{ __('site.profile_form.profile_information.fields.cv.label') }}</label>
             @if ($user->profile && $user->profile->cv_path)
                 <div class="mb-2">
                     <div class="alert alert-info" role="alert">
                         <i class="fas fa-file-pdf me-2"></i>
-                        Current CV: <strong>{{ basename($user->profile->cv_path) }}</strong>
+                        {{ __('site.profile_form.profile_information.fields.cv.current') }} <strong>{{ basename($user->profile->cv_path) }}</strong>
                         <a href="{{ asset('storage/' . $user->profile->cv_path) }}" target="_blank"
                             class="btn btn-sm btn-outline-primary ms-2">
-                            <i class="fas fa-eye me-1"></i>View
+                            <i class="fas fa-eye me-1"></i>{{ __('site.profile_form.profile_information.fields.cv.view') }}
                         </a>
                     </div>
                 </div>
             @endif
             <input type="file" class="form-control form-control-lg" id="cv" name="cv"
                 accept=".pdf,.doc,.docx" style="border-radius: 15px; border: 2px solid #e9ecef;">
-            <div class="form-text">Upload your CV/Resume (PDF, DOC, DOCX formats only. Max size: 2MB)</div>
+            <div class="form-text">{{ __('site.profile_form.profile_information.fields.cv.hint') }}</div>
             @if ($errors->get('cv'))
                 <div class="text-danger small mt-1">
                     @foreach ($errors->get('cv') as $error)
@@ -225,16 +236,16 @@
         @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && !$user->hasVerifiedEmail())
             <div class="alert alert-warning mt-2" role="alert">
                 <i class="fas fa-exclamation-triangle me-2"></i>
-                <strong>{{ __('Your email address is unverified.') }}</strong>
+                <strong>{{ __('site.profile_form.profile_information.verification.unverified') }}</strong>
                 <button form="send-verification" class="btn btn-link p-0 text-decoration-underline small">
-                    {{ __('Click here to re-send the verification email.') }}
+                    {{ __('site.profile_form.profile_information.verification.resend') }}
                 </button>
             </div>
 
             @if (session('status') === 'verification-link-sent')
                 <div class="alert alert-success mt-2" role="alert">
                     <i class="fas fa-check-circle me-2"></i>
-                    {{ __('A new verification link has been sent to your email address.') }}
+                    {{ __('site.profile_form.profile_information.verification.sent') }}
                 </div>
             @endif
         @endif
@@ -242,14 +253,14 @@
         <div class="d-flex align-items-center gap-3">
             <button type="submit" class="btn morph-btn pulse-btn fw-semibold px-4 py-2 text-white"
                 style="background: var(--gradient-1); border: none; border-radius: 25px;">
-                <i class="fas fa-save me-2"></i>{{ __('Save Changes') }}
+                <i class="fas fa-save me-2"></i>{{ __('site.profile_form.profile_information.buttons.save') }}
             </button>
 
             @if (session('status') === 'profile-updated')
                 <div class="alert alert-success d-inline-block mb-0 py-2 px-3"
                     style="border-radius: 15px; font-size: 0.875rem;" x-data="{ show: true }" x-show="show"
                     x-init="setTimeout(() => show = false, 3000)">
-                    <i class="fas fa-check-circle me-1"></i>{{ __('Saved successfully!') }}
+                    <i class="fas fa-check-circle me-1"></i>{{ __('site.profile_form.profile_information.messages.saved') }}
                 </div>
             @endif
         </div>
@@ -261,7 +272,6 @@
                 var preview = document.getElementById('skills-preview');
                 if (!textarea || !preview) return;
 
-                // Clear existing
                 preview.innerHTML = '';
 
                 var raw = textarea.value || '';
@@ -269,7 +279,6 @@
                     .map(function(s) { return s.trim(); })
                     .filter(function(s) { return s.length > 0; });
 
-                // Optionally de-duplicate while preserving order
                 var seen = new Set();
                 items.forEach(function(skill) {
                     if (seen.has(skill.toLowerCase())) return;
@@ -283,7 +292,7 @@
                 if (items.length === 0) {
                     var none = document.createElement('span');
                     none.className = 'text-muted small';
-                    none.textContent = 'No skills to preview';
+                    none.textContent = @json(__('site.profile_form.profile_information.fields.skills.preview_empty'));
                     preview.appendChild(none);
                 }
             }

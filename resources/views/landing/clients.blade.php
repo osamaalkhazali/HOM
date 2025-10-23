@@ -2,13 +2,13 @@
 <section id="clients" class="py-5 position-relative section-with-bg">
     <div class="section-bg-overlay"></div>
     <div class="container">
+        @php($clients = trans('site.clients'))
         <!-- Section Header -->
         <div class="row">
             <div class="col-lg-10 mx-auto text-center mb-5" data-aos="fade-up">
-                <h2 class="section-title fw-bold mb-4">Our Valued Clients</h2>
+                <h2 class="section-title fw-bold mb-4">{{ $clients['title'] }}</h2>
                 <p class="lead text-muted">
-                    We're proud to partner with innovative companies and organizations that share our vision for
-                    <strong>excellence and growth</strong> across diverse industries.
+                    {!! $clients['subtitle_html'] !!}
                 </p>
             </div>
         </div>

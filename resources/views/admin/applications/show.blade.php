@@ -270,27 +270,27 @@
                                         <i class="fas fa-map-marker-alt mr-2"></i>
                                         {{ $application->job->location ?? 'N/A' }}
                                     </div>
-                                    @if(optional($application->job)->salary)
-                                    <div class="flex items-center text-sm text-gray-600">
-                                        <i class="fas fa-dollar-sign mr-2"></i>
-                                        ${{ number_format($application->job->salary) }}
-                                    </div>
-                                    @endif
                                     @if(optional($application->job)->level)
                                     <div class="flex items-center text-sm text-gray-600">
                                         <i class="fas fa-layer-group mr-2"></i>
                                         {{ ucfirst($application->job->level) }}
                                     </div>
                                     @endif
-                                    @if(optional($application->job->subCategory)->category)
-                                    <div class="flex items-center text-sm text-gray-600">
-                                        <i class="fas fa-tags mr-2"></i>
-                                        {{ $application->job->subCategory->category->name }}
-                                        @if($application->job->subCategory)
-                                            <span class="mx-1">></span>
-                                            {{ $application->job->subCategory->name }}
-                                        @endif
-                                    </div>
+                                    @php
+                                        $categoryLabel = optional(optional($application->job?->subCategory)->category)->admin_label
+                                            ?? optional(optional($application->job?->subCategory)->category)->name;
+                                        $subLabel = optional($application->job?->subCategory)->admin_label
+                                            ?? optional($application->job?->subCategory)->name;
+                                    @endphp
+                                    @if($categoryLabel || $subLabel)
+                                        <div class="flex items-center text-sm text-gray-600">
+                                            <i class="fas fa-tags mr-2"></i>
+                                            {{ $categoryLabel ?? 'Uncategorized' }}
+                                            @if($subLabel)
+                                                <span class="mx-1">></span>
+                                                {{ $subLabel }}
+                                            @endif
+                                        </div>
                                     @endif
                                     @if(optional($application->job)->deadline)
                                     <div class="flex items-center text-sm text-gray-600">
@@ -396,33 +396,39 @@
                             </button>
                         </form>
 
-                        <form method="POST" action="{{ route('admin.applications.update-status', $application) }}">
+                        <form method="POST" action="{{ route('admin.applications.update-status', $application) }}"
+                              data-confirm="Are you sure you want to hire this candidate?"
+                              data-confirm-variant="success"
+                              data-confirm-confirm="Hire">
                             @csrf
                             @method('PATCH')
                             <input type="hidden" name="status" value="hired">
                             <button type="submit"
-                                onclick="return confirm('Are you sure you want to hire this candidate?')"
                                 class="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors text-sm">
                                 <i class="fas fa-check mr-2"></i>Hire Candidate
                             </button>
                         </form>
 
-                        <form method="POST" action="{{ route('admin.applications.update-status', $application) }}">
+                        <form method="POST" action="{{ route('admin.applications.update-status', $application) }}"
+                              data-confirm="Are you sure you want to reject this application?"
+                              data-confirm-variant="warning"
+                              data-confirm-confirm="Reject">
                             @csrf
                             @method('PATCH')
                             <input type="hidden" name="status" value="rejected">
                             <button type="submit"
-                                onclick="return confirm('Are you sure you want to reject this application?')"
                                 class="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors text-sm">
                                 <i class="fas fa-times mr-2"></i>Reject Application
                             </button>
                         </form>
 
-                        <form method="POST" action="{{ route('admin.applications.destroy', $application) }}">
+                        <form method="POST" action="{{ route('admin.applications.destroy', $application) }}"
+                              data-confirm="Are you sure you want to delete this application? This action cannot be undone."
+                              data-confirm-variant="danger"
+                              data-confirm-confirm="Delete">
                             @csrf
                             @method('DELETE')
                             <button type="submit"
-                                onclick="return confirm('Are you sure you want to delete this application? This action cannot be undone.')"
                                 class="w-full bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-colors text-sm">
                                 <i class="fas fa-trash mr-2"></i>Delete Application
                             </button>
@@ -433,3 +439,4 @@
         </div>
     </div>
 @endsection
+

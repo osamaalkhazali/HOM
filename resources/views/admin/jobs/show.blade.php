@@ -63,14 +63,6 @@
                                     {{ $job->location }}
                                 </div>
                                 <div class="flex items-center text-sm text-gray-600">
-                                    <i class="fas fa-dollar-sign mr-2 text-gray-400"></i>
-                                    @if ($job->salary && $job->salary > 0)
-                                        ${{ number_format($job->salary) }}
-                                    @else
-                                        Negotiable
-                                    @endif
-                                </div>
-                                <div class="flex items-center text-sm text-gray-600">
                                     <i class="fas fa-layer-group mr-2 text-gray-400"></i>
                                     {{ ucfirst($job->level) }}
                                 </div>
@@ -78,17 +70,25 @@
                                     <i class="fas fa-calendar mr-2 text-gray-400"></i>
                                     {{ $job->deadline->format('M d, Y') }}
                                 </div>
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <i class="fas fa-clock mr-2 text-gray-400"></i>
+                                    Posted {{ $job->created_at->format('M d, Y') }}
+                                </div>
                             </div>
 
                             <div class="flex items-center space-x-4">
-                                <span
-                                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                    <i class="fas fa-tag mr-1"></i>{{ $job->category->name }}
-                                </span>
-                                <span
-                                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                                    <i class="fas fa-tags mr-1"></i>{{ $job->subCategory->name }}
-                                </span>
+                                @if ($job->category)
+                                    <span
+                                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                        <i class="fas fa-tag mr-1"></i>{{ $job->category->admin_label ?: $job->category->name }}
+                                    </span>
+                                @endif
+                                @if ($job->subCategory)
+                                    <span
+                                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                        <i class="fas fa-tags mr-1"></i>{{ $job->subCategory->admin_label ?: $job->subCategory->name }}
+                                    </span>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -104,8 +104,53 @@
                             {!! nl2br(e($job->description)) !!}
                         </div>
                     </div>
-                </div>
+                </div>\r\n                @if (->questions->isNotEmpty())
+                    <div class="bg-white rounded-lg shadow">
+                        <div class="px-6 py-4 border-b border-gray-200">
+                            <h3 class="text-lg font-medium text-gray-900">Application Questions</h3>
+                        </div>
+                        <div class="p-6 space-y-4">
+                            @foreach (->questions as )
+                                <div class="border border-gray-200 rounded-lg p-4">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <span class="text-sm font-medium text-gray-900">{{ ->question }}</span>
+                                        @if (->question_ar)
+                                            <span class="text-sm text-gray-500" dir="rtl">{{ ->question_ar }}</span>
+                                        @endif
+                                    </div>
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ ->is_required ? 'bg-red-50 text-red-700' : 'bg-gray-100 text-gray-600' }}">
+                                        <i class="fas {{ ->is_required ? 'fa-exclamation-circle text-red-500' : 'fa-check text-gray-500' }} mr-1"></i>
+                                        {{ ->is_required ? 'Required' : 'Optional' }}
+                                    </span>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
 
+                @if (->documents->isNotEmpty())
+                    <div class="bg-white rounded-lg shadow">
+                        <div class="px-6 py-4 border-b border-gray-200">
+                            <h3 class="text-lg font-medium text-gray-900">Required Documents</h3>
+                        </div>
+                        <div class="p-6 space-y-4">
+                            @foreach (->documents as )
+                                <div class="flex items-center justify-between border border-gray-200 rounded-lg p-4">
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-900">{{ ->name }}</p>
+                                        @if (->name_ar)
+                                            <p class="text-sm text-gray-500" dir="rtl">{{ ->name_ar }}</p>
+                                        @endif
+                                    </div>
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ ->is_required ? 'bg-red-50 text-red-700' : 'bg-gray-100 text-gray-600' }}">
+                                        <i class="fas {{ ->is_required ? 'fa-paperclip text-red-500' : 'fa-file text-gray-500' }} mr-1"></i>
+                                        {{ ->is_required ? 'Required' : 'Optional' }}
+                                    </span>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
                 <!-- Applications -->
                 <div class="bg-white rounded-lg shadow">
                     <div class="px-6 py-4 border-b border-gray-200">
@@ -277,7 +322,11 @@
                         </a>
 
                         <form method="POST" action="{{ route('admin.jobs.destroy', $job) }}"
-                            onsubmit="return confirm('Are you sure you want to delete this job? This action can be undone from the deleted jobs section.')">
+                            data-confirm="{{ __('site.confirm.actions.jobs.delete_soft_notice.message', [], 'en') }}"
+                            data-confirm-title="{{ __('site.confirm.delete.title', [], 'en') }}"
+                            data-confirm-variant="danger"
+                            data-confirm-confirm="{{ __('site.confirm.actions.jobs.delete_soft_notice.confirm', [], 'en') }}"
+                            data-confirm-cancel="{{ __('site.confirm.cancel', [], 'en') }}">
                             @csrf
                             @method('DELETE')
                             <button type="submit"
@@ -291,3 +340,4 @@
         </div>
     </div>
 @endsection
+

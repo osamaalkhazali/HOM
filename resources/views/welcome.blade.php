@@ -1,5 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+@php
+    $locale = app()->getLocale();
+    $isRtl = $locale === 'ar';
+@endphp
+<html lang="{{ str_replace('_', '-', $locale) }}" dir="{{ $isRtl ? 'rtl' : 'ltr' }}">
 
 <head>
     <meta charset="UTF-8">
@@ -10,14 +14,24 @@
     <link rel="icon" type="image/png" href="{{ asset('hom-favicon.png') }}">
     <link rel="shortcut icon" type="image/png" href="{{ asset('hom-favicon.png') }}">
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap{{ $isRtl ? '.rtl' : '' }}.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
+    @if ($isRtl)
+        <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    @endif
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     @include('layouts.styles')
     <style>
+        body {
+            font-family: 'Poppins', sans-serif !important;
+        }
 
+        body.rtl {
+            font-family: 'Tajawal', 'Poppins', sans-serif !important;
+        }
+        body {\n            font-family: 'Poppins', sans-serif !important;\n        }\n\n        body.rtl {\n            font-family: 'Tajawal', 'Poppins', sans-serif !important;\n        }\n\n
         .floating-shapes {
             position: absolute;
             top: 0;
@@ -377,7 +391,7 @@
     </style>
 </head>
 
-<body id="top" class="landing">
+<body id="top" class="landing {{ $isRtl ? 'rtl' : 'ltr' }}">
     <!-- Navigation -->
     @include('layouts.navigation')
 
@@ -474,23 +488,8 @@
             });
         });
 
-        // Button click handlers
-        document.querySelectorAll('button').forEach(button => {
-            button.addEventListener('click', function() {
-                if (this.textContent.includes('Get Started') || this.textContent.includes('Explore')) {
-                    document.querySelector('#services').scrollIntoView({
-                        behavior: 'smooth'
-                    });
-                } else if (this.textContent.includes('Consultation')) {
-                    document.querySelector('#contact').scrollIntoView({
-                        behavior: 'smooth'
-                    });
-                }
-            });
-        });
-
         // Typing animation
-        const typingTexts = ['Management Consulting', 'Strategic Solutions', 'Business Excellence'];
+        const typingTexts = @json(trans('site.hero.typing_texts'));
         let textIndex = 0;
         let charIndex = 0;
         let isDeleting = false;
@@ -540,3 +539,5 @@
 </body>
 
 </html>
+
+

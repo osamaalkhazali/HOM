@@ -13,19 +13,20 @@ class CategorySeeder extends Seeder
   public function run(): void
   {
     $categories = [
-      'Technology & IT',
-      'Healthcare & Medical',
-      'Finance & Banking',
-      'Marketing & Sales',
-      'Education & Training',
-      'Engineering',
+      ['en' => 'Technology & IT', 'ar' => 'التكنولوجيا وتقنية المعلومات'],
+      ['en' => 'Healthcare & Medical', 'ar' => 'الرعاية الصحية والطب'],
+      ['en' => 'Finance & Banking', 'ar' => 'المالية والمصارف'],
+      ['en' => 'Marketing & Sales', 'ar' => 'التسويق والمبيعات'],
+      ['en' => 'Education & Training', 'ar' => 'التعليم والتدريب'],
+      ['en' => 'Engineering', 'ar' => 'الهندسة'],
     ];
 
-    foreach ($categories as $categoryName) {
+    foreach ($categories as $category) {
       Category::updateOrCreate(
-        ['name' => $categoryName],
+        ['name' => $category['en']],
         [
-          'name' => $categoryName,
+          'name' => $category['en'],
+          'name_ar' => $category['ar'],
           'created_at' => now(),
           'updated_at' => now(),
         ]

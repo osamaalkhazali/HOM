@@ -21,6 +21,10 @@
         overflow-x: hidden;
     }
 
+    body.rtl {
+        font-family: 'Tajawal', 'Poppins', sans-serif !important;
+    }
+
     /* App layout base (scoped to body.app so landing pages are unaffected) */
     body.app {
         background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);

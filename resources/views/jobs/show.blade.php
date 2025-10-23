@@ -1,15 +1,17 @@
-<x-app-layout>
+﻿<x-app-layout>
     @include('layouts.styles')
 
     <x-slot name="header">
         <div class="d-flex align-items-center justify-content-between">
             <div>
-                <h1 class="title"><i class="fas fa-briefcase me-2"></i>Job Details</h1>
-                <p class="subtitle mb-0">{{ $job->title }} at {{ $job->company }}</p>
+                <h1 class="title"><i class="fas fa-briefcase me-2"></i>{{ __('site.jobs.labels.header_title') }}</h1>
+                <p class="subtitle mb-0">{{ $job->title_localized }} {{ __('site.jobs.at') }} {{ $job->company_localized }}</p>
             </div>
             <div class="actions d-flex gap-2">
                 <a href="{{ route('jobs.index') }}" class="btn btn-outline-light btn-sm">
-                    <i class="fas fa-arrow-left me-1"></i>Back to Jobs
+                <a href="{{ route('jobs.index') }}" class="btn btn-outline-light btn-sm">
+                    <i class="fas fa-arrow-left me-1"></i>{{ __('site.jobs.labels.back_to_jobs') }}
+                </a>
                 </a>
             </div>
         </div>
@@ -38,29 +40,29 @@
                 <div class="panel-header" style="background: var(--primary-color); color: white; padding: 1.5rem;">
                     <div class="row align-items-center">
                         <div class="col-md-8">
-                            <h2 class="fw-bold mb-3">{{ $job->title }}</h2>
+                            <h2 class="fw-bold mb-3">{{ $job->title_localized }}</h2>
                             <p class="mb-3 opacity-90 fs-5">
-                                <i class="fas fa-building me-2"></i>{{ $job->company }}
+                                <i class="fas fa-building me-2"></i>{{ $job->company_localized }}
                                 @if ($job->location)
                                     <span class="ms-4">
-                                        <i class="fas fa-map-marker-alt me-1"></i>{{ $job->location }}
+                                        <i class="fas fa-map-marker-alt me-1"></i>{{ $job->location_localized }}
                                     </span>
                                 @endif
                             </p>
                             <div class="d-flex flex-wrap gap-2">
                                 @if ($job->subCategory && $job->subCategory->category)
                                     <span class="badge bg-primary bg-opacity-25 text-white border border-light border-opacity-25" style="border-radius: 10px;">
-                                        <i class="fas fa-folder me-1"></i>{{ $job->subCategory->category->name }}
+                                        <i class="fas fa-folder me-1"></i>{{ optional($job->subCategory->category)->display_name }}
                                     </span>
                                 @endif
                                 @if ($job->subCategory)
                                     <span class="badge bg-primary bg-opacity-25 text-white border border-light border-opacity-25" style="border-radius: 10px;">
-                                        <i class="fas fa-tag me-1"></i>{{ $job->subCategory->name }}
+                                        <i class="fas fa-tag me-1"></i>{{ $job->subCategory->display_name }}
                                     </span>
                                 @endif
                                 @if ($job->level)
                                     <span class="badge bg-primary bg-opacity-25 text-white border border-light border-opacity-25" style="border-radius: 10px;">
-                                        <i class="fas fa-level-up-alt me-1"></i>{{ $job->level }}
+                                        <i class="fas fa-level-up-alt me-1"></i>{{ __('site.jobs.levels.' . $job->level) }}
                                     </span>
                                 @endif
                                 @if ($job->type)
@@ -76,23 +78,12 @@
                             </div>
                         </div>
                         <div class="col-md-4 text-md-end mt-4 mt-md-0">
-                            @if ($job->salary_min && $job->salary_min > 0 && ($job->salary_max && $job->salary_max > 0))
-                                <div class="fs-3 fw-bold mb-1">${{ number_format($job->salary_min) }} - ${{ number_format($job->salary_max) }}</div>
-                                <div class="opacity-75 mb-3">Per year</div>
-                            @elseif ($job->salary && $job->salary > 0)
-                                <div class="fs-3 fw-bold mb-1">${{ number_format($job->salary) }}</div>
-                                <div class="opacity-75 mb-3">Per year</div>
-                            @else
-                                <div class="fs-3 fw-bold mb-1">Negotiable</div>
-                                <div class="opacity-75 mb-3">Salary</div>
-                            @endif
-
                             @if ($job->deadline)
-                                <div>
-                                    <div class="opacity-75">Apply by:</div>
-                                    <div class="fw-bold fs-6">{{ \Carbon\Carbon::parse($job->deadline)->format('M d, Y') }}</div>
-                                </div>
+                                <div class="opacity-75 text-uppercase small mb-1">{{ __('site.jobs.labels.apply_by') }}</div>
+                                <div class="fw-bold fs-5">{{ \Carbon\Carbon::parse($job->deadline)->format('M d, Y') }}</div>
                             @endif
+                            <div class="opacity-75 text-uppercase small mt-3 mb-1">Posted</div>
+                            <div class="fw-bold fs-6">{{ $job->created_at->format('M d, Y') }}</div>
                         </div>
                     </div>
                 </div>
@@ -105,12 +96,12 @@
                     <div class="panel mb-4 shadow-soft">
                         <div class="panel-header">
                             <h5 class="panel-title mb-0">
-                                <i class="fas fa-file-alt me-2"></i>Job Description
+                                <i class="fas fa-file-alt me-2"></i>{{ __('site.jobs.labels.job_description') }}
                             </h5>
                         </div>
                         <div class="panel-body">
                             <div class="job-description" style="line-height: 1.7; font-size: 15px;">
-                                {!! nl2br(e($job->description)) !!}
+                                {!! $job->description_localized !!}
                             </div>
                         </div>
                     </div>
@@ -139,7 +130,7 @@
                                 <div class="panel h-100 shadow-soft">
                                     <div class="panel-header">
                                         <h5 class="panel-title mb-0">
-                                            <i class="fas fa-gift me-2"></i>Benefits
+                                            <i class="fas fa-gift me-2"></i>{{ __('site.jobs.labels.benefits') }}
                                         </h5>
                                     </div>
                                     <div class="panel-body">
@@ -156,7 +147,7 @@
                     <div class="panel shadow-soft">
                         <div class="panel-header">
                             <h5 class="panel-title mb-0">
-                                <i class="fas fa-info-circle me-2"></i>Job Information
+                                <i class="fas fa-info-circle me-2"></i>{{ __('site.jobs.labels.job_information') }}
                             </h5>
                         </div>
                         <div class="panel-body">
@@ -166,8 +157,8 @@
                                         <div class="quick-icon">
                                             <i class="fas fa-building"></i>
                                         </div>
-                                        <small class="d-block text-muted mb-1">Company</small>
-                                        <div class="fw-bold">{{ $job->company }}</div>
+                                        <small class="d-block text-muted mb-1">{{ __('site.jobs.labels.company') }}</small>
+                                        <div class="fw-bold">{{ $job->company_localized }}</div>
                                     </div>
                                 </div>
 
@@ -177,8 +168,8 @@
                                             <div class="quick-icon">
                                                 <i class="fas fa-map-marker-alt"></i>
                                             </div>
-                                            <small class="d-block text-muted mb-1">Location</small>
-                                            <div class="fw-bold">{{ $job->location }}</div>
+                                            <small class="d-block text-muted mb-1">{{ __('site.jobs.labels.location') }}</small>
+                                            <div class="fw-bold">{{ $job->location_localized }}</div>
                                         </div>
                                     </div>
                                 @endif
@@ -189,7 +180,7 @@
                                             <div class="quick-icon">
                                                 <i class="fas fa-briefcase"></i>
                                             </div>
-                                            <small class="d-block text-muted mb-1">Job Type</small>
+                                            <small class="d-block text-muted mb-1">{{ __('site.jobs.labels.job_type') }}</small>
                                             <div class="fw-bold">{{ $job->type }}</div>
                                         </div>
                                     </div>
@@ -201,7 +192,7 @@
                                             <div class="quick-icon">
                                                 <i class="fas fa-clock"></i>
                                             </div>
-                                            <small class="d-block text-muted mb-1">Schedule</small>
+                                            <small class="d-block text-muted mb-1">{{ __('site.jobs.labels.schedule') }}</small>
                                             <div class="fw-bold">{{ $job->schedule }}</div>
                                         </div>
                                     </div>
@@ -213,8 +204,8 @@
                                             <div class="quick-icon">
                                                 <i class="fas fa-level-up-alt"></i>
                                             </div>
-                                            <small class="d-block text-muted mb-1">Experience</small>
-                                            <div class="fw-bold">{{ $job->level }}</div>
+                                            <small class="d-block text-muted mb-1">{{ __('site.jobs.labels.level') }}</small>
+                                            <div class="fw-bold">{{ __('site.jobs.levels.' . $job->level) }}</div>
                                         </div>
                                     </div>
                                 @endif
@@ -224,7 +215,7 @@
                                         <div class="quick-icon">
                                             <i class="fas fa-calendar"></i>
                                         </div>
-                                        <small class="d-block text-muted mb-1">Posted</small>
+                                        <small class="d-block text-muted mb-1">{{ __('site.jobs.labels.posted_on') }}</small>
                                         <div class="fw-bold">{{ $job->created_at->diffForHumans() }}</div>
                                     </div>
                                 </div>
@@ -253,7 +244,7 @@
                                     </button>
                                 @elseif ($job->isInactive())
                                     <div class="alert alert-warning mb-3" role="alert">
-                                        <i class="fas fa-pause-circle me-2"></i>This job is no longer accepting applications.
+                                        <i class="fas fa-pause-circle me-2"></i>{{ __('site.jobs.messages.job_closed') }}
                                     </div>
                                     <button class="btn btn-warning btn-lg w-100" disabled>
                                         <i class="fas fa-pause me-2"></i>Not Accepting Applications
@@ -274,7 +265,7 @@
                                     </a>
                                 @else
                                     <a href="{{ route('jobs.apply', $job) }}" class="btn btn-success btn-lg w-100 pulse-btn">
-                                        <i class="fas fa-paper-plane me-2"></i>Apply for this Job
+                                        <i class="fas fa-paper-plane me-2"></i>{{ __('site.jobs.buttons.apply_for_job') }}
                                     </a>
                                 @endif
                             @else
@@ -295,7 +286,7 @@
                     <div class="panel mb-4 shadow-soft">
                         <div class="panel-header">
                             <h5 class="panel-title mb-0">
-                                <i class="fas fa-bolt me-2"></i>Quick Actions
+                                <i class="fas fa-bolt me-2"></i>{{ __('site.jobs.labels.quick_actions') }}
                             </h5>
                         </div>
                         <div class="panel-body">
@@ -305,7 +296,7 @@
                                         <div class="quick-icon">
                                             <i class="fab fa-linkedin"></i>
                                         </div>
-                                        <small class="fw-semibold">Share on LinkedIn</small>
+                                        <small class="fw-semibold">{{ __('site.jobs.buttons.share_linkedin') }}</small>
                                     </button>
                                 </div>
                                 <div class="col-6">
@@ -313,7 +304,7 @@
                                         <div class="quick-icon">
                                             <i class="fas fa-link"></i>
                                         </div>
-                                        <small class="fw-semibold">Copy Link</small>
+                                        <small class="fw-semibold">{{ __('site.jobs.buttons.copy_link') }}</small>
                                     </button>
                                 </div>
                                 <div class="col-6">
@@ -321,7 +312,7 @@
                                         <div class="quick-icon">
                                             <i class="fab fa-facebook"></i>
                                         </div>
-                                        <small class="fw-semibold">Facebook</small>
+                                        <small class="fw-semibold">{{ __('site.jobs.buttons.share_facebook') }}</small>
                                     </button>
                                 </div>
                                 <div class="col-6">
@@ -329,7 +320,7 @@
                                         <div class="quick-icon">
                                             <i class="fab fa-twitter"></i>
                                         </div>
-                                        <small class="fw-semibold">Twitter</small>
+                                        <small class="fw-semibold">{{ __('site.jobs.buttons.share_twitter') }}</small>
                                     </button>
                                 </div>
                             </div>
@@ -339,18 +330,18 @@
                     <!-- Company Info -->
                     <div class="panel mb-4 shadow-soft">
                         <div class="panel-header">
-                            <h5 class="panel-title mb-0">
-                                <i class="fas fa-building me-2"></i>About Company
+                                <h5 class="panel-title mb-0">
+                                <i class="fas fa-building me-2"></i>{{ __('site.jobs.labels.company_overview') }}
                             </h5>
                         </div>
                         <div class="panel-body text-center py-4">
                             <div class="avatar-lg mb-3" style="background: var(--primary-color);">
                                 <i class="fas fa-building fa-2x text-white"></i>
                             </div>
-                            <h4 class="fw-bold mb-2">{{ $job->company }}</h4>
+                            <h4 class="fw-bold mb-2">{{ $job->company_localized }}</h4>
                             @if ($job->location)
                                 <p class="text-muted mb-0">
-                                    <i class="fas fa-map-marker-alt me-1"></i>{{ $job->location }}
+                                    <i class="fas fa-map-marker-alt me-1"></i>{{ $job->location_localized }}
                                 </p>
                             @endif
                         </div>
@@ -361,7 +352,7 @@
                         <div class="panel shadow-soft">
                             <div class="panel-header">
                                 <h5 class="panel-title mb-0">
-                                    <i class="fas fa-lightbulb me-2"></i>Similar Jobs
+                                    <i class="fas fa-lightbulb me-2"></i>{{ __('site.jobs.labels.similar_jobs') }}
                                 </h5>
                             </div>
                             <div class="panel-body p-0">
@@ -397,7 +388,7 @@
     <script>
         function shareJob(platform) {
             const url = encodeURIComponent(window.location.href);
-            const title = encodeURIComponent('{{ $job->title }} - {{ $job->company }}');
+        const title = encodeURIComponent('{{ $job->title_localized }} - {{ $job->company_localized }}');
 
             let shareUrl = '';
             switch (platform) {
@@ -435,3 +426,6 @@
         }
     </script>
 </x-app-layout>
+
+
+

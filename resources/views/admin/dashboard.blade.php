@@ -168,10 +168,17 @@
                         <div class="flex items-center justify-between">
                             <div>
                                 <h4 class="text-sm font-medium text-gray-900">{{ $job->title }}</h4>
+                                @php
+                                    $categoryLabel = optional(optional($job->subCategory)->category)->admin_label
+                                        ?? optional(optional($job->subCategory)->category)->name
+                                        ?? 'Uncategorized';
+                                    $subLabel = optional($job->subCategory)->admin_label
+                                        ?? optional($job->subCategory)->name;
+                                @endphp
                                 <p class="text-sm text-gray-500">
-                                    {{ $job->subCategory->category->name ?? 'Uncategorized' }}
-                                    @if ($job->subCategory)
-                                        • {{ $job->subCategory->name }}
+                                    {{ $categoryLabel }}
+                                    @if ($subLabel)
+                                        &bull; {{ $subLabel }}
                                     @endif
                                 </p>
                             </div>

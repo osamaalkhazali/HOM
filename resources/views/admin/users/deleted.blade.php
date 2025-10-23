@@ -135,7 +135,12 @@
                                 <div class="flex items-center space-x-2">
                                     <!-- Restore Button -->
                                     <form method="POST" action="{{ route('admin.users.restore', $user->id) }}"
-                                        class="inline">
+                                        class="inline"
+                                        data-confirm="{{ __('site.confirm.actions.users.restore.message', [], 'en') }}"
+                                        data-confirm-title="{{ __('site.confirm.restore.title', [], 'en') }}"
+                                        data-confirm-variant="success"
+                                        data-confirm-confirm="{{ __('site.confirm.actions.users.restore.confirm', [], 'en') }}"
+                                        data-confirm-cancel="{{ __('site.confirm.cancel', [], 'en') }}">
                                         @csrf
                                         <button type="submit"
                                             class="bg-green-600 text-white px-3 py-1 rounded text-xs hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">
@@ -146,7 +151,11 @@
                                     <!-- Permanent Delete Button -->
                                     <form method="POST" action="{{ route('admin.users.force-delete', $user->id) }}"
                                         class="inline"
-                                        onsubmit="return confirm('Are you sure you want to permanently delete this user? This action cannot be undone and will also permanently delete their profile and all related data.')">
+                                        data-confirm="{{ __('site.confirm.actions.users.delete_force.message', [], 'en') }}"
+                                        data-confirm-title="{{ __('site.confirm.delete.title', [], 'en') }}"
+                                        data-confirm-variant="danger"
+                                        data-confirm-confirm="{{ __('site.confirm.actions.users.delete_force.confirm', [], 'en') }}"
+                                        data-confirm-cancel="{{ __('site.confirm.cancel', [], 'en') }}">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit"

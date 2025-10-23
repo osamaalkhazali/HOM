@@ -1,4 +1,4 @@
-@extends('layouts.admin.app')
+﻿@extends('layouts.admin.app')
 
 @section('title', 'Add Category & Subcategories')
 
@@ -31,16 +31,29 @@
                 <input type="hidden" name="action" value="new_category">
 
                 <!-- New Category Name -->
-                <div class="mb-6">
-                    <label for="new_category_name" class="block text-sm font-medium text-gray-700 mb-2">
-                        New Category Name <span class="text-red-500">*</span>
-                    </label>
-                    <input type="text" name="name" id="new_category_name" value="{{ old('name') }}"
-                        class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="e.g., Technology, Healthcare, Finance">
-                    @error('name')
-                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                    @enderror
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div>
+                        <label for="new_category_name" class="block text-sm font-medium text-gray-700 mb-2">
+                            New Category Name <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" name="name" id="new_category_name" value="{{ old('name') }}"
+                            class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="e.g., Technology, Healthcare, Finance">
+                        @error('name')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+                    <div>
+                        <label for="new_category_name_ar" class="block text-sm font-medium text-gray-700 mb-2">
+                            Arabic Name
+                        </label>
+                        <input type="text" name="name_ar" id="new_category_name_ar" value="{{ old('name_ar') }}"
+                            class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="Arabic name (optional)">
+                        @error('name_ar')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
                 </div>
 
                 <!-- Subcategories for New Category -->
@@ -56,10 +69,17 @@
                     </div>
 
                     <div id="new-category-subcategories" class="space-y-3">
-                        <div class="subcategory-item flex items-center space-x-2">
-                            <input type="text" name="subcategories[]"
-                                class="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                placeholder="Subcategory name">
+                        <div class="subcategory-item flex items-center gap-2">
+                            <div class="flex-1">
+                                <input type="text" name="subcategories[]"
+                                    class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    placeholder="Subcategory name (EN)">
+                            </div>
+                            <div class="flex-1">
+                                <input type="text" name="subcategories_ar[]"
+                                    class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    placeholder="Arabic name (optional)">
+                            </div>
                             <button type="button" onclick="removeSubcategory(this)"
                                 class="text-red-600 hover:text-red-800 p-2">
                                 <i class="fas fa-trash"></i>
@@ -129,10 +149,17 @@
                     </div>
 
                     <div id="existing-category-subcategories" class="space-y-3">
-                        <div class="subcategory-item flex items-center space-x-2">
-                            <input type="text" name="new_subcategories[]"
-                                class="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                placeholder="New subcategory name">
+                        <div class="subcategory-item flex items-center gap-2">
+                            <div class="flex-1">
+                                <input type="text" name="new_subcategories[]"
+                                    class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    placeholder="Subcategory name (EN)">
+                            </div>
+                            <div class="flex-1">
+                                <input type="text" name="new_subcategories_ar[]"
+                                    class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    placeholder="Arabic name (optional)">
+                            </div>
                             <button type="button" onclick="removeSubcategory(this)"
                                 class="text-red-600 hover:text-red-800 p-2">
                                 <i class="fas fa-trash"></i>
@@ -154,36 +181,50 @@
         function addNewCategorySubcategory() {
             const container = document.getElementById('new-category-subcategories');
             const newItem = document.createElement('div');
-            newItem.className = 'subcategory-item flex items-center space-x-2';
+            newItem.className = 'subcategory-item flex items-center gap-2';
             newItem.innerHTML = `
-                <input type="text" name="subcategories[]"
-                    class="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Subcategory name">
+                <div class="flex-1">
+                    <input type="text" name="subcategories[]"
+                        class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Subcategory name (EN)">
+                </div>
+                <div class="flex-1">
+                    <input type="text" name="subcategories_ar[]"
+                        class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Arabic name (optional)">
+                </div>
                 <button type="button" onclick="removeSubcategory(this)"
                     class="text-red-600 hover:text-red-800 p-2">
                     <i class="fas fa-trash"></i>
                 </button>
             `;
             container.appendChild(newItem);
-            newItem.querySelector('input').focus();
+            newItem.querySelector('input[name="subcategories[]"]').focus();
         }
 
         // Add subcategory for existing category
         function addExistingCategorySubcategory() {
             const container = document.getElementById('existing-category-subcategories');
             const newItem = document.createElement('div');
-            newItem.className = 'subcategory-item flex items-center space-x-2';
+            newItem.className = 'subcategory-item flex items-center gap-2';
             newItem.innerHTML = `
-                <input type="text" name="new_subcategories[]"
-                    class="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="New subcategory name">
+                <div class="flex-1">
+                    <input type="text" name="new_subcategories[]"
+                        class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Subcategory name (EN)">
+                </div>
+                <div class="flex-1">
+                    <input type="text" name="new_subcategories_ar[]"
+                        class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Arabic name (optional)">
+                </div>
                 <button type="button" onclick="removeSubcategory(this)"
                     class="text-red-600 hover:text-red-800 p-2">
                     <i class="fas fa-trash"></i>
                 </button>
             `;
             container.appendChild(newItem);
-            newItem.querySelector('input').focus();
+            newItem.querySelector('input[name="new_subcategories[]"]').focus();
         }
 
         // Remove subcategory
@@ -216,7 +257,7 @@
                         let html = '<div class="flex flex-wrap gap-2">';
                         data.subcategories.forEach(sub => {
                             html += `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                ${sub.name}
+                                ${sub.name}${sub.name_ar ? ` / ${sub.name_ar}` : ''}
                                 ${sub.jobs_count > 0 ? ` (${sub.jobs_count} jobs)` : ''}
                             </span>`;
                         });
@@ -232,3 +273,9 @@
         }
     </script>
 @endsection
+
+
+
+
+
+

@@ -22,8 +22,10 @@ class CategoryController extends Controller
       $search = $request->search;
       $query->where(function ($q) use ($search) {
         $q->where('name', 'like', "%{$search}%")
+          ->orWhere('name_ar', 'like', "%{$search}%")
           ->orWhereHas('subCategories', function ($subQuery) use ($search) {
-            $subQuery->where('name', 'like', "%{$search}%");
+            $subQuery->where('name', 'like', "%{$search}%")
+              ->orWhere('name_ar', 'like', "%{$search}%");
           });
       });
     }
@@ -37,7 +39,8 @@ class CategoryController extends Controller
     $subCategories = SubCategory::with(['category', 'jobs'])
       ->withCount('jobs')
       ->when($request->filled('search'), function ($q) use ($request) {
-        $q->where('name', 'like', "%{$request->search}%");
+        $q->where('name', 'like', "%{$request->search}%")
+          ->orWhere('name_ar', 'like', "%{$request->search}%");
       })
       ->orderBy('name')
       ->get()
@@ -69,23 +72,34 @@ class CategoryController extends Controller
   {
     $validated = $request->validate([
       'name' => 'required|string|max:255|unique:categories,name',
-      'subcategories' => 'array',
-      'subcategories.*' => 'string|max:255'
+      'name_ar' => 'nullable|string|max:255',
+      'subcategories' => 'nullable|array',
+      'subcategories.*' => 'nullable|string|max:255',
+      'subcategories_ar' => 'nullable|array',
+      'subcategories_ar.*' => 'nullable|string|max:255',
     ]);
 
     $category = Category::create([
-      'name' => $validated['name']
+      'name' => $validated['name'],
+      'name_ar' => $validated['name_ar'] ?? null,
     ]);
 
     // Create subcategories if provided
-    if (!empty($validated['subcategories'])) {
-      foreach ($validated['subcategories'] as $subCategoryName) {
-        if (!empty(trim($subCategoryName))) {
-          SubCategory::create([
-            'name' => trim($subCategoryName),
-            'category_id' => $category->id
-          ]);
+    $englishSubcategories = $validated['subcategories'] ?? [];
+    $arabicSubcategories = $request->input('subcategories_ar', []);
+
+    if (!empty($englishSubcategories)) {
+      foreach ($englishSubcategories as $index => $subCategoryName) {
+        $name = trim($subCategoryName ?? '');
+        if ($name === '') {
+          continue;
         }
+
+        SubCategory::create([
+          'name' => $name,
+          'name_ar' => trim($arabicSubcategories[$index] ?? '') ?: null,
+          'category_id' => $category->id,
+        ]);
       }
     }
 
@@ -100,27 +114,33 @@ class CategoryController extends Controller
     $validated = $request->validate([
       'category_id' => 'required|exists:categories,id',
       'new_subcategories' => 'required|array|min:1',
-      'new_subcategories.*' => 'string|max:255'
+      'new_subcategories.*' => 'nullable|string|max:255',
+      'new_subcategories_ar' => 'nullable|array',
+      'new_subcategories_ar.*' => 'nullable|string|max:255',
     ]);
 
     $category = Category::findOrFail($validated['category_id']);
 
     $addedCount = 0;
-    foreach ($validated['new_subcategories'] as $subCategoryName) {
-      $trimmedName = trim($subCategoryName);
-      if (!empty($trimmedName)) {
-        // Check if subcategory already exists for this category
-        $exists = SubCategory::where('category_id', $category->id)
-          ->where('name', $trimmedName)
-          ->exists();
+    $arabicInputs = $request->input('new_subcategories_ar', []);
 
-        if (!$exists) {
-          SubCategory::create([
-            'name' => $trimmedName,
-            'category_id' => $category->id
-          ]);
-          $addedCount++;
-        }
+    foreach ($validated['new_subcategories'] as $index => $subCategoryName) {
+      $trimmedName = trim($subCategoryName ?? '');
+      if ($trimmedName === '') {
+        continue;
+      }
+
+      $exists = SubCategory::where('category_id', $category->id)
+        ->where('name', $trimmedName)
+        ->exists();
+
+      if (!$exists) {
+        SubCategory::create([
+          'name' => $trimmedName,
+          'name_ar' => trim($arabicInputs[$index] ?? '') ?: null,
+          'category_id' => $category->id,
+        ]);
+        $addedCount++;
       }
     }
 
@@ -139,13 +159,14 @@ class CategoryController extends Controller
     $subcategories = $category->subCategories()
       ->withCount('jobs')
       ->orderBy('name')
-      ->get(['id', 'name']);
+      ->get(['id', 'name', 'name_ar']);
 
     return response()->json([
       'subcategories' => $subcategories->map(function ($sub) {
         return [
           'id' => $sub->id,
           'name' => $sub->name,
+          'name_ar' => $sub->name_ar,
           'jobs_count' => $sub->jobs_count
         ];
       })
@@ -168,18 +189,23 @@ class CategoryController extends Controller
   {
     $validated = $request->validate([
       'name' => 'required|string|max:255|unique:categories,name,' . $category->id,
-      'existing_subcategories' => 'array',
+      'name_ar' => 'nullable|string|max:255',
+      'existing_subcategories' => 'nullable|array',
       'existing_subcategories.*.id' => 'required|exists:sub_categories,id',
       'existing_subcategories.*.name' => 'required|string|max:255',
-      'new_subcategories' => 'array',
-      'new_subcategories.*' => 'string|max:255',
-      'delete_subcategories' => 'array',
-      'delete_subcategories.*' => 'exists:sub_categories,id'
+      'existing_subcategories.*.name_ar' => 'nullable|string|max:255',
+      'new_subcategories' => 'nullable|array',
+      'new_subcategories.*' => 'nullable|string|max:255',
+      'new_subcategories_ar' => 'nullable|array',
+      'new_subcategories_ar.*' => 'nullable|string|max:255',
+      'delete_subcategories' => 'nullable|array',
+      'delete_subcategories.*' => 'exists:sub_categories,id',
     ]);
 
     // Update category name
     $category->update([
-      'name' => $validated['name']
+      'name' => $validated['name'],
+      'name_ar' => $validated['name_ar'] ?? null,
     ]);
 
     // Handle existing subcategories updates
@@ -188,7 +214,8 @@ class CategoryController extends Controller
         $subCategory = SubCategory::find($subCatData['id']);
         if ($subCategory && $subCategory->category_id === $category->id) {
           $subCategory->update([
-            'name' => trim($subCatData['name'])
+            'name' => trim($subCatData['name']),
+            'name_ar' => trim($subCatData['name_ar'] ?? '') ?: null,
           ]);
         }
       }
@@ -208,14 +235,20 @@ class CategoryController extends Controller
     }
 
     // Handle new subcategories
-    if (isset($validated['new_subcategories'])) {
-      foreach ($validated['new_subcategories'] as $subCategoryName) {
-        if (!empty(trim($subCategoryName))) {
-          SubCategory::create([
-            'name' => trim($subCategoryName),
-            'category_id' => $category->id
-          ]);
+    $newEnglish = $validated['new_subcategories'] ?? [];
+    $newArabic = $request->input('new_subcategories_ar', []);
+    if (!empty($newEnglish)) {
+      foreach ($newEnglish as $index => $subCategoryName) {
+        $name = trim($subCategoryName ?? '');
+        if ($name === '') {
+          continue;
         }
+
+        SubCategory::create([
+          'name' => $name,
+          'name_ar' => trim($newArabic[$index] ?? '') ?: null,
+          'category_id' => $category->id,
+        ]);
       }
     }
 
@@ -253,7 +286,10 @@ class CategoryController extends Controller
     // Search functionality for deleted categories
     if ($request->filled('search')) {
       $search = $request->search;
-      $query->where('name', 'like', "%{$search}%");
+      $query->where(function ($q) use ($search) {
+        $q->where('name', 'like', "%{$search}%")
+          ->orWhere('name_ar', 'like', "%{$search}%");
+      });
     }
 
     // Sort by deletion date (most recent first)

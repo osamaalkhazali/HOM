@@ -243,7 +243,11 @@
                                             @if ($admin->id !== auth('admin')->id())
                                                 <form method="POST" action="{{ route('admin.admins.destroy', $admin) }}"
                                                     class="inline"
-                                                    onsubmit="return confirm('Are you sure you want to delete this admin?')">
+                                                    data-confirm="{{ __('site.confirm.actions.admins.delete.message', [], 'en') }}"
+                                                    data-confirm-title="{{ __('site.confirm.delete.title', [], 'en') }}"
+                                                    data-confirm-variant="danger"
+                                                    data-confirm-confirm="{{ __('site.confirm.actions.admins.delete.confirm', [], 'en') }}"
+                                                    data-confirm-cancel="{{ __('site.confirm.cancel', [], 'en') }}">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit" class="text-red-600 hover:text-red-900">

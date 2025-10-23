@@ -10,17 +10,14 @@
                 <div class="hero-content py-5" data-aos="fade-up">
 
                     <!-- Main Headline -->
+                    @php($hero = trans('site.hero'))
                     <h1 class="hero-headline mb-3" data-aos="fade-up" data-aos-delay="400">
-                        Empowering Businesses with
-                        <span class="text-gradient">Strategic Excellence</span>
+                        {!! $hero['heading_html'] !!}
                     </h1>
 
                     <!-- Subtitle -->
                     <p class="hero-description mb-4" data-aos="fade-up" data-aos-delay="600">
-                        House of Management for Studies and Consultations (HOM) delivers comprehensive financial
-                        advisory,
-                        commercial strategy, project management, and construction consulting services to organizations
-                        across <strong>industry, government, real estate, healthcare, tourism, and NGO sectors</strong>.
+                        {!! $hero['description_html'] !!}
                     </p>
 
 
@@ -31,12 +28,12 @@
                             <button class="btn btn-primary cta-primary"
                                 onclick="document.querySelector('#services').scrollIntoView({behavior: 'smooth'});">
                                 <i class="fas fa-rocket me-2"></i>
-                                Explore Our Services
+                                {{ $hero['cta_primary'] }}
                             </button>
                             <button class="btn btn-outline-dark cta-secondary"
                                 onclick="window.location.href='{{ route('jobs.index') }}'">
                                 <i class="fas fa-briefcase me-2"></i>
-                                View Career Opportunities
+                                {{ $hero['cta_secondary'] }}
                             </button>
                         </div>
                     </div>
@@ -53,14 +50,28 @@
 <style>
     /* Hero Section - Full Background Image */
     .hero-section {
-        background-image: linear-gradient(135deg, rgba(0, 0, 0, 0.4) 0%, rgba(24, 69, 143, 0.3) 100%),
-            url('{{ asset('assets/images/hero.jpg') }}');
+        position: relative;
+        overflow: hidden;
+        background-color: #ffffff;
+    }
+
+    .hero-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url('{{ asset('assets/images/hero.jpg') }}');
         background-size: cover;
         background-position: center center;
         background-repeat: no-repeat;
         background-attachment: fixed;
-        position: relative;
-        overflow: hidden;
+        transform: scaleX(1);
+        transform-origin: center;
+        z-index: 0;
+        transition: transform 0.6s ease;
+        pointer-events: none;
     }
 
     .hero-bg-overlay {
@@ -71,6 +82,7 @@
         height: 100%;
         background: linear-gradient(90deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.85) 60%, rgba(255, 255, 255, 0.4) 70%, rgba(255, 255, 255, 0.1) 80%, rgba(255, 255, 255, 0.05) 90%, transparent 100%);
         z-index: 1;
+        pointer-events: none;
     }
 
     .hero-content {
@@ -183,12 +195,8 @@
     @media (max-width: 991.98px) {
 
         /* Remove background image and use solid color on mobile */
-        .hero-section {
+        .hero-section::before {
             background-image: none !important;
-            background-color: #ffffff;
-            /* solid color */
-            background-attachment: scroll;
-            min-height: auto !important; /* don't force 100vh on mobile */
         }
 
         .hero-bg-overlay {
@@ -224,5 +232,13 @@
         .trust-item {
             margin-bottom: 1rem;
         }
+    }
+
+    body.rtl .hero-section::before {
+        transform: scaleX(-1);
+    }
+
+    body.rtl .hero-bg-overlay {
+        background: linear-gradient(270deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.85) 40%, rgba(255, 255, 255, 0.4) 55%, rgba(255, 255, 255, 0.1) 70%, rgba(255, 255, 255, 0.05) 80%, transparent 100%);
     }
 </style>
