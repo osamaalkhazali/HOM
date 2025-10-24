@@ -49,6 +49,16 @@ class LoginRequest extends FormRequest
             ]);
         }
 
+        // Check if the user account is active
+        $user = Auth::user();
+        if (!$user->is_active) {
+            Auth::logout();
+
+            throw ValidationException::withMessages([
+                'email' => __('site.flash.account_deactivated'),
+            ]);
+        }
+
         RateLimiter::clear($this->throttleKey());
     }
 

@@ -217,10 +217,15 @@
     .dashboard .shadow-hover:hover { box-shadow: 0 20px 45px rgba(0,0,0,0.12); transform: translateY(-4px); }
 
     .dashboard .kpi-card { border-radius: 10px; color: #fff; padding: 1rem; border: 0; position: relative; overflow: hidden; }
-    .dashboard .kpi-1 { background: var(--primary-color); }
-    .dashboard .kpi-2 { background: #f5576c; }
-    .dashboard .kpi-3 { background: #00bcd4; }
-    .dashboard .kpi-4 { background: #43e97b; }
+    .dashboard .kpi-1 { background: #6366f1; } /* Indigo - Total */
+    .dashboard .kpi-2 { background: #f59e0b; } /* Amber - Pending */
+    .dashboard .kpi-3 { background: #3b82f6; } /* Blue - Under Review */
+    .dashboard .kpi-4 { background: #06b6d4; } /* Cyan - Reviewed */
+    .dashboard .kpi-5 { background: #8b5cf6; } /* Purple - Shortlisted */
+    .dashboard .kpi-6 { background: #f97316; } /* Orange - Docs Requested */
+    .dashboard .kpi-7 { background: #14b8a6; } /* Teal - Docs Submitted */
+    .dashboard .kpi-8 { background: #ef4444; } /* Red - Rejected */
+    .dashboard .kpi-9 { background: #10b981; } /* Green - Hired */
     .dashboard .kpi-icon { width: 36px; height: 36px; border-radius: 10px; background: rgba(255,255,255,0.15); display:flex; align-items:center; justify-content:center; }
     .dashboard .kpi-number { font-weight: 800; font-size: 1.5rem; line-height: 1; }
     .dashboard .kpi-label { font-size: .8rem; opacity:.95; }
@@ -241,10 +246,12 @@
 
     .dashboard .status { padding: 0.25rem .6rem; border-radius: 10px; font-size: .75rem; font-weight:700; text-transform: capitalize; display:inline-flex; align-items:center; gap:.35rem; }
     .dashboard .status-pending { background:#fef3c7; color:#92400e; }
+    .dashboard .status-under_reviewing { background:#dbeafe; color:#1e40af; }
     .dashboard .status-reviewed { background:#dbeafe; color:#1e40af; }
-    .dashboard .status-accepted { background:#d1fae5; color:#065f46; }
-    .dashboard .status-rejected { background:#fee2e2; color:#991b1b; }
     .dashboard .status-shortlisted { background:#e0e7ff; color:#3730a3; }
+    .dashboard .status-documents_requested { background:#fef3c7; color:#92400e; }
+    .dashboard .status-documents_submitted { background:#dcfce7; color:#166534; }
+    .dashboard .status-rejected { background:#fee2e2; color:#991b1b; }
     .dashboard .status-hired { background:#dcfce7; color:#166534; }
 
     .dashboard .quick-action { background:#fff; border:1px solid rgba(0,0,0,0.06); border-radius:10px; padding: .9rem; text-align:center; transition:.2s; text-decoration:none; color:inherit; display:block; }

@@ -128,6 +128,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/notifications', [AdminNotificationController::class, 'index'])->name('notifications.index');
         Route::post('/notifications/read-all', [AdminNotificationController::class, 'readAll'])->name('notifications.readAll');
         Route::get('/notifications/open/{id}', [AdminNotificationController::class, 'open'])->name('notifications.open');
+
+        // Document download/view route
+        Route::get('/applications/documents/{document}/view', [ApplicationController::class, 'viewDocument'])->name('applications.documents.view');
     });
 });
 
@@ -138,6 +141,7 @@ Route::middleware('auth')->group(function () {
 
     // User applications routes
     Route::get('/applications', [JobController::class, 'myApplications'])->name('applications.index');
+    Route::post('/applications/{application}/upload-documents', [JobController::class, 'uploadRequestedDocuments'])->name('applications.upload-documents');
 
     // User notifications
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');

@@ -475,6 +475,11 @@ $base['dashboard_user'] = array_replace_recursive($base['dashboard_user'], [
             'message' => 'قم برفع سيرتك الذاتية لزيادة فرصك في الحصول على وظيفة.',
             'action' => 'رفع السيرة الذاتية الآن',
         ],
+        'pending_documents' => [
+            'title' => 'مطلوب إجراء: رفع وثائق',
+            'message' => 'لديك طلبات توظيف تتطلب وثائق إضافية.',
+            'action' => 'رفع الآن',
+        ],
     ],
     'profile' => [
         'title' => 'ملخص الملف الشخصي',
@@ -495,10 +500,14 @@ $base['dashboard_user'] = array_replace_recursive($base['dashboard_user'], [
         'filter' => 'تصفية',
         'filters' => [
             'all' => 'الكل',
-            'pending' => 'قيد المراجعة',
-            'reviewed' => 'تمت المراجعة',
-            'accepted' => 'مقبول',
+            'pending' => 'بانتظار المراجعة',
+            'under_reviewing' => 'جارٍ المراجعة',
+            'reviewed' => 'تمت المراجعة المبدئية',
+            'shortlisted' => 'تم الترشيح للمقابلة',
+            'documents_requested' => 'وثائق مطلوبة',
+            'documents_submitted' => 'وثائق قيد التقييم',
             'rejected' => 'مرفوض',
+            'hired' => 'تم التوظيف',
         ],
         'view_all' => 'عرض الكل',
         'job_unavailable' => 'الوظيفة غير متاحة',
@@ -509,22 +518,27 @@ $base['dashboard_user'] = array_replace_recursive($base['dashboard_user'], [
         'applied' => 'تم التقديم:',
         'no_applications_title' => 'لا توجد طلبات بعد',
         'no_applications_message' => 'ابدأ بالبحث عن فرص عمل الآن!',
+        'show_requested_documents' => 'عرض الوثائق المطلوبة',
     ],
     'statuses' => [
-        'pending' => 'قيد المراجعة',
-        'accepted' => 'مقبول',
+        'pending' => 'بانتظار المراجعة',
+        'under_reviewing' => 'جارٍ المراجعة',
+        'reviewed' => 'تمت المراجعة المبدئية',
+        'shortlisted' => 'تم الترشيح للمقابلة',
+        'documents_requested' => 'وثائق مطلوبة',
+        'documents_submitted' => 'وثائق قيد التقييم',
         'rejected' => 'مرفوض',
-        'reviewed' => 'تمت المراجعة',
-        'shortlisted' => 'القائمة المختصرة',
         'hired' => 'تم التوظيف',
+        'accepted' => 'مقبول',
         'draft' => 'مسودة',
     ],
     'metrics' => [
         'title' => 'ملخص الحالة',
         'total' => 'الإجمالي',
-        'pending' => 'قيد المراجعة',
-        'accepted' => 'مقبول',
-        'reviewed' => 'تمت المراجعة',
+        'pending' => 'بانتظار المراجعة',
+        'under_reviewing' => 'جارٍ المراجعة',
+        'reviewed' => 'تمت المراجعة المبدئية',
+        'documents_requested' => 'وثائق مطلوبة',
     ],
     'quick_actions' => [
         'title' => 'إجراءات سريعة',
@@ -604,6 +618,18 @@ $base['profile_completion'] = array_replace($base['profile_completion'], [
     ],
 ]);
 
+$base['application_statuses'] = [
+    'pending' => 'بانتظار مراجعة الطلب',
+    'under_reviewing' => 'جارٍ مراجعة الطلب',
+    'reviewed' => 'تمت المراجعة المبدئية',
+    'shortlisted' => 'تم ترشيحك للمقابلة',
+    'documents_requested' => 'نحتاج منك وثائق إضافية',
+    'documents_submitted' => 'تم استلام الوثائق وجارٍ التقييم',
+    'rejected' => 'لم يتم القبول',
+    'hired' => 'تم التوظيف',
+    'accepted' => 'مقبول',
+];
+
 $base['applications_index'] = array_replace_recursive($base['applications_index'], [
     'header' => [
         'title' => 'طلباتي',
@@ -611,10 +637,22 @@ $base['applications_index'] = array_replace_recursive($base['applications_index'
         'dashboard' => 'لوحة التحكم',
         'browse_jobs' => 'تصفح الوظائف',
     ],
+    'alerts' => [
+        'pending_documents' => [
+            'title' => 'مطلوب إجراء: رفع وثائق',
+            'message' => 'بعض طلباتك تتطلب رفع وثائق إضافية. يرجى مراجعتها وإرسالها أدناه.',
+        ],
+    ],
     'stats' => [
         'total' => 'إجمالي الطلبات',
         'pending' => 'بانتظار المراجعة',
-        'accepted' => 'مقبولة',
+        'under_reviewing' => 'جارٍ المراجعة',
+        'reviewed' => 'تمت المراجعة المبدئية',
+        'shortlisted' => 'تم الترشيح للمقابلة',
+        'documents_requested' => 'وثائق مطلوبة',
+        'documents_submitted' => 'وثائق قيد التقييم',
+        'rejected' => 'مرفوضة',
+        'hired' => 'تم التوظيف',
         'monthly' => 'هذا الشهر',
     ],
     'filters' => [
@@ -636,10 +674,15 @@ $base['applications_index'] = array_replace_recursive($base['applications_index'
     ],
     'status' => [
         'labels' => [
-            'pending' => 'قيد المراجعة',
-            'reviewed' => 'تمت المراجعة',
-            'accepted' => 'مقبولة',
+            'pending' => 'بانتظار المراجعة',
+            'under_reviewing' => 'جارٍ المراجعة',
+            'reviewed' => 'تمت المراجعة المبدئية',
+            'shortlisted' => 'تم الترشيح للمقابلة',
+            'documents_requested' => 'وثائق مطلوبة',
+            'documents_submitted' => 'وثائق قيد التقييم',
+            'accepted' => 'مقبول',
             'rejected' => 'مرفوضة',
+            'hired' => 'تم التوظيف',
         ],
     ],
     'list' => [
@@ -666,6 +709,16 @@ $base['applications_index'] = array_replace_recursive($base['applications_index'
             'empty' => 'لم يتم رفع أي مستندات داعمة.',
             'download' => 'تنزيل',
         ],
+    ],
+    'documents_requested' => [
+        'title' => 'الوثائق المطلوبة',
+        'alert_title' => 'مطلوب إجراء: رفع وثائق',
+        'alert_message' => 'طلب صاحب العمل وثائق إضافية. يرجى رفع الملفات المطلوبة أدناه.',
+        'pending' => 'قيد الانتظار',
+        'submitted' => 'تم الرفع',
+        'file_hint' => 'الصيغ المقبولة: PDF, DOC, DOCX, JPG, JPEG, PNG (الحد الأقصى 5 ميجابايت)',
+        'submit_button' => 'رفع الوثائق',
+        'download' => 'تنزيل',
     ],
     'empty' => [
         'title' => 'لا توجد طلبات',
@@ -791,6 +844,7 @@ $base['flash'] = [
     'deleted_successfully' => 'تم الحذف بنجاح!',
     'updated_successfully' => 'تم التحديث بنجاح!',
     'restored_successfully' => 'تمت الاستعادة بنجاح!',
+    'account_deactivated' => 'تم تعطيل هذا الحساب. يرجى التواصل مع الدعم للحصول على المساعدة.',
 
     // رسائل متعلقة بالوظائف
     'job_created' => 'تم إنشاء الوظيفة بنجاح.',

@@ -284,6 +284,7 @@ class JobController extends Controller
             },
             'questionAnswers.question',
             'documents.jobDocument',
+            'documentRequests',
         ])
             ->where('user_id', $userId);
 
@@ -325,7 +326,84 @@ class JobController extends Controller
 
         $applications = $query->paginate(10);
 
-        return view('applications.index', compact('applications'));
+        // Check if user has applications with pending document requests
+        $hasPendingDocuments = Application::where('user_id', Auth::id())
+            ->where('status', 'documents_requested')
+            ->whereHas('documentRequests', function ($q) {
+                $q->where('is_submitted', false);
+            })
+            ->exists();
+
+        return view('applications.index', compact('applications', 'hasPendingDocuments'));
+    }
+
+    /**
+     * Upload requested documents for an application
+     */
+    public function uploadRequestedDocuments(Request $request, Application $application)
+    {
+        // Ensure the application belongs to the authenticated user
+        if ($application->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        // Validate that the application status allows document uploads
+        if (!in_array($application->status, ['documents_requested', 'documents_submitted'])) {
+            return redirect()->back()->with('error', 'Document upload is not available for this application status.');
+        }
+
+        $validated = $request->validate([
+            'documents' => 'required|array',
+            'documents.*' => 'required|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:5120',
+        ]);
+
+        $storedFiles = [];
+        $allSubmitted = true;
+
+        DB::beginTransaction();
+
+        try {
+            foreach ($request->file('documents') as $requestId => $file) {
+                $documentRequest = $application->documentRequests()->find($requestId);
+
+                if (!$documentRequest) {
+                    continue;
+                }
+
+                // Store the file
+                $path = $file->store('applications/requested-documents', 'public');
+                $storedFiles[] = $path;
+
+                // Update the document request
+                $documentRequest->update([
+                    'is_submitted' => true,
+                    'submitted_at' => now(),
+                    'file_path' => $path,
+                    'original_name' => $file->getClientOriginalName(),
+                ]);
+            }
+
+            // Check if all documents are submitted
+            $allSubmitted = $application->documentRequests()
+                ->where('is_submitted', false)
+                ->doesntExist();
+
+            // Update application status if all documents are submitted
+            if ($allSubmitted && $application->status === 'documents_requested') {
+                $application->update(['status' => 'documents_submitted']);
+            }
+
+            DB::commit();
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            foreach ($storedFiles as $path) {
+                Storage::disk('public')->delete($path);
+            }
+            throw $e;
+        }
+
+        return redirect()->back()->with('success', 'Documents uploaded successfully!');
     }
 }
+
 

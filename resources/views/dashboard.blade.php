@@ -21,6 +21,21 @@
     <section class="py-3 dashboard">
         <div class="container">
 
+            <!-- Document Upload Warning -->
+            @if ($hasPendingDocuments)
+                <div class="alert alert-warning alert-dismissible fade show mb-4" role="alert">
+                    <div class="d-flex align-items-start gap-2">
+                        <i class="fas fa-exclamation-triangle mt-1"></i>
+                        <div class="flex-grow-1">
+                            <strong>{{ __('site.dashboard_user.alerts.pending_documents.title') }}</strong>
+                            {{ __('site.dashboard_user.alerts.pending_documents.message') }}
+                            <a href="{{ route('applications.index') }}" class="alert-link">{{ __('site.dashboard_user.alerts.pending_documents.action') }}</a>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            @endif
+
             <!-- Email Verification Alert (original) -->
             @if (!Auth::user()->email_verified_at)
                 <div class="alert alert-warning alert-dismissible fade show mb-4" role="alert">
@@ -294,14 +309,18 @@
                                                     <span class="status status-{{ $application->status }}">
                                                         @if ($application->status === 'pending')
                                                             <i class="fas fa-clock me-1"></i>{{ __('site.dashboard_user.statuses.pending') }}
-                                                        @elseif($application->status === 'accepted')
-                                                            <i class="fas fa-check me-1"></i>{{ __('site.dashboard_user.statuses.accepted') }}
-                                                        @elseif($application->status === 'rejected')
-                                                            <i class="fas fa-times me-1"></i>{{ __('site.dashboard_user.statuses.rejected') }}
+                                                        @elseif($application->status === 'under_reviewing')
+                                                            <i class="fas fa-search me-1"></i>{{ __('site.dashboard_user.statuses.under_reviewing') }}
                                                         @elseif($application->status === 'reviewed')
                                                             <i class="fas fa-eye me-1"></i>{{ __('site.dashboard_user.statuses.reviewed') }}
                                                         @elseif($application->status === 'shortlisted')
                                                             <i class="fas fa-star me-1"></i>{{ __('site.dashboard_user.statuses.shortlisted') }}
+                                                        @elseif($application->status === 'documents_requested')
+                                                            <i class="fas fa-file-upload me-1"></i>{{ __('site.dashboard_user.statuses.documents_requested') }}
+                                                        @elseif($application->status === 'documents_submitted')
+                                                            <i class="fas fa-file-check me-1"></i>{{ __('site.dashboard_user.statuses.documents_submitted') }}
+                                                        @elseif($application->status === 'rejected')
+                                                            <i class="fas fa-times me-1"></i>{{ __('site.dashboard_user.statuses.rejected') }}
                                                         @elseif($application->status === 'hired')
                                                             <i class="fas fa-trophy me-1"></i>{{ __('site.dashboard_user.statuses.hired') }}
                                                         @else
@@ -354,6 +373,13 @@
                                                                      href="{{ Storage::url($application->cv_path) }}"
                                                                      target="_blank">
                                                                      <i class="fas fa-download me-2"></i>{{ __('site.dashboard_user.applications.download_cv') }}
+                                                                 </a></li>
+                                                        @endif
+                                                        @if ($application->status === 'documents_requested' && $application->documentRequests->count() > 0)
+                                                             <li><hr class="dropdown-divider"></li>
+                                                             <li><a class="dropdown-item text-warning"
+                                                                     href="{{ route('applications.index') }}">
+                                                                     <i class="fas fa-file-upload me-2"></i>{{ __('site.dashboard_user.applications.show_requested_documents') }}
                                                                  </a></li>
                                                         @endif
                                                     </ul>

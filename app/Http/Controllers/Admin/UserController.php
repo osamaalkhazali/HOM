@@ -14,29 +14,52 @@ class UserController extends Controller
    */
   public function index(Request $request)
   {
-    $query = User::with(['profile', 'applications']);
+    $query = User::with(['profile', 'applications.job']);
 
-    // Search functionality - enhanced to include profile data
+    // Enhanced search functionality - searches across user, profile, and application data
     if ($request->filled('search')) {
       $search = $request->search;
       $query->where(function ($q) use ($search) {
+        // Search in user basic fields
         $q->where('name', 'like', "%{$search}%")
           ->orWhere('email', 'like', "%{$search}%")
           ->orWhere('phone', 'like', "%{$search}%")
+          // Search in profile fields
           ->orWhereHas('profile', function ($profileQuery) use ($search) {
             $profileQuery->where('headline', 'like', "%{$search}%")
               ->orWhere('current_position', 'like', "%{$search}%")
               ->orWhere('skills', 'like', "%{$search}%")
-              ->orWhere('location', 'like', "%{$search}%");
+              ->orWhere('location', 'like', "%{$search}%")
+              ->orWhere('about', 'like', "%{$search}%")
+              ->orWhere('education', 'like', "%{$search}%")
+              ->orWhere('website', 'like', "%{$search}%")
+              ->orWhere('linkedin_url', 'like', "%{$search}%")
+              ->orWhere('experience_years', 'like', "%{$search}%");
+          })
+          // Search in applied jobs
+          ->orWhereHas('applications.job', function ($jobQuery) use ($search) {
+            $jobQuery->where('title', 'like', "%{$search}%")
+              ->orWhere('title_ar', 'like', "%{$search}%")
+              ->orWhere('company', 'like', "%{$search}%")
+              ->orWhere('company_ar', 'like', "%{$search}%");
           });
       });
     }
 
-    // Filter by verification status
+    // Filter by account status (active/inactive)
     if ($request->filled('status')) {
-      if ($request->status === 'verified') {
+      if ($request->status === 'active') {
+        $query->where('is_active', true);
+      } elseif ($request->status === 'inactive') {
+        $query->where('is_active', false);
+      }
+    }
+
+    // Filter by email verification
+    if ($request->filled('verified')) {
+      if ($request->verified === 'yes') {
         $query->whereNotNull('email_verified_at');
-      } elseif ($request->status === 'unverified') {
+      } elseif ($request->verified === 'no') {
         $query->whereNull('email_verified_at');
       }
     }
@@ -50,6 +73,50 @@ class UserController extends Controller
       }
     }
 
+    // Filter by CV existence
+    if ($request->filled('has_cv')) {
+      if ($request->has_cv === 'yes') {
+        $query->whereHas('profile', function ($q) {
+          $q->whereNotNull('cv_path');
+        });
+      } elseif ($request->has_cv === 'no') {
+        $query->whereDoesntHave('profile', function ($q) {
+          $q->whereNotNull('cv_path');
+        })->orWhereHas('profile', function ($q) {
+          $q->whereNull('cv_path');
+        });
+      }
+    }
+
+    // Filter by users with applications
+    if ($request->filled('has_applications')) {
+      if ($request->has_applications === 'yes') {
+        $query->has('applications');
+      } elseif ($request->has_applications === 'no') {
+        $query->doesntHave('applications');
+      }
+    }
+
+    // Filter by experience years range
+    if ($request->filled('experience_min')) {
+      $query->whereHas('profile', function ($q) use ($request) {
+        $q->where('experience_years', '>=', $request->experience_min);
+      });
+    }
+    if ($request->filled('experience_max')) {
+      $query->whereHas('profile', function ($q) use ($request) {
+        $q->where('experience_years', '<=', $request->experience_max);
+      });
+    }
+
+    // Filter by registration date range
+    if ($request->filled('date_from')) {
+      $query->whereDate('created_at', '>=', $request->date_from);
+    }
+    if ($request->filled('date_to')) {
+      $query->whereDate('created_at', '<=', $request->date_to);
+    }
+
     // Sorting
     $sortBy = $request->get('sort', 'created_at');
     $sortDirection = $request->get('direction', 'desc');
@@ -59,7 +126,7 @@ class UserController extends Controller
       $query->orderBy($sortBy, $sortDirection);
     }
 
-    $users = $query->paginate(15)->withQueryString();
+    $users = $query->withCount('applications')->paginate(15)->withQueryString();
 
     return view('admin.users.index', compact('users'));
   }
@@ -74,19 +141,14 @@ class UserController extends Controller
   }
 
   /**
-   * Toggle user email verification status
+   * Toggle user active status
    */
   public function toggleStatus(User $user)
   {
-    if ($user->email_verified_at) {
-      $user->email_verified_at = null;
-      $message = 'User email verification removed';
-    } else {
-      $user->email_verified_at = now();
-      $message = 'User email verified';
-    }
-
+    $user->is_active = !$user->is_active;
     $user->save();
+
+    $message = $user->is_active ? 'User activated successfully' : 'User deactivated successfully';
 
     return redirect()->back()->with('success', $message);
   }

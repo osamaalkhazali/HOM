@@ -21,10 +21,10 @@
             <form method="GET" action="{{ route('admin.jobs.index') }}" class="space-y-4">
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <!-- Search -->
-                    <div>
+                    <div class="md:col-span-2">
                         <label for="search" class="block text-sm font-medium text-gray-700 mb-1">Search</label>
                         <input type="text" name="search" id="search" value="{{ request('search') }}"
-                            placeholder="Title, company, location..."
+                            placeholder="Title, description, company, location, category, questions, documents..."
                             class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
 
@@ -64,9 +64,52 @@
                             @foreach (['entry', 'mid', 'senior', 'executive'] as $levelKey)
                                 <option value="{{ $levelKey }}" {{ request('level') === $levelKey ? 'selected' : '' }}>
                                     {{ trans('site.jobs.levels.' . $levelKey, [], 'en') }}
-                                    ({{ trans('site.jobs.levels.' . $levelKey, [], 'ar') }})
                                 </option>
                             @endforeach
+                        </select>
+                    </div>
+
+                    <!-- Deadline Status -->
+                    <div>
+                        <label for="deadline_status" class="block text-sm font-medium text-gray-700 mb-1">Deadline</label>
+                        <select name="deadline_status" id="deadline_status"
+                            class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">All Jobs</option>
+                            <option value="active" {{ request('deadline_status') === 'active' ? 'selected' : '' }}>Active (Not Expired)</option>
+                            <option value="expired" {{ request('deadline_status') === 'expired' ? 'selected' : '' }}>Expired</option>
+                        </select>
+                    </div>
+
+                    <!-- Has Applications -->
+                    <div>
+                        <label for="has_applications" class="block text-sm font-medium text-gray-700 mb-1">Applications</label>
+                        <select name="has_applications" id="has_applications"
+                            class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">All Jobs</option>
+                            <option value="yes" {{ request('has_applications') === 'yes' ? 'selected' : '' }}>With Applications</option>
+                            <option value="no" {{ request('has_applications') === 'no' ? 'selected' : '' }}>No Applications</option>
+                        </select>
+                    </div>
+
+                    <!-- Has Questions -->
+                    <div>
+                        <label for="has_questions" class="block text-sm font-medium text-gray-700 mb-1">Questions</label>
+                        <select name="has_questions" id="has_questions"
+                            class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">All Jobs</option>
+                            <option value="yes" {{ request('has_questions') === 'yes' ? 'selected' : '' }}>With Questions</option>
+                            <option value="no" {{ request('has_questions') === 'no' ? 'selected' : '' }}>No Questions</option>
+                        </select>
+                    </div>
+
+                    <!-- Has Documents -->
+                    <div>
+                        <label for="has_documents" class="block text-sm font-medium text-gray-700 mb-1">Documents</label>
+                        <select name="has_documents" id="has_documents"
+                            class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">All Jobs</option>
+                            <option value="yes" {{ request('has_documents') === 'yes' ? 'selected' : '' }}>With Documents</option>
+                            <option value="no" {{ request('has_documents') === 'no' ? 'selected' : '' }}>No Documents</option>
                         </select>
                     </div>
                 </div>

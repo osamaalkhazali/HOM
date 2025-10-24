@@ -494,6 +494,11 @@ return [
                 'message' => 'Upload your CV/Resume to increase your chances of getting hired!',
                 'action' => 'Upload CV Now',
             ],
+            'pending_documents' => [
+                'title' => 'Action Required: Document Upload',
+                'message' => 'You have applications that require additional documents.',
+                'action' => 'Upload Now',
+            ],
         ],
         'profile' => [
             'title' => 'Profile Overview',
@@ -516,8 +521,12 @@ return [
                 'all' => 'All',
                 'pending' => 'Pending',
                 'reviewed' => 'Reviewed',
-                'accepted' => 'Accepted',
+                'under_reviewing' => 'Under Reviewing',
+                'shortlisted' => 'Shortlisted',
+                'documents_requested' => 'Documents Requested',
+                'documents_submitted' => 'Documents Submitted',
                 'rejected' => 'Rejected',
+                'hired' => 'Hired',
             ],
             'view_all' => 'View All',
             'job_unavailable' => 'Job Unavailable',
@@ -528,22 +537,27 @@ return [
             'applied' => 'Applied:',
             'no_applications_title' => 'No Applications Yet',
             'no_applications_message' => 'Start exploring job opportunities!',
+            'show_requested_documents' => 'Show Requested Documents',
         ],
         'statuses' => [
             'pending' => 'Pending',
-            'accepted' => 'Accepted',
+            'under_reviewing' => 'Under Reviewing',
             'rejected' => 'Rejected',
             'reviewed' => 'Reviewed',
             'shortlisted' => 'Shortlisted',
             'hired' => 'Hired',
+            'documents_requested' => 'Documents Requested',
+            'documents_submitted' => 'Documents Submitted',
+            'accepted' => 'Accepted',
             'draft' => 'Draft',
         ],
         'metrics' => [
             'title' => 'Status Summary',
             'total' => 'Total',
             'pending' => 'Pending',
-            'accepted' => 'Accepted',
+            'under_reviewing' => 'Under Reviewing',
             'reviewed' => 'Reviewed',
+            'documents_requested' => 'Documents Requested',
         ],
         'quick_actions' => [
             'title' => 'Quick Actions',
@@ -665,6 +679,18 @@ return [
         ],
     ],
 
+    'application_statuses' => [
+        'pending' => 'Pending',
+        'under_reviewing' => 'Under Reviewing',
+        'reviewed' => 'Reviewed',
+        'shortlisted' => 'Shortlisted',
+        'documents_requested' => 'Documents Requested',
+        'documents_submitted' => 'Documents Submitted',
+        'rejected' => 'Rejected',
+        'hired' => 'Hired',
+        'accepted' => 'Accepted',
+    ],
+
     'applications_index' => [
         'header' => [
             'title' => 'My Applications',
@@ -672,10 +698,22 @@ return [
             'dashboard' => 'Dashboard',
             'browse_jobs' => 'Browse Jobs',
         ],
+        'alerts' => [
+            'pending_documents' => [
+                'title' => 'Action Required: Document Upload',
+                'message' => 'Some of your applications require additional documents to be uploaded. Please review and submit them below.',
+            ],
+        ],
         'stats' => [
             'total' => 'Total Applications',
             'pending' => 'Pending Review',
-            'accepted' => 'Accepted',
+            'under_reviewing' => 'Under Reviewing',
+            'reviewed' => 'Reviewed',
+            'shortlisted' => 'Shortlisted',
+            'documents_requested' => 'Documents Requested',
+            'documents_submitted' => 'Documents Submitted',
+            'rejected' => 'Rejected',
+            'hired' => 'Hired',
             'monthly' => 'This Month',
         ],
         'filters' => [
@@ -698,9 +736,14 @@ return [
         'status' => [
             'labels' => [
                 'pending' => 'Pending',
+                'under_reviewing' => 'Under Reviewing',
                 'reviewed' => 'Reviewed',
+                'shortlisted' => 'Shortlisted',
+                'documents_requested' => 'Documents Requested',
+                'documents_submitted' => 'Documents Submitted',
                 'accepted' => 'Accepted',
                 'rejected' => 'Rejected',
+                'hired' => 'Hired',
             ],
         ],
         'list' => [
@@ -727,6 +770,16 @@ return [
                 'empty' => 'No supporting documents were uploaded.',
                 'download' => 'Download',
             ],
+        ],
+        'documents_requested' => [
+            'title' => 'Requested Documents',
+            'alert_title' => 'Action Required: Document Upload',
+            'alert_message' => 'The employer has requested additional documents. Please upload the required files below.',
+            'pending' => 'Pending',
+            'submitted' => 'Submitted',
+            'file_hint' => 'Accepted formats: PDF, DOC, DOCX, JPG, JPEG, PNG (Max 5MB)',
+            'submit_button' => 'Upload Documents',
+            'download' => 'Download',
         ],
         'empty' => [
             'title' => 'No Applications Found',
@@ -852,6 +905,7 @@ return [
         'deleted_successfully' => 'Deleted successfully!',
         'updated_successfully' => 'Updated successfully!',
         'restored_successfully' => 'Restored successfully!',
+        'account_deactivated' => 'This account has been deactivated. Please contact support for assistance.',
 
         // Job-related messages
         'job_created' => 'Job created successfully.',

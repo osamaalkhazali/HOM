@@ -12,82 +12,62 @@
         </div>
     </div>
 
-    <!-- Stats Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-5 gap-6">
-        <div class="bg-white rounded-lg shadow p-6">
-            <div class="flex items-center">
-                <div class="p-2 bg-yellow-100 rounded-lg">
-                    <i class="fas fa-clock text-yellow-600"></i>
+    @php
+        $statusSummary = [
+            ['key' => 'pending', 'icon' => 'fas fa-clock', 'bg' => 'bg-yellow-100', 'iconColor' => 'text-yellow-600'],
+            ['key' => 'under_reviewing', 'icon' => 'fas fa-spinner', 'bg' => 'bg-blue-100', 'iconColor' => 'text-blue-600'],
+            ['key' => 'reviewed', 'icon' => 'fas fa-eye', 'bg' => 'bg-sky-100', 'iconColor' => 'text-sky-600'],
+            ['key' => 'shortlisted', 'icon' => 'fas fa-star', 'bg' => 'bg-purple-100', 'iconColor' => 'text-purple-600'],
+            ['key' => 'documents_requested', 'icon' => 'fas fa-file-signature', 'bg' => 'bg-amber-100', 'iconColor' => 'text-amber-600'],
+            ['key' => 'documents_submitted', 'icon' => 'fas fa-file-upload', 'bg' => 'bg-teal-100', 'iconColor' => 'text-teal-600'],
+            ['key' => 'hired', 'icon' => 'fas fa-check', 'bg' => 'bg-green-100', 'iconColor' => 'text-green-600'],
+        ];
+    @endphp
+
+    <!-- Stats Cards - Compact Two Rows -->
+    <div class="bg-white rounded-lg shadow px-6 py-3">
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-8 gap-4">
+            <!-- Total Applications First -->
+            <div class="flex items-center gap-2">
+                <div class="w-7 h-7 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-file-alt text-gray-600 text-xs"></i>
                 </div>
-                <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-600">Pending</p>
-                    <p class="text-2xl font-semibold text-gray-900">
-                        {{ \App\Models\Application::where('status', 'pending')->count() }}
-                    </p>
-                </div>
-            </div>
-        </div>
-        <div class="bg-white rounded-lg shadow p-6">
-            <div class="flex items-center">
-                <div class="p-2 bg-blue-100 rounded-lg">
-                    <i class="fas fa-eye text-blue-600"></i>
-                </div>
-                <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-600">Reviewed</p>
-                    <p class="text-2xl font-semibold text-gray-900">
-                        {{ \App\Models\Application::where('status', 'reviewed')->count() }}
-                    </p>
+                <div class="flex flex-col min-w-0">
+                    <span class="text-[10px] font-medium text-gray-500 truncate">Total</span>
+                    <span class="text-lg font-bold text-gray-900">{{ \App\Models\Application::count() }}</span>
                 </div>
             </div>
-        </div>
-        <div class="bg-white rounded-lg shadow p-6">
-            <div class="flex items-center">
-                <div class="p-2 bg-purple-100 rounded-lg">
-                    <i class="fas fa-star text-purple-600"></i>
+
+            @foreach ($statusSummary as $summary)
+                @php
+                    $labelEn = __('site.application_statuses.' . $summary['key'], [], 'en');
+                    $count = \App\Models\Application::where('status', $summary['key'])->count();
+                @endphp
+                <div class="flex items-center gap-2">
+                    <div class="w-7 h-7 {{ $summary['bg'] }} rounded-lg flex items-center justify-center flex-shrink-0">
+                        <i class="{{ $summary['icon'] }} {{ $summary['iconColor'] }} text-xs"></i>
+                    </div>
+                    <div class="flex flex-col min-w-0">
+                        <span class="text-[10px] font-medium text-gray-500 truncate">{{ $labelEn }}</span>
+                        <span class="text-lg font-bold text-gray-900">{{ $count }}</span>
+                    </div>
                 </div>
-                <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-600">Shortlisted</p>
-                    <p class="text-2xl font-semibold text-gray-900">
-                        {{ \App\Models\Application::where('status', 'shortlisted')->count() }}
-                    </p>
-                </div>
-            </div>
-        </div>
-        <div class="bg-white rounded-lg shadow p-6">
-            <div class="flex items-center">
-                <div class="p-2 bg-green-100 rounded-lg">
-                    <i class="fas fa-check text-green-600"></i>
-                </div>
-                <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-600">Hired</p>
-                    <p class="text-2xl font-semibold text-gray-900">
-                        {{ \App\Models\Application::where('status', 'hired')->count() }}
-                    </p>
-                </div>
-            </div>
-        </div>
-        <div class="bg-white rounded-lg shadow p-6">
-            <div class="flex items-center">
-                <div class="p-2 bg-gray-100 rounded-lg">
-                    <i class="fas fa-file-alt text-gray-600"></i>
-                </div>
-                <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-600">Total</p>
-                    <p class="text-2xl font-semibold text-gray-900">{{ \App\Models\Application::count() }}</p>
-                </div>
-            </div>
+            @endforeach
         </div>
     </div>
 
     <!-- Filters -->
     <div class="bg-white rounded-lg shadow">
         <form method="GET" action="{{ route('admin.applications.index') }}" class="p-6">
+            @php
+                $statusOptions = ['pending', 'under_reviewing', 'reviewed', 'shortlisted', 'documents_requested', 'documents_submitted', 'rejected', 'hired'];
+            @endphp
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <!-- Search -->
-                <div>
+                <div class="md:col-span-2">
                     <label for="search" class="block text-sm font-medium text-gray-700 mb-1">Search</label>
                     <input type="text" name="search" id="search" value="{{ request('search') }}"
-                        placeholder="Applicant name, email, job title..."
+                        placeholder="Applicant name, email, phone, skills, job title, company, cover letter, answers..."
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
 
@@ -97,11 +77,15 @@
                     <select name="status" id="status"
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <option value="">All Status</option>
-                        <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>Pending</option>
-                        <option value="reviewed" {{ request('status') === 'reviewed' ? 'selected' : '' }}>Reviewed</option>
-                        <option value="shortlisted" {{ request('status') === 'shortlisted' ? 'selected' : '' }}>Shortlisted</option>
-                        <option value="rejected" {{ request('status') === 'rejected' ? 'selected' : '' }}>Rejected</option>
-                        <option value="hired" {{ request('status') === 'hired' ? 'selected' : '' }}>Hired</option>
+                        @foreach ($statusOptions as $statusOption)
+                            @php
+                                $labelEn = __('site.application_statuses.' . $statusOption, [], 'en');
+                                $labelAr = __('site.application_statuses.' . $statusOption, [], 'ar');
+                            @endphp
+                            <option value="{{ $statusOption }}" {{ request('status') === $statusOption ? 'selected' : '' }}>
+                                {{ $labelEn }} ({{ $labelAr }})
+                            </option>
+                        @endforeach
                     </select>
                 </div>
 
@@ -116,6 +100,53 @@
                                 {{ $job->title }} - {{ $job->company }}
                             </option>
                         @endforeach
+                    </select>
+                </div>
+
+                <!-- Category Filter -->
+                <div>
+                    <label for="category_id" class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                    <select name="category_id" id="category_id"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">All Categories</option>
+                        @foreach ($categories as $category)
+                            <option value="{{ $category->id }}" {{ request('category_id') == $category->id ? 'selected' : '' }}>
+                                {{ $category->admin_label ?: $category->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <!-- Has Answers Filter -->
+                <div>
+                    <label for="has_answers" class="block text-sm font-medium text-gray-700 mb-1">Question Answers</label>
+                    <select name="has_answers" id="has_answers"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">All Applications</option>
+                        <option value="yes" {{ request('has_answers') === 'yes' ? 'selected' : '' }}>With Answers</option>
+                        <option value="no" {{ request('has_answers') === 'no' ? 'selected' : '' }}>No Answers</option>
+                    </select>
+                </div>
+
+                <!-- Has Documents Filter -->
+                <div>
+                    <label for="has_documents" class="block text-sm font-medium text-gray-700 mb-1">Additional Documents</label>
+                    <select name="has_documents" id="has_documents"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">All Applications</option>
+                        <option value="yes" {{ request('has_documents') === 'yes' ? 'selected' : '' }}>With Documents</option>
+                        <option value="no" {{ request('has_documents') === 'no' ? 'selected' : '' }}>No Documents</option>
+                    </select>
+                </div>
+
+                <!-- Has Cover Letter Filter -->
+                <div>
+                    <label for="has_cover_letter" class="block text-sm font-medium text-gray-700 mb-1">Cover Letter</label>
+                    <select name="has_cover_letter" id="has_cover_letter"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">All Applications</option>
+                        <option value="yes" {{ request('has_cover_letter') === 'yes' ? 'selected' : '' }}>With Cover Letter</option>
+                        <option value="no" {{ request('has_cover_letter') === 'no' ? 'selected' : '' }}>No Cover Letter</option>
                     </select>
                 </div>
 
@@ -301,33 +332,64 @@
                                     </div>
                                 </td>
                                 <td class="px-6 py-4">
-                                    @switch($application->status)
-                                        @case('pending')
-                                            <span class="inline-flex items-center justify-center px-3 py-1.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700 border border-yellow-200">
-                                                <i class="fas fa-clock text-yellow-600 mr-1.5 text-[10px]"></i>Pending
-                                            </span>
-                                            @break
-                                        @case('reviewed')
-                                            <span class="inline-flex items-center justify-center px-3 py-1.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700 border border-blue-200">
-                                                <i class="fas fa-eye text-blue-600 mr-1.5 text-[10px]"></i>Reviewed
-                                            </span>
-                                            @break
-                                        @case('shortlisted')
-                                            <span class="inline-flex items-center justify-center px-3 py-1.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700 border border-purple-200">
-                                                <i class="fas fa-star text-purple-600 mr-1.5 text-[10px]"></i>Shortlisted
-                                            </span>
-                                            @break
-                                        @case('rejected')
-                                            <span class="inline-flex items-center justify-center px-3 py-1.5 rounded-full text-xs font-medium bg-red-100 text-red-700 border border-red-200">
-                                                <i class="fas fa-times text-red-600 mr-1.5 text-[10px]"></i>Rejected
-                                            </span>
-                                            @break
-                                        @case('hired')
-                                            <span class="inline-flex items-center justify-center px-3 py-1.5 rounded-full text-xs font-medium bg-green-100 text-green-700 border border-green-200">
-                                                <i class="fas fa-check text-green-600 mr-1.5 text-[10px]"></i>Hired
-                                            </span>
-                                            @break
-                                    @endswitch
+                                    @php
+                                        $statusMeta = [
+                                            'pending' => [
+                                                'badge' => 'bg-yellow-100 text-yellow-700 border border-yellow-200',
+                                                'icon' => 'fas fa-clock text-yellow-600',
+                                            ],
+                                            'under_reviewing' => [
+                                                'badge' => 'bg-blue-100 text-blue-700 border border-blue-200',
+                                                'icon' => 'fas fa-spinner text-blue-600',
+                                            ],
+                                            'reviewed' => [
+                                                'badge' => 'bg-sky-100 text-sky-700 border border-sky-200',
+                                                'icon' => 'fas fa-eye text-sky-600',
+                                            ],
+                                            'shortlisted' => [
+                                                'badge' => 'bg-purple-100 text-purple-700 border border-purple-200',
+                                                'icon' => 'fas fa-star text-purple-600',
+                                            ],
+                                            'documents_requested' => [
+                                                'badge' => 'bg-amber-100 text-amber-700 border border-amber-200',
+                                                'icon' => 'fas fa-file-signature text-amber-600',
+                                            ],
+                                            'documents_submitted' => [
+                                                'badge' => 'bg-teal-100 text-teal-700 border border-teal-200',
+                                                'icon' => 'fas fa-file-upload text-teal-600',
+                                            ],
+                                            'rejected' => [
+                                                'badge' => 'bg-red-100 text-red-700 border border-red-200',
+                                                'icon' => 'fas fa-times text-red-600',
+                                            ],
+                                            'hired' => [
+                                                'badge' => 'bg-green-100 text-green-700 border border-green-200',
+                                                'icon' => 'fas fa-check text-green-600',
+                                            ],
+                                        ];
+                                        $statusInfo = $statusMeta[$application->status] ?? null;
+                                        $statusLabelEn = __('site.application_statuses.' . $application->status, [], 'en');
+                                        $statusLabelAr = __('site.application_statuses.' . $application->status, [], 'ar');
+                                        $requestedDocuments = $application->documentRequests;
+                                        $submittedDocuments = $requestedDocuments->where('is_submitted', true);
+                                    @endphp
+                                    @if ($statusInfo)
+                                        <span class="inline-flex items-center justify-center px-3 py-1.5 rounded-full text-xs font-medium {{ $statusInfo['badge'] }}">
+                                            <i class="{{ $statusInfo['icon'] }} mr-1.5 text-[10px]"></i>{{ $statusLabelEn }}
+                                        </span>
+                                        <p class="text-[11px] text-gray-400 mt-1">{{ $statusLabelAr }}</p>
+                                    @else
+                                        <span class="inline-flex items-center justify-center px-3 py-1.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600 border border-gray-200">
+                                            <i class="fas fa-question-circle text-gray-500 mr-1.5 text-[10px]"></i>{{ \Illuminate\Support\Str::headline($application->status) }}
+                                        </span>
+                                    @endif
+
+                                    @if ($requestedDocuments->count() > 0)
+                                        <div class="mt-2 text-xs text-gray-500 flex items-center gap-1">
+                                            <i class="fas fa-file-signature text-amber-500"></i>
+                                            <span>{{ $submittedDocuments->count() }} / {{ $requestedDocuments->count() }} documents submitted</span>
+                                        </div>
+                                    @endif
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm text-gray-900">{{ $application->created_at->format('M d, Y') }}</div>
@@ -371,11 +433,14 @@
                                             <select name="status" onchange="this.form.submit()"
                                                     class="text-xs border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500">
                                                 <option value="">Quick Update</option>
-                                                <option value="pending" {{ $application->status === 'pending' ? 'disabled' : '' }}>Pending</option>
-                                                <option value="reviewed" {{ $application->status === 'reviewed' ? 'disabled' : '' }}>Reviewed</option>
-                                                <option value="shortlisted" {{ $application->status === 'shortlisted' ? 'disabled' : '' }}>Shortlisted</option>
-                                                <option value="rejected" {{ $application->status === 'rejected' ? 'disabled' : '' }}>Rejected</option>
-                                                <option value="hired" {{ $application->status === 'hired' ? 'disabled' : '' }}>Hired</option>
+                                                @foreach ($statusOptions as $statusOption)
+                                                    @php
+                                                        $labelEn = __('site.application_statuses.' . $statusOption, [], 'en');
+                                                    @endphp
+                                                    <option value="{{ $statusOption }}" {{ $application->status === $statusOption ? 'disabled' : '' }}>
+                                                        {{ $labelEn }}
+                                                    </option>
+                                                @endforeach
                                             </select>
                                         </form>
 

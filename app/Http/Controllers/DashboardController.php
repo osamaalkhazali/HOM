@@ -16,10 +16,13 @@ class DashboardController extends Controller
 
     // Get recent applications with job data, ordered by created_at desc
     $recentApplications = $user->applications()
-      ->with(['job' => function ($query) {
-      $query->withTrashed() // Include soft-deleted jobs
-        ->select('id', 'title', 'company', 'salary', 'location', 'status', 'deleted_at');
-      }])
+      ->with([
+        'job' => function ($query) {
+          $query->withTrashed() // Include soft-deleted jobs
+            ->select('id', 'title', 'company', 'salary', 'location', 'status', 'deleted_at');
+      },
+      'documentRequests'
+    ])
       ->orderBy('created_at', 'desc')
       ->take(5)
       ->get();
@@ -35,11 +38,19 @@ class DashboardController extends Controller
     // Check if user has uploaded CV
     $hasCv = $user->profile && $user->profile->cv_path;
 
+    // Check if user has applications with pending document requests
+    $hasPendingDocuments = $user->applications()
+      ->where('status', 'documents_requested')
+      ->whereHas('documentRequests', function ($query) {
+        $query->where('is_submitted', false);
+      })
+      ->exists();
+
     // Get user profile for dashboard display
     $profile = $user->profile;
 
     $profileCompletion = $user->profileCompletionStatus();
 
-    return view('dashboard', compact('user', 'recentApplications', 'stats', 'hasCv', 'profile', 'profileCompletion'));
+    return view('dashboard', compact('user', 'recentApplications', 'stats', 'hasCv', 'profile', 'profileCompletion', 'hasPendingDocuments'));
   }
 }

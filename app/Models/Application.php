@@ -48,4 +48,9 @@ class Application extends Model
   {
     return $this->hasMany(ApplicationDocument::class);
   }
+
+  public function documentRequests()
+  {
+    return $this->hasMany(ApplicationDocumentRequest::class);
+  }
 }

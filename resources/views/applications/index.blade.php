@@ -24,44 +24,115 @@
 
     <section class="py-3 dashboard">
         <div class="container">
-            <div class="row g-3 mb-4">
-                <div class="col-lg-3 col-md-6">
-                    <div class="kpi-card kpi-1 shadow-soft shadow-hover">
-                        <div class="kpi-icon mb-2">
-                            <i class="fas fa-paper-plane"></i>
+            <!-- Document Upload Warning -->
+            @if ($hasPendingDocuments)
+                <div class="alert alert-warning alert-dismissible fade show mb-4" role="alert">
+                    <div class="d-flex align-items-start gap-2">
+                        <i class="fas fa-exclamation-triangle mt-1"></i>
+                        <div class="flex-grow-1">
+                            <strong>{{ __('site.applications_index.alerts.pending_documents.title') }}</strong>
+                            {{ __('site.applications_index.alerts.pending_documents.message') }}
                         </div>
-                        <div class="kpi-number">{{ $applications->total() }}</div>
-                        <div class="kpi-label">{{ __('site.applications_index.stats.total') }}</div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            @endif
+
+            @if (session('success'))
+                <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+                    <i class="fas fa-check-circle me-2"></i>
+                    {{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            @endif
+
+            @if (session('error'))
+                <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    {{ session('error') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            @endif
+
+            <div class="row g-2 mb-4">
+                <div class="col">
+                    <div class="kpi-card kpi-1 shadow-soft shadow-hover d-flex align-items-center justify-content-center" style="height: 90px;">
+                        <div class="text-center">
+                            <div class="kpi-number mb-0" style="font-size: 1.75rem; line-height: 1; font-weight: 700;">{{ $applications->total() }}</div>
+                            <div class="kpi-label mt-1" style="font-size: 0.75rem; white-space: nowrap;">{{ __('site.applications_index.stats.total') }}</div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="col-lg-3 col-md-6">
-                    <div class="kpi-card kpi-2 shadow-soft shadow-hover">
-                        <div class="kpi-icon mb-2">
-                            <i class="fas fa-clock"></i>
+                <div class="col">
+                    <div class="kpi-card kpi-2 shadow-soft shadow-hover d-flex align-items-center justify-content-center" style="height: 90px;">
+                        <div class="text-center">
+                            <div class="kpi-number mb-0" style="font-size: 1.75rem; line-height: 1; font-weight: 700;">{{ $applications->where('status', 'pending')->count() }}</div>
+                            <div class="kpi-label mt-1" style="font-size: 0.75rem; white-space: nowrap;">{{ __('site.applications_index.stats.pending') }}</div>
                         </div>
-                        <div class="kpi-number">{{ $applications->where('status', 'pending')->count() }}</div>
-                        <div class="kpi-label">{{ __('site.applications_index.stats.pending') }}</div>
                     </div>
                 </div>
 
-                <div class="col-lg-3 col-md-6">
-                    <div class="kpi-card kpi-3 shadow-soft shadow-hover">
-                        <div class="kpi-icon mb-2">
-                            <i class="fas fa-check-circle"></i>
+                <div class="col">
+                    <div class="kpi-card kpi-3 shadow-soft shadow-hover d-flex align-items-center justify-content-center" style="height: 90px;">
+                        <div class="text-center">
+                            <div class="kpi-number mb-0" style="font-size: 1.75rem; line-height: 1; font-weight: 700;">{{ $applications->where('status', 'under_reviewing')->count() }}</div>
+                            <div class="kpi-label mt-1" style="font-size: 0.75rem; white-space: nowrap;">{{ __('site.applications_index.stats.under_reviewing') }}</div>
                         </div>
-                        <div class="kpi-number">{{ $applications->where('status', 'accepted')->count() }}</div>
-                        <div class="kpi-label">{{ __('site.applications_index.stats.accepted') }}</div>
                     </div>
                 </div>
 
-                <div class="col-lg-3 col-md-6">
-                    <div class="kpi-card kpi-4 shadow-soft shadow-hover">
-                        <div class="kpi-icon mb-2">
-                            <i class="fas fa-calendar-check"></i>
+                <div class="col">
+                    <div class="kpi-card kpi-4 shadow-soft shadow-hover d-flex align-items-center justify-content-center" style="height: 90px;">
+                        <div class="text-center">
+                            <div class="kpi-number mb-0" style="font-size: 1.75rem; line-height: 1; font-weight: 700;">{{ $applications->where('status', 'reviewed')->count() }}</div>
+                            <div class="kpi-label mt-1" style="font-size: 0.75rem; white-space: nowrap;">{{ __('site.applications_index.stats.reviewed') }}</div>
                         </div>
-                        <div class="kpi-number">{{ $applications->where('created_at', '>=', now()->startOfMonth())->count() }}</div>
-                        <div class="kpi-label">{{ __('site.applications_index.stats.monthly') }}</div>
+                    </div>
+                </div>
+
+                <div class="col">
+                    <div class="kpi-card kpi-5 shadow-soft shadow-hover d-flex align-items-center justify-content-center" style="height: 90px;">
+                        <div class="text-center">
+                            <div class="kpi-number mb-0" style="font-size: 1.75rem; line-height: 1; font-weight: 700;">{{ $applications->where('status', 'shortlisted')->count() }}</div>
+                            <div class="kpi-label mt-1" style="font-size: 0.75rem; white-space: nowrap;">{{ __('site.applications_index.stats.shortlisted') }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col">
+                    <div class="kpi-card kpi-6 shadow-soft shadow-hover d-flex align-items-center justify-content-center" style="height: 90px;">
+                        <div class="text-center">
+                            <div class="kpi-number mb-0" style="font-size: 1.75rem; line-height: 1; font-weight: 700;">{{ $applications->where('status', 'documents_requested')->count() }}</div>
+                            <div class="kpi-label mt-1" style="font-size: 0.75rem; white-space: nowrap;">{{ __('site.applications_index.stats.documents_requested') }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col">
+                    <div class="kpi-card kpi-7 shadow-soft shadow-hover d-flex align-items-center justify-content-center" style="height: 90px;">
+                        <div class="text-center">
+                            <div class="kpi-number mb-0" style="font-size: 1.75rem; line-height: 1; font-weight: 700;">{{ $applications->where('status', 'documents_submitted')->count() }}</div>
+                            <div class="kpi-label mt-1" style="font-size: 0.75rem; white-space: nowrap;">{{ __('site.applications_index.stats.documents_submitted') }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col">
+                    <div class="kpi-card kpi-8 shadow-soft shadow-hover d-flex align-items-center justify-content-center" style="height: 90px;">
+                        <div class="text-center">
+                            <div class="kpi-number mb-0" style="font-size: 1.75rem; line-height: 1; font-weight: 700;">{{ $applications->where('status', 'rejected')->count() }}</div>
+                            <div class="kpi-label mt-1" style="font-size: 0.75rem; white-space: nowrap;">{{ __('site.applications_index.stats.rejected') }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col">
+                    <div class="kpi-card kpi-9 shadow-soft shadow-hover d-flex align-items-center justify-content-center" style="height: 90px;">
+                        <div class="text-center">
+                            <div class="kpi-number mb-0" style="font-size: 1.75rem; line-height: 1; font-weight: 700;">{{ $applications->where('status', 'hired')->count() }}</div>
+                            <div class="kpi-label mt-1" style="font-size: 0.75rem; white-space: nowrap;">{{ __('site.applications_index.stats.hired') }}</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -94,7 +165,7 @@
                                 </label>
                                 <select id="applications-status" class="form-select" name="status">
                                     <option value="">{{ __('site.applications_index.filters.status.all') }}</option>
-                                    @foreach (['pending', 'reviewed', 'accepted', 'rejected'] as $status)
+                                    @foreach (['pending', 'under_reviewing', 'reviewed', 'shortlisted', 'documents_requested', 'documents_submitted', 'rejected', 'hired'] as $status)
                                         <option value="{{ $status }}" @selected(request('status') === $status)>
                                             {{ __('site.applications_index.status.labels.' . $status) }}
                                         </option>
@@ -131,13 +202,6 @@
                             $detailsId = 'application-details-' . $application->id;
                             $status = $application->status;
                             $statusLabel = __('site.applications_index.status.labels.' . $status);
-                            $statusClass = match ($status) {
-                                'pending' => 'badge bg-warning-subtle text-warning',
-                                'reviewed' => 'badge bg-info-subtle text-info',
-                                'accepted' => 'badge bg-success-subtle text-success',
-                                'rejected' => 'badge bg-danger-subtle text-danger',
-                                default => 'badge bg-secondary-subtle text-secondary',
-                            };
                             $answers = $application->questionAnswers
                                 ->filter(fn ($answer) => $answer->question)
                                 ->sortBy(fn ($answer) => $answer->question->display_order ?? PHP_INT_MAX)
@@ -160,7 +224,27 @@
                                                     <h5 class="mb-0">
                                                         {{ $job?->title_localized ?? $job?->title ?? __('site.applications_index.list.deleted_job') }}
                                                     </h5>
-                                                    <span class="{{ $statusClass }}">{{ $statusLabel }}</span>
+                                                    <span class="status status-{{ $application->status }}">
+                                                        @if ($application->status === 'pending')
+                                                            <i class="fas fa-clock me-1"></i>{{ __('site.applications_index.status.labels.pending') }}
+                                                        @elseif($application->status === 'under_reviewing')
+                                                            <i class="fas fa-search me-1"></i>{{ __('site.applications_index.status.labels.under_reviewing') }}
+                                                        @elseif($application->status === 'reviewed')
+                                                            <i class="fas fa-eye me-1"></i>{{ __('site.applications_index.status.labels.reviewed') }}
+                                                        @elseif($application->status === 'shortlisted')
+                                                            <i class="fas fa-star me-1"></i>{{ __('site.applications_index.status.labels.shortlisted') }}
+                                                        @elseif($application->status === 'documents_requested')
+                                                            <i class="fas fa-file-upload me-1"></i>{{ __('site.applications_index.status.labels.documents_requested') }}
+                                                        @elseif($application->status === 'documents_submitted')
+                                                            <i class="fas fa-file-check me-1"></i>{{ __('site.applications_index.status.labels.documents_submitted') }}
+                                                        @elseif($application->status === 'rejected')
+                                                            <i class="fas fa-times me-1"></i>{{ __('site.applications_index.status.labels.rejected') }}
+                                                        @elseif($application->status === 'hired')
+                                                            <i class="fas fa-trophy me-1"></i>{{ __('site.applications_index.status.labels.hired') }}
+                                                        @else
+                                                            {{ $statusLabel }}
+                                                        @endif
+                                                    </span>
                                                 </div>
                                                 <div class="text-muted small mt-1">
                                                     @if ($job)
@@ -235,6 +319,88 @@
                             </div>
                             <div id="{{ $detailsId }}" class="collapse border-top">
                                 <div class="panel-body p-4">
+                                    @if ($application->status === 'documents_requested' && $application->documentRequests->whereNull('submitted_at')->count() > 0)
+                                        <div class="alert alert-warning mb-4">
+                                            <div class="d-flex align-items-start gap-2">
+                                                <i class="fas fa-exclamation-triangle mt-1"></i>
+                                                <div>
+                                                    <h6 class="mb-1 fw-bold">{{ __('site.applications_index.documents_requested.alert_title') }}</h6>
+                                                    <p class="mb-0 small">{{ __('site.applications_index.documents_requested.alert_message') }}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endif
+
+                                    @if ($application->documentRequests->count() > 0)
+                                        <div class="mb-4">
+                                            <h6 class="fw-semibold mb-3">
+                                                <i class="fas fa-file-upload me-2"></i>{{ __('site.applications_index.documents_requested.title') }}
+                                            </h6>
+                                            <form action="{{ route('applications.upload-documents', $application) }}" method="POST" enctype="multipart/form-data">
+                                                @csrf
+                                                <div class="row g-3">
+                                                    @foreach ($application->documentRequests as $docRequest)
+                                                        <div class="col-12">
+                                                            <div class="border rounded p-3 @if($docRequest->is_submitted) bg-light @endif">
+                                                                <div class="d-flex align-items-start justify-content-between gap-3">
+                                                                    <div class="flex-grow-1">
+                                                                        <label class="form-label fw-semibold mb-1">
+                                                                            {{ $docRequest->name_localized }}
+                                                                            @if($docRequest->is_submitted)
+                                                                                <span class="badge bg-success-subtle text-success ms-2">
+                                                                                    <i class="fas fa-check me-1"></i>{{ __('site.applications_index.documents_requested.submitted') }}
+                                                                                </span>
+                                                                            @else
+                                                                                <span class="badge bg-warning-subtle text-warning ms-2">
+                                                                                    <i class="fas fa-clock me-1"></i>{{ __('site.applications_index.documents_requested.pending') }}
+                                                                                </span>
+                                                                            @endif
+                                                                        </label>
+                                                                        @if($docRequest->notes)
+                                                                            <div class="text-muted small mb-2">{{ $docRequest->notes }}</div>
+                                                                        @endif
+                                                                        @if($docRequest->is_submitted)
+                                                                            <div class="d-flex align-items-center gap-2 text-muted small">
+                                                                                <i class="fas fa-paperclip"></i>
+                                                                                <span>{{ $docRequest->original_name }}</span>
+                                                                                <span>&bull;</span>
+                                                                                <span>{{ $docRequest->submitted_at->diffForHumans() }}</span>
+                                                                            </div>
+                                                                        @else
+                                                                            <input
+                                                                                type="file"
+                                                                                name="documents[{{ $docRequest->id }}]"
+                                                                                class="form-control"
+                                                                                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                                                                                required
+                                                                            >
+                                                                            <div class="form-text">{{ __('site.applications_index.documents_requested.file_hint') }}</div>
+                                                                        @endif
+                                                                    </div>
+                                                                    @if($docRequest->is_submitted && $docRequest->file_path)
+                                                                        <a href="{{ Storage::url($docRequest->file_path) }}"
+                                                                           class="btn btn-sm btn-outline-primary"
+                                                                           target="_blank">
+                                                                            <i class="fas fa-download me-1"></i>{{ __('site.applications_index.documents_requested.download') }}
+                                                                        </a>
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    @endforeach
+                                                </div>
+                                                @if($application->documentRequests->whereNull('submitted_at')->count() > 0)
+                                                    <div class="mt-3">
+                                                        <button type="submit" class="btn btn-warning">
+                                                            <i class="fas fa-upload me-1"></i>{{ __('site.applications_index.documents_requested.submit_button') }}
+                                                        </button>
+                                                    </div>
+                                                @endif
+                                            </form>
+                                        </div>
+                                        <hr>
+                                    @endif
+
                                     @if ($application->cover_letter)
                                         <div class="mb-4">
                                             <h6 class="fw-semibold mb-2">

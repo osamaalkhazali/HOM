@@ -30,16 +30,20 @@
                     class="flex items-center space-x-2">
                     @csrf
                     @method('PATCH')
+                    @php
+                        $statusOptions = ['pending', 'under_reviewing', 'reviewed', 'shortlisted', 'documents_requested', 'documents_submitted', 'rejected', 'hired'];
+                    @endphp
                     <select name="status" onchange="this.form.submit()"
                         class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value="pending" {{ $application->status === 'pending' ? 'selected' : '' }}>Pending</option>
-                        <option value="reviewed" {{ $application->status === 'reviewed' ? 'selected' : '' }}>Reviewed
-                        </option>
-                        <option value="shortlisted" {{ $application->status === 'shortlisted' ? 'selected' : '' }}>
-                            Shortlisted</option>
-                        <option value="rejected" {{ $application->status === 'rejected' ? 'selected' : '' }}>Rejected
-                        </option>
-                        <option value="hired" {{ $application->status === 'hired' ? 'selected' : '' }}>Hired</option>
+                        @foreach ($statusOptions as $statusOption)
+                            @php
+                                $labelEn = __('site.application_statuses.' . $statusOption, [], 'en');
+                                $labelAr = __('site.application_statuses.' . $statusOption, [], 'ar');
+                            @endphp
+                            <option value="{{ $statusOption }}" {{ $application->status === $statusOption ? 'selected' : '' }}>
+                                {{ $labelEn }} ({{ $labelAr }})
+                            </option>
+                        @endforeach
                     </select>
                 </form>
             </div>
@@ -47,42 +51,31 @@
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div class="text-center">
                     <div class="text-2xl font-semibold text-gray-900">
-                        @switch($application->status)
-                            @case('pending')
-                                <span
-                                    class="inline-flex items-center justify-center px-4 py-2 rounded-full text-sm font-medium bg-yellow-100 text-yellow-700 border border-yellow-200">
-                                    <i class="fas fa-clock text-yellow-600 mr-2 text-xs"></i>Pending
-                                </span>
-                            @break
-
-                            @case('reviewed')
-                                <span
-                                    class="inline-flex items-center justify-center px-4 py-2 rounded-full text-sm font-medium bg-blue-100 text-blue-700 border border-blue-200">
-                                    <i class="fas fa-eye text-blue-600 mr-2 text-xs"></i>Reviewed
-                                </span>
-                            @break
-
-                            @case('shortlisted')
-                                <span
-                                    class="inline-flex items-center justify-center px-4 py-2 rounded-full text-sm font-medium bg-purple-100 text-purple-700 border border-purple-200">
-                                    <i class="fas fa-star text-purple-600 mr-2 text-xs"></i>Shortlisted
-                                </span>
-                            @break
-
-                            @case('rejected')
-                                <span
-                                    class="inline-flex items-center justify-center px-4 py-2 rounded-full text-sm font-medium bg-red-100 text-red-700 border border-red-200">
-                                    <i class="fas fa-times text-red-600 mr-2 text-xs"></i>Rejected
-                                </span>
-                            @break
-
-                            @case('hired')
-                                <span
-                                    class="inline-flex items-center justify-center px-4 py-2 rounded-full text-sm font-medium bg-green-100 text-green-700 border border-green-200">
-                                    <i class="fas fa-check text-green-600 mr-2 text-xs"></i>Hired
-                                </span>
-                            @break
-                        @endswitch
+                        @php
+                            $statusMeta = [
+                                'pending' => ['badge' => 'bg-yellow-100 text-yellow-700 border border-yellow-200', 'icon' => 'fas fa-clock text-yellow-600'],
+                                'under_reviewing' => ['badge' => 'bg-blue-100 text-blue-700 border border-blue-200', 'icon' => 'fas fa-spinner text-blue-600'],
+                                'reviewed' => ['badge' => 'bg-sky-100 text-sky-700 border border-sky-200', 'icon' => 'fas fa-eye text-sky-600'],
+                                'shortlisted' => ['badge' => 'bg-purple-100 text-purple-700 border border-purple-200', 'icon' => 'fas fa-star text-purple-600'],
+                                'documents_requested' => ['badge' => 'bg-amber-100 text-amber-700 border border-amber-200', 'icon' => 'fas fa-file-signature text-amber-600'],
+                                'documents_submitted' => ['badge' => 'bg-teal-100 text-teal-700 border border-teal-200', 'icon' => 'fas fa-file-upload text-teal-600'],
+                                'rejected' => ['badge' => 'bg-red-100 text-red-700 border border-red-200', 'icon' => 'fas fa-times text-red-600'],
+                                'hired' => ['badge' => 'bg-green-100 text-green-700 border border-green-200', 'icon' => 'fas fa-check text-green-600'],
+                            ];
+                            $statusInfo = $statusMeta[$application->status] ?? null;
+                            $statusLabelEn = __('site.application_statuses.' . $application->status, [], 'en');
+                            $statusLabelAr = __('site.application_statuses.' . $application->status, [], 'ar');
+                        @endphp
+                        @if ($statusInfo)
+                            <span class="inline-flex items-center justify-center px-4 py-2 rounded-full text-sm font-medium {{ $statusInfo['badge'] }}">
+                                <i class="{{ $statusInfo['icon'] }} mr-2 text-xs"></i>{{ $statusLabelEn }}
+                            </span>
+                            <p class="text-xs text-gray-400 mt-2">{{ $statusLabelAr }}</p>
+                        @else
+                            <span class="inline-flex items-center justify-center px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-600 border border-gray-200">
+                                <i class="fas fa-question-circle text-gray-500 mr-2 text-xs"></i>{{ \Illuminate\Support\Str::headline($application->status) }}
+                            </span>
+                        @endif
                     </div>
                     <p class="text-sm text-gray-500 mt-1">Current Status</p>
                 </div>
@@ -106,6 +99,87 @@
                 </div>
             </div>
         </div>
+
+        @php
+            $documentRequests = $application->documentRequests;
+        @endphp
+
+        @if ($documentRequests->count() > 0)
+            <div class="bg-white rounded-lg shadow">
+                <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+                    <div>
+                        <h3 class="text-lg font-medium text-gray-900">Requested Documents</h3>
+                        <p class="text-sm text-gray-500">Additional documents requested for this candidate.</p>
+                    </div>
+                    <a href="{{ route('admin.applications.edit', $application) }}"
+                       class="inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-800">
+                        <i class="fas fa-edit mr-1"></i>Manage
+                    </a>
+                </div>
+                <div class="divide-y divide-gray-200">
+                    @foreach ($documentRequests as $request)
+                        <div class="px-6 py-4 flex items-start justify-between gap-4">
+                            <div class="flex-1">
+                                <p class="text-sm font-semibold text-gray-900">{{ $request->name }}</p>
+                                @if ($request->name_ar)
+                                    <p class="text-xs text-gray-500">{{ $request->name_ar }}</p>
+                                @endif
+                                @if ($request->notes)
+                                    <p class="text-xs text-gray-500 mt-2">{{ $request->notes }}</p>
+                                @endif
+                                @if ($request->is_submitted && $request->original_name)
+                                    <p class="text-xs text-gray-600 mt-2">
+                                        <i class="fas fa-file-alt mr-1"></i>{{ $request->original_name }}
+                                    </p>
+                                @endif
+                                <p class="text-[11px] text-gray-400 mt-2">Requested {{ $request->created_at->diffForHumans() }}</p>
+                            </div>
+                            <div class="text-right min-w-[200px]">
+                                @if ($request->is_submitted)
+                                    <span class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-teal-100 text-teal-700 border border-teal-200">
+                                        <i class="fas fa-check-circle text-teal-600 mr-1.5 text-[10px]"></i>Submitted
+                                    </span>
+                                    @if ($request->submitted_at)
+                                        <p class="text-[11px] text-gray-400 mt-1">Received {{ $request->submitted_at->diffForHumans() }}</p>
+                                    @endif
+                                    @if ($request->file_path)
+                                        <div class="mt-2 flex gap-2 justify-end">
+                                            <a href="{{ route('admin.applications.documents.view', $request) }}" target="_blank"
+                                               class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium bg-blue-600 text-white hover:bg-blue-700 transition-colors">
+                                                <i class="fas fa-eye mr-1.5"></i>View
+                                            </a>
+                                            <a href="{{ route('admin.applications.documents.view', $request) }}" download="{{ $request->original_name }}"
+                                               class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium bg-green-600 text-white hover:bg-green-700 transition-colors">
+                                                <i class="fas fa-download mr-1.5"></i>Download
+                                            </a>
+                                        </div>
+                                    @endif
+                                @else
+                                    <span class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700 border border-amber-200">
+                                        <i class="fas fa-hourglass-half text-amber-600 mr-1.5 text-[10px]"></i>Pending
+                                    </span>
+                                @endif
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        @elseif (in_array($application->status, ['shortlisted', 'documents_requested', 'documents_submitted']))
+            <div class="bg-white rounded-lg shadow">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-medium text-gray-900">Requested Documents</h3>
+                </div>
+                <div class="p-6">
+                    <p class="text-sm text-gray-600">
+                        No additional documents have been requested yet. Use the edit page to add requested documents for shortlisted candidates.
+                    </p>
+                    <a href="{{ route('admin.applications.edit', $application) }}"
+                       class="mt-4 inline-flex items-center px-4 py-2 rounded-lg bg-blue-600 text-white text-sm hover:bg-blue-700 transition-colors">
+                        <i class="fas fa-file-signature mr-2"></i>Add Document Request
+                    </a>
+                </div>
+            </div>
+        @endif
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <!-- Applicant Information -->
@@ -386,6 +460,52 @@
                         <h3 class="text-lg font-medium text-gray-900">Quick Actions</h3>
                     </div>
                     <div class="p-6 space-y-3">
+                        <a href="{{ route('admin.applications.edit', $application) }}"
+                           class="w-full inline-flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg transition-colors text-sm">
+                            <i class="fas fa-sliders-h mr-2"></i>Edit & Manage Documents
+                        </a>
+
+                        <!-- Pending Status -->
+                        @if ($application->status !== 'pending')
+                        <form method="POST" action="{{ route('admin.applications.update-status', $application) }}">
+                            @csrf
+                            @method('PATCH')
+                            <input type="hidden" name="status" value="pending">
+                            <button type="submit"
+                                class="w-full bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg transition-colors text-sm">
+                                <i class="fas fa-clock mr-2"></i>Mark as Pending
+                            </button>
+                        </form>
+                        @endif
+
+                        <!-- Under Reviewing Status -->
+                        @if ($application->status !== 'under_reviewing')
+                        <form method="POST" action="{{ route('admin.applications.update-status', $application) }}">
+                            @csrf
+                            @method('PATCH')
+                            <input type="hidden" name="status" value="under_reviewing">
+                            <button type="submit"
+                                class="w-full bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors text-sm">
+                                <i class="fas fa-spinner mr-2"></i>Mark as Under Review
+                            </button>
+                        </form>
+                        @endif
+
+                        <!-- Reviewed Status -->
+                        @if ($application->status !== 'reviewed')
+                        <form method="POST" action="{{ route('admin.applications.update-status', $application) }}">
+                            @csrf
+                            @method('PATCH')
+                            <input type="hidden" name="status" value="reviewed">
+                            <button type="submit"
+                                class="w-full bg-sky-500 hover:bg-sky-600 text-white px-4 py-2 rounded-lg transition-colors text-sm">
+                                <i class="fas fa-eye mr-2"></i>Mark as Reviewed
+                            </button>
+                        </form>
+                        @endif
+
+                        <!-- Shortlisted Status -->
+                        @if ($application->status !== 'shortlisted')
                         <form method="POST" action="{{ route('admin.applications.update-status', $application) }}">
                             @csrf
                             @method('PATCH')
@@ -395,7 +515,50 @@
                                 <i class="fas fa-star mr-2"></i>Shortlist Candidate
                             </button>
                         </form>
+                        @endif
 
+                        <!-- Documents Requested Status -->
+                        @if ($application->status !== 'documents_requested')
+                        @php
+                            $canRequestDocuments = $application->status === 'shortlisted' && $documentRequests->count() > 0;
+                        @endphp
+                        <form method="POST" action="{{ route('admin.applications.update-status', $application) }}">
+                            @csrf
+                            @method('PATCH')
+                            <input type="hidden" name="status" value="documents_requested">
+                            <button type="submit" {{ $canRequestDocuments ? '' : 'disabled' }}
+                                class="w-full bg-amber-500 text-white px-4 py-2 rounded-lg transition-colors text-sm {{ $canRequestDocuments ? 'hover:bg-amber-600' : 'opacity-60 cursor-not-allowed' }}">
+                                <i class="fas fa-file-signature mr-2"></i>Request Documents
+                            </button>
+                        </form>
+                        @if (! $canRequestDocuments && $application->status !== 'documents_requested')
+                            <p class="text-xs text-amber-600">Shortlist first and add document requests to enable this.</p>
+                        @endif
+                        @endif
+
+                        <!-- Documents Submitted Status -->
+                        @if ($application->status !== 'documents_submitted')
+                        @php
+                            $canMarkDocumentsSubmitted = $documentRequests->count() > 0;
+                        @endphp
+                        <form method="POST" action="{{ route('admin.applications.update-status', $application) }}">
+                            @csrf
+                            @method('PATCH')
+                            <input type="hidden" name="status" value="documents_submitted">
+                            <button type="submit" {{ $canMarkDocumentsSubmitted ? '' : 'disabled' }}
+                                class="w-full bg-teal-600 text-white px-4 py-2 rounded-lg transition-colors text-sm {{ $canMarkDocumentsSubmitted ? 'hover:bg-teal-700' : 'opacity-60 cursor-not-allowed' }}">
+                                <i class="fas fa-file-upload mr-2"></i>Mark Docs Submitted
+                            </button>
+                        </form>
+                        @if (! $canMarkDocumentsSubmitted && $application->status !== 'documents_submitted')
+                            <p class="text-xs text-teal-600">Add document requests to enable this action.</p>
+                        @endif
+                        @endif
+
+                        <hr class="my-2">
+
+                        <!-- Hired Status -->
+                        @if ($application->status !== 'hired')
                         <form method="POST" action="{{ route('admin.applications.update-status', $application) }}"
                               data-confirm="Are you sure you want to hire this candidate?"
                               data-confirm-variant="success"
@@ -408,7 +571,10 @@
                                 <i class="fas fa-check mr-2"></i>Hire Candidate
                             </button>
                         </form>
+                        @endif
 
+                        <!-- Rejected Status -->
+                        @if ($application->status !== 'rejected')
                         <form method="POST" action="{{ route('admin.applications.update-status', $application) }}"
                               data-confirm="Are you sure you want to reject this application?"
                               data-confirm-variant="warning"
@@ -421,7 +587,11 @@
                                 <i class="fas fa-times mr-2"></i>Reject Application
                             </button>
                         </form>
+                        @endif
 
+                        <hr class="my-2">
+
+                        <!-- Delete Application -->
                         <form method="POST" action="{{ route('admin.applications.destroy', $application) }}"
                               data-confirm="Are you sure you want to delete this application? This action cannot be undone."
                               data-confirm-variant="danger"

@@ -16,20 +16,45 @@ class JobController extends Controller
    */
   public function index(Request $request)
   {
-    $query = Job::with(['category', 'subCategory', 'postedBy', 'applications']);
+        $query = Job::with(['category', 'subCategory', 'postedBy', 'applications', 'questions', 'documents']);
 
-    // Search functionality
-    if ($request->filled('search')) {
+        // Enhanced search functionality - searches across job fields, categories, and related data
+        if ($request->filled('search')) {
       $search = $request->search;
       $query->where(function ($q) use ($search) {
-        $q->where('title', 'like', "%{$search}%")
+                // Search in job basic fields
+                $q->where('title', 'like', "%{$search}%")
           ->orWhere('title_ar', 'like', "%{$search}%")
           ->orWhere('company', 'like', "%{$search}%")
           ->orWhere('company_ar', 'like', "%{$search}%")
           ->orWhere('location', 'like', "%{$search}%")
           ->orWhere('location_ar', 'like', "%{$search}%")
           ->orWhere('description', 'like', "%{$search}%")
-          ->orWhere('description_ar', 'like', "%{$search}%");
+                    ->orWhere('description_ar', 'like', "%{$search}%")
+                    ->orWhere('salary', 'like', "%{$search}%")
+                    ->orWhere('level', 'like', "%{$search}%")
+                    // Search in category names
+                    ->orWhereHas('category', function ($catQuery) use ($search) {
+                        $catQuery->where('name', 'like', "%{$search}%")
+                            ->orWhere('name_ar', 'like', "%{$search}%")
+                            ->orWhere('admin_label', 'like', "%{$search}%");
+                    })
+                    // Search in subcategory names
+                    ->orWhereHas('subCategory', function ($subCatQuery) use ($search) {
+                        $subCatQuery->where('name', 'like', "%{$search}%")
+                            ->orWhere('name_ar', 'like', "%{$search}%")
+                            ->orWhere('admin_label', 'like', "%{$search}%");
+                    })
+                    // Search in job questions
+                    ->orWhereHas('questions', function ($questionQuery) use ($search) {
+                        $questionQuery->where('question', 'like', "%{$search}%")
+                            ->orWhere('question_ar', 'like', "%{$search}%");
+                    })
+                    // Search in required documents
+                    ->orWhereHas('documents', function ($docQuery) use ($search) {
+                        $docQuery->where('name', 'like', "%{$search}%")
+                            ->orWhere('name_ar', 'like', "%{$search}%");
+                    });
       });
     }
 
@@ -55,8 +80,44 @@ class JobController extends Controller
       $query->where('level', $request->level);
     }
 
-    // Filter by date range
-    if ($request->filled('date_from')) {
+        // Filter by jobs with applications
+        if ($request->filled('has_applications')) {
+            if ($request->has_applications === 'yes') {
+                $query->has('applications');
+            } elseif ($request->has_applications === 'no') {
+                $query->doesntHave('applications');
+            }
+        }
+
+        // Filter by jobs with questions
+        if ($request->filled('has_questions')) {
+            if ($request->has_questions === 'yes') {
+                $query->has('questions');
+            } elseif ($request->has_questions === 'no') {
+                $query->doesntHave('questions');
+            }
+        }
+
+        // Filter by jobs with required documents
+        if ($request->filled('has_documents')) {
+            if ($request->has_documents === 'yes') {
+                $query->has('documents');
+            } elseif ($request->has_documents === 'no') {
+                $query->doesntHave('documents');
+            }
+        }
+
+        // Filter by expired/active deadline
+        if ($request->filled('deadline_status')) {
+            if ($request->deadline_status === 'expired') {
+                $query->where('deadline', '<', now()->toDateString());
+            } elseif ($request->deadline_status === 'active') {
+                $query->where('deadline', '>=', now()->toDateString());
+            }
+        }
+
+        // Filter by date range
+        if ($request->filled('date_from')) {
       $query->whereDate('created_at', '>=', $request->date_from);
     }
     if ($request->filled('date_to')) {
@@ -72,7 +133,7 @@ class JobController extends Controller
       $query->orderBy($sortBy, $sortDirection);
     }
 
-    $jobs = $query->paginate(15)->withQueryString();
+        $jobs = $query->withCount('applications')->paginate(15)->withQueryString();
     $categories = Category::all();
 
     return view('admin.jobs.index', compact('jobs', 'categories'));
