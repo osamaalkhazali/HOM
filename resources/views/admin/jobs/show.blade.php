@@ -66,9 +66,17 @@
                                     <i class="fas fa-layer-group mr-2 text-gray-400"></i>
                                     {{ ucfirst($job->level) }}
                                 </div>
-                                <div class="flex items-center text-sm text-gray-600">
-                                    <i class="fas fa-calendar mr-2 text-gray-400"></i>
-                                    {{ $job->deadline->format('M d, Y') }}
+                                <div class="flex flex-col space-y-1 text-sm">
+                                    <div class="flex items-center text-gray-600">
+                                        <i class="fas fa-calendar mr-2 text-gray-400"></i>
+                                        {{ $job->deadline->format('M d, Y') }}
+                                    </div>
+                                    @if ($job->deadline->isPast())
+                                        <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-semibold bg-red-100 text-red-700">
+                                            <i class="fas fa-exclamation-triangle mr-1"></i>
+                                            Deadline passed {{ $job->deadline->diffForHumans() }}
+                                        </span>
+                                    @endif
                                 </div>
                                 <div class="flex items-center text-sm text-gray-600">
                                     <i class="fas fa-clock mr-2 text-gray-400"></i>
@@ -104,53 +112,67 @@
                             {!! nl2br(e($job->description)) !!}
                         </div>
                     </div>
-                </div>\r\n                @if (->questions->isNotEmpty())
-                    <div class="bg-white rounded-lg shadow">
-                        <div class="px-6 py-4 border-b border-gray-200">
-                            <h3 class="text-lg font-medium text-gray-900">Application Questions</h3>
-                        </div>
-                        <div class="p-6 space-y-4">
-                            @foreach (->questions as )
-                                <div class="border border-gray-200 rounded-lg p-4">
-                                    <div class="flex items-center justify-between mb-2">
-                                        <span class="text-sm font-medium text-gray-900">{{ ->question }}</span>
-                                        @if (->question_ar)
-                                            <span class="text-sm text-gray-500" dir="rtl">{{ ->question_ar }}</span>
-                                        @endif
-                                    </div>
-                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ ->is_required ? 'bg-red-50 text-red-700' : 'bg-gray-100 text-gray-600' }}">
-                                        <i class="fas {{ ->is_required ? 'fa-exclamation-circle text-red-500' : 'fa-check text-gray-500' }} mr-1"></i>
-                                        {{ ->is_required ? 'Required' : 'Optional' }}
-                                    </span>
-                                </div>
-                            @endforeach
-                        </div>
-                    </div>
-                @endif
+                </div>
 
-                @if (->documents->isNotEmpty())
-                    <div class="bg-white rounded-lg shadow">
-                        <div class="px-6 py-4 border-b border-gray-200">
-                            <h3 class="text-lg font-medium text-gray-900">Required Documents</h3>
-                        </div>
-                        <div class="p-6 space-y-4">
-                            @foreach (->documents as )
-                                <div class="flex items-center justify-between border border-gray-200 rounded-lg p-4">
-                                    <div>
-                                        <p class="text-sm font-medium text-gray-900">{{ ->name }}</p>
-                                        @if (->name_ar)
-                                            <p class="text-sm text-gray-500" dir="rtl">{{ ->name_ar }}</p>
-                                        @endif
-                                    </div>
-                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ ->is_required ? 'bg-red-50 text-red-700' : 'bg-gray-100 text-gray-600' }}">
-                                        <i class="fas {{ ->is_required ? 'fa-paperclip text-red-500' : 'fa-file text-gray-500' }} mr-1"></i>
-                                        {{ ->is_required ? 'Required' : 'Optional' }}
-                                    </span>
-                                </div>
-                            @endforeach
-                        </div>
+                <div class="bg-white rounded-lg shadow">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-medium text-gray-900">Application Questions</h3>
                     </div>
-                @endif
+                    <div class="p-6 space-y-4">
+                        @forelse ($job->questions as $question)
+                            <div class="border border-gray-200 rounded-lg p-4">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-sm font-medium text-gray-900">{{ $question->question }}</span>
+                                    @if ($question->question_ar)
+                                        <span class="text-sm text-gray-500" dir="rtl">{{ $question->question_ar }}</span>
+                                    @endif
+                                </div>
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $question->is_required ? 'bg-red-50 text-red-700' : 'bg-gray-100 text-gray-600' }}">
+                                    <i class="fas {{ $question->is_required ? 'fa-exclamation-circle text-red-500' : 'fa-check text-gray-500' }} mr-1"></i>
+                                    {{ $question->is_required ? 'Required' : 'Optional' }}
+                                </span>
+                            </div>
+                        @empty
+                            <div class="flex items-center justify-between border border-dashed border-gray-300 rounded-lg p-4 bg-gray-50">
+                                <div class="flex items-center space-x-3">
+                                    <i class="fas fa-question-circle text-gray-400 text-lg"></i>
+                                    <p class="text-sm text-gray-600">No questions added yet.</p>
+                                </div>
+                                <a href="{{ route('admin.jobs.edit', $job) }}" class="text-sm text-blue-600 hover:text-blue-800">Add questions</a>
+                            </div>
+                        @endforelse
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-medium text-gray-900">Required Documents</h3>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        @forelse ($job->documents as $document)
+                            <div class="flex items-center justify-between border border-gray-200 rounded-lg p-4">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-900">{{ $document->name }}</p>
+                                    @if ($document->name_ar)
+                                        <p class="text-sm text-gray-500" dir="rtl">{{ $document->name_ar }}</p>
+                                    @endif
+                                </div>
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $document->is_required ? 'bg-red-50 text-red-700' : 'bg-gray-100 text-gray-600' }}">
+                                    <i class="fas {{ $document->is_required ? 'fa-paperclip text-red-500' : 'fa-file text-gray-500' }} mr-1"></i>
+                                    {{ $document->is_required ? 'Required' : 'Optional' }}
+                                </span>
+                            </div>
+                        @empty
+                            <div class="flex items-center justify-between border border-dashed border-gray-300 rounded-lg p-4 bg-gray-50">
+                                <div class="flex items-center space-x-3">
+                                    <i class="fas fa-folder-open text-gray-400 text-lg"></i>
+                                    <p class="text-sm text-gray-600">No required documents configured.</p>
+                                </div>
+                                <a href="{{ route('admin.jobs.edit', $job) }}" class="text-sm text-blue-600 hover:text-blue-800">Add documents</a>
+                            </div>
+                        @endforelse
+                    </div>
+                </div>
                 <!-- Applications -->
                 <div class="bg-white rounded-lg shadow">
                     <div class="px-6 py-4 border-b border-gray-200">
@@ -159,7 +181,7 @@
                             </h3>
                             <a href="{{ route('admin.applications.index', ['job' => $job->id]) }}"
                                 class="text-blue-600 hover:text-blue-800 text-sm">
-                                View All Applications →
+                                View All Applications
                             </a>
                         </div>
                     </div>
@@ -300,6 +322,20 @@
                         <h3 class="text-lg font-medium text-gray-900">Quick Actions</h3>
                     </div>
                     <div class="p-6 space-y-3">
+                        @php $jobExpired = $job->deadline->isPast(); @endphp
+                        <form method="POST" action="{{ route('admin.jobs.extend-deadline', $job) }}">
+                            @csrf
+                            @method('PATCH')
+                            <button type="submit"
+                                class="w-full flex items-center justify-center px-4 py-2 border rounded-md shadow-sm text-sm font-medium transition-colors
+                                {{ $jobExpired ? 'border-indigo-600 text-white bg-indigo-600 hover:bg-indigo-700' : 'border-indigo-300 text-indigo-700 bg-indigo-50 hover:bg-indigo-100' }}">
+                                <i class="fas fa-calendar-plus mr-2"></i>
+                                Extend deadline by 14 days
+                            </button>
+                        </form>
+                        @if ($jobExpired)
+                            <p class="text-xs text-red-600">Deadline expired {{ $job->deadline->diffForHumans() }}.</p>
+                        @endif
                         <a href="{{ route('admin.jobs.edit', $job) }}"
                             class="w-full flex items-center justify-center px-4 py-2 border border-blue-300 rounded-md shadow-sm text-sm font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 transition-colors">
                             <i class="fas fa-edit mr-2"></i>Edit Job
@@ -340,4 +376,3 @@
         </div>
     </div>
 @endsection
-

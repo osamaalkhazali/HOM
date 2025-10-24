@@ -20,6 +20,23 @@
 
     <section class="py-3 dashboard">
         <div class="container">
+            <!-- Success Message -->
+            @if (session('status') === 'profile-updated')
+                <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <strong>{{ __('site.flash.success') }}</strong> {{ __('site.flash.profile_updated') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
+
+            @if (session('status') === 'password-updated')
+                <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <strong>{{ __('site.flash.success') }}</strong> {{ __('site.flash.password_updated') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
+
             <div class="row g-4">
                 <!-- Main content -->
                 <div class="col-lg-8">
@@ -81,6 +98,50 @@
                                         <div class="value">{{ now()->format('M d') }}</div>
                                     </div>
                                 </div>
+
+                                @if(isset($profileCompletion))
+                                    @php
+                                        $missingLabels = collect($profileCompletion['missing'] ?? [])->pluck('label')->all();
+                                        $previewLimit = 4;
+                                        $preview = array_slice($missingLabels, 0, $previewLimit);
+                                        $remaining = max(count($missingLabels) - count($preview), 0);
+                                        $separator = app()->getLocale() === 'ar' ? '، ' : ', ';
+                                        $captionText = count($missingLabels) === 0
+                                            ? __('site.profile_completion.complete_all')
+                                            : __('site.profile_completion.complete_prompt', ['fields' => implode($separator, $preview)])
+                                                . ($remaining > 0 ? __('site.profile_completion.complete_more', ['count' => $remaining]) : '');
+                                        $fieldsForJs = [];
+                                        foreach ($profileCompletion['fields'] as $key => $field) {
+                                            $fieldsForJs[$key] = [
+                                                'label' => $field['label'],
+                                                'filled' => $field['filled'],
+                                            ];
+                                        }
+                                    @endphp
+                                    <div id="profile-completion-widget" class="mt-3 text-start"
+                                        data-fields='@json($fieldsForJs)'
+                                        data-order='@json(array_keys($fieldsForJs))'
+                                        data-preview-limit="{{ $previewLimit }}"
+                                        data-separator="{{ $separator }}"
+                                        data-initial-cv="{{ ($fieldsForJs['cv_path']['filled'] ?? false) ? 1 : 0 }}">
+                                        <div class="d-flex justify-content-between align-items-center small text-muted mb-1">
+                                            <span><i class="fas fa-chart-line me-1"></i>{{ __('site.profile_completion.title') }}</span>
+                                            <span class="fw-semibold text-dark" id="profile-completion-percentage">{{ $profileCompletion['percentage'] }}%</span>
+                                        </div>
+                                        <div class="progress" style="height: 6px;">
+                                            <div class="progress-bar bg-primary" id="profile-completion-progress" role="progressbar"
+                                                style="width: {{ $profileCompletion['percentage'] }}%;"
+                                                aria-valuenow="{{ $profileCompletion['percentage'] }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                        <div class="small mt-2 {{ count($missingLabels) === 0 ? 'text-success' : 'text-muted' }}"
+                                            id="profile-completion-caption"
+                                            data-template="{{ __('site.profile_completion.complete_prompt') }}"
+                                            data-more="{{ __('site.profile_completion.complete_more') }}"
+                                            data-complete="{{ __('site.profile_completion.complete_all') }}">
+                                            {{ $captionText }}
+                                        </div>
+                                    </div>
+                                @endif
 
                                 <div class="d-flex justify-content-center gap-2 mt-3">
                                     <a href="{{ route('applications.index') }}" class="btn btn-sm btn-outline-primary" style="border-radius: 10px;">

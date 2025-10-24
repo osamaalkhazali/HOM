@@ -78,6 +78,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/jobs/{job}/edit', [AdminJobController::class, 'edit'])->name('jobs.edit');
         Route::patch('/jobs/{job}', [AdminJobController::class, 'update'])->name('jobs.update');
         Route::patch('/jobs/{job}/toggle-status', [AdminJobController::class, 'toggleStatus'])->name('jobs.toggle-status');
+        Route::patch('/jobs/{job}/extend-deadline', [AdminJobController::class, 'extendDeadline'])->name('jobs.extend-deadline');
         Route::delete('/jobs/{job}', [AdminJobController::class, 'destroy'])->name('jobs.destroy');
         Route::patch('/jobs/{id}/restore', [AdminJobController::class, 'restore'])->name('jobs.restore');
         Route::delete('/jobs/{id}/force-delete', [AdminJobController::class, 'forceDelete'])->name('jobs.force-delete');
@@ -119,9 +120,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::patch('/admins/{admin}/toggle-status', [AdminController::class, 'toggleStatus'])->name('admins.toggle-status');
         Route::delete('/admins/{admin}', [AdminController::class, 'destroy'])->name('admins.destroy');
 
-        // Settings (HOM Profile PDF)
-        Route::get('/settings/hom-profile', [SettingController::class, 'editHomProfile'])->name('settings.hom-profile.edit');
-        Route::post('/settings/hom-profile', [SettingController::class, 'updateHomProfile'])->name('settings.hom-profile.update');
+        // Settings
+        Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
+        Route::post('/settings', [SettingController::class, 'update'])->name('settings.update');
 
         // Admin notifications
         Route::get('/notifications', [AdminNotificationController::class, 'index'])->name('notifications.index');

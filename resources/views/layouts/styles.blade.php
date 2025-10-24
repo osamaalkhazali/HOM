@@ -289,4 +289,13 @@
         border-color: var(--primary-color);
     }
     body.app .btn.text-primary { color: var(--primary-color) !important; }
+
+    /* Override Bootstrap primary color throughout the app */
+    body.app .text-primary { color: var(--primary-color) !important; }
+    body.app .bg-primary { background-color: var(--primary-color) !important; }
+    body.app .border-primary { border-color: var(--primary-color) !important; }
+    body.app .badge.bg-primary { background-color: var(--primary-color) !important; }
+    body.app .progress-bar.bg-primary { background-color: var(--primary-color) !important; }
+    body.app a.text-primary:hover,
+    body.app a.text-primary:focus { color: var(--primary-dark) !important; }
 </style>

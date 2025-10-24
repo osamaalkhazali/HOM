@@ -175,7 +175,7 @@
                 </a>
 
                 <!-- Settings -->
-                <a href="{{ route('admin.settings.hom-profile.edit') }}"
+                <a href="{{ route('admin.settings.index') }}"
                     class="group flex items-center px-2 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.settings.*') ? '' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
                     style="{{ request()->routeIs('admin.settings.*') ? 'background: rgba(13,110,253,0.06); color: var(--primary-color);' : '' }}">
                     <i class="fas fa-cog mr-3"></i>

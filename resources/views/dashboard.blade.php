@@ -5,13 +5,16 @@
                 <h1 class="title"><i class="fas fa-tachometer-alt me-2"></i>{{ __('site.dashboard_user.header.title') }}</h1>
                 <p class="subtitle mb-0">{{ __('site.dashboard_user.header.welcome', ['name' => Auth::user()->name]) }}</p>
             </div>
-            <div class="actions d-flex gap-2">
-                <a href="{{ route('jobs.index') }}" class="btn btn-outline-light btn-sm">
-                    <i class="fas fa-search me-1"></i>{{ __('site.dashboard_user.header.buttons.browse_jobs') }}
-                </a>
-                <a href="{{ route('profile.edit') }}" class="btn btn-light btn-sm text-primary">
-                    <i class="fas fa-user-edit me-1"></i>{{ __('site.dashboard_user.header.buttons.profile') }}
-                </a>
+
+            <div class="d-flex align-items-center gap-3">
+                <div class="d-flex gap-2">
+                    <a href="{{ route('jobs.index') }}" class="btn btn-outline-light btn-sm">
+                        <i class="fas fa-search me-1"></i>{{ __('site.dashboard_user.header.buttons.browse_jobs') }}
+                    </a>
+                    <a href="{{ route('profile.edit') }}" class="btn btn-light btn-sm text-primary">
+                        <i class="fas fa-user-edit me-1"></i>{{ __('site.dashboard_user.header.buttons.profile') }}
+                    </a>
+                </div>
             </div>
         </div>
     </x-slot>
@@ -41,28 +44,73 @@
             <!-- Profile Overview -->
             <div class="panel mb-4 shadow-soft">
                 <div class="panel-header d-flex justify-content-between align-items-center">
-                    <h5 class="panel-title mb-0"><i class="fas fa-user me-2"></i>{{ __('site.dashboard_user.profile.title') }}</h5>
+                    <h5 class="panel-title mb-0"><i class="fas fa-user-circle me-2"></i>{{ __('site.dashboard_user.profile.title') }}</h5>
                     <a href="{{ route('profile.edit') }}" class="btn btn-sm btn-primary">
-                        <i class="fas fa-user-edit me-1"></i>{{ __('site.dashboard_user.profile.edit_button') }}
+                        <i class="fas fa-edit me-1"></i>{{ __('site.dashboard_user.profile.edit_button') }}
                     </a>
                 </div>
                 <div class="panel-body">
-                    <div class="row g-4">
-                        <!-- Basic Info -->
-                        <div class="col-md-4">
-                            <div class="text-center">
-                                <div class="avatar-lg profile-avatar mb-3">
+                    <div class="row g-3">
+                        <!-- Left Column: Basic Info -->
+                        <div class="col-lg-4">
+                            <div class="text-center border rounded p-3">
+                                <!-- Profile Completion -->
+                                @if(isset($profileCompletion))
+                                    @php
+                                        $percentage = $profileCompletion['percentage'];
+                                        $isComplete = $percentage === 100;
+
+                                        // Dynamic color based on percentage
+                                        if ($percentage >= 80) {
+                                            $progressColor = '#10b981'; // Green
+                                            $textColor = 'text-success';
+                                        } elseif ($percentage >= 60) {
+                                            $progressColor = '#22c55e'; // Light green
+                                            $textColor = 'text-success';
+                                        } elseif ($percentage >= 40) {
+                                            $progressColor = '#eab308'; // Yellow
+                                            $textColor = 'text-warning';
+                                        } elseif ($percentage >= 20) {
+                                            $progressColor = '#f97316'; // Orange
+                                            $textColor = 'text-warning';
+                                        } else {
+                                            $progressColor = '#ef4444'; // Red
+                                            $textColor = 'text-danger';
+                                        }
+                                    @endphp
+                                    @if($isComplete)
+                                        <!-- 100% Complete Badge -->
+                                        <div class="badge bg-success text-white mb-3" style="font-size: 0.875rem; padding: 8px 16px;">
+                                            <i class="fas fa-check-circle me-1"></i>{{ __('site.profile_completion.profile') }} 100%
+                                        </div>
+                                    @else
+                                        <!-- Progress Bar -->
+                                        <div class="mb-3">
+                                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                                <small class="text-muted"><i class="fas fa-chart-line me-1"></i>{{ __('site.profile_completion.title') }}</small>
+                                                <small class="fw-bold {{ $textColor }}">{{ $percentage }}%</small>
+                                            </div>
+                                            <div class="progress" style="height: 6px; background: #e5e7eb;">
+                                                <div class="progress-bar" role="progressbar"
+                                                    style="width: {{ $percentage }}%; background-color: {{ $progressColor }}; transition: all 0.3s ease;"
+                                                    aria-valuenow="{{ $percentage }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                            </div>
+                                        </div>
+                                    @endif
+                                @endif
+
+                                <div class="avatar-lg profile-avatar mb-2 mx-auto">
                                     <i class="fas fa-user fa-lg text-white"></i>
                                 </div>
                                 <h5 class="fw-bold mb-1">{{ $user->name }}</h5>
-                                <div class="text-muted mb-2">{{ $user->email }}</div>
+                                <div class="text-muted small mb-2">{{ $user->email }}</div>
                                 @if (!empty($user->phone))
                                     <div class="text-muted small mb-2">
                                         <i class="fas fa-phone me-1"></i>{{ $user->phone }}
                                     </div>
                                 @endif
                                 @if ($profile && !empty($profile->headline))
-                                    <div class="badge bg-primary text-white">{{ $profile->headline }}</div>
+                                    <div class="badge bg-primary text-white mt-2">{{ $profile->headline }}</div>
                                 @endif
                                 @if($profile && !empty($profile->linkedin_url))
                                     <div class="mt-2">
@@ -74,72 +122,102 @@
                             </div>
                         </div>
 
-                        <!-- Professional Details -->
-                        <div class="col-md-8">
+                        <!-- Right Column: Professional Details -->
+                        <div class="col-lg-8">
                             <div class="row g-3">
-                                <div class="col-sm-6">
-                                    <div class="info-item">
-                                        <div class="info-label">
-                                            <i class="fas fa-map-marker-alt me-2 text-primary"></i>{{ __('site.dashboard_user.profile.location') }}
-                                        </div>
-                                        <div class="info-value">{{ $profile->location ?? __('site.dashboard_user.profile.not_specified') }}</div>
-                                    </div>
-                                </div>
-                                <div class="col-sm-6">
-                                    <div class="info-item">
-                                        <div class="info-label">
-                                            <i class="fas fa-briefcase me-2 text-primary"></i>{{ __('site.dashboard_user.profile.current_position') }}
-                                        </div>
-                                        <div class="info-value">{{ $profile->current_position ?? __('site.dashboard_user.profile.not_specified') }}</div>
-                                    </div>
-                                </div>
-                                <div class="col-sm-6">
-                                    <div class="info-item">
-                                        <div class="info-label">
-                                            <i class="fas fa-clock me-2 text-primary"></i>{{ __('site.dashboard_user.profile.experience') }}
-                                        </div>
-                                        <div class="info-value">{{ $profile->experience_years ?? __('site.dashboard_user.profile.not_specified') }}</div>
-                                    </div>
-                                </div>
-                                <div class="col-sm-6">
-                                    <div class="info-item">
-                                        <div class="info-label">
-                                            <i class="fas fa-file-pdf me-2 text-primary"></i>{{ __('site.dashboard_user.profile.resume') }}
-                                        </div>
-                                        <div class="info-value">
-                                            @if($profile && !empty($profile->cv_path))
-                                                <a href="{{ Storage::url($profile->cv_path) }}" target="_blank" class="text-success">
-                                                    <i class="fas fa-download me-1"></i>{{ __('site.dashboard_user.profile.resume_view') }}
-                                                </a>
-                                            @else
-                                                <span class="text-muted">{{ __('site.dashboard_user.profile.resume_missing') }}</span>
-                                            @endif
+                                <!-- Location -->
+                                <div class="col-md-6">
+                                    <div class="border rounded p-3">
+                                        <div class="d-flex align-items-start">
+                                            <div class="text-primary me-2">
+                                                <i class="fas fa-map-marker-alt"></i>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <div class="small text-muted">{{ __('site.dashboard_user.profile.location') }}</div>
+                                                <div class="fw-semibold">{{ $profile->location ?? __('site.dashboard_user.profile.not_specified') }}</div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
 
-                            <!-- Skills -->
-                            @if($profile && !empty($profile->skills))
-                                <div class="mt-3">
-                                    <div class="info-label mb-2">
-                                        <i class="fas fa-tools me-2 text-primary"></i>{{ __('site.dashboard_user.profile.skills') }}
-                                    </div>
-                                    <div class="d-flex flex-wrap gap-2">
-                                        @php
-                                            $skills = array_filter(array_map('trim', explode(',', $profile->skills)));
-                                        @endphp
-                                        @foreach($skills as $skill)
-                                            <span class="badge bg-light text-dark border">{{ $skill }}</span>
-                                        @endforeach
+                                <!-- Current Position -->
+                                <div class="col-md-6">
+                                    <div class="border rounded p-3">
+                                        <div class="d-flex align-items-start">
+                                            <div class="text-primary me-2">
+                                                <i class="fas fa-briefcase"></i>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <div class="small text-muted">{{ __('site.dashboard_user.profile.current_position') }}</div>
+                                                <div class="fw-semibold">{{ $profile->current_position ?? __('site.dashboard_user.profile.not_specified') }}</div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                            @endif
 
-                            <!-- Links -->
-                            <div class="row g-2 mt-2">
+                                <!-- Experience -->
+                                <div class="col-md-6">
+                                    <div class="border rounded p-3">
+                                        <div class="d-flex align-items-start">
+                                            <div class="text-primary me-2">
+                                                <i class="fas fa-clock"></i>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <div class="small text-muted">{{ __('site.dashboard_user.profile.experience') }}</div>
+                                                <div class="fw-semibold">{{ $profile->experience_years ?? __('site.dashboard_user.profile.not_specified') }}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Resume -->
+                                <div class="col-md-6">
+                                    <div class="border rounded p-3">
+                                        <div class="d-flex align-items-start">
+                                            <div class="text-primary me-2">
+                                                <i class="fas fa-file-pdf"></i>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <div class="small text-muted">{{ __('site.dashboard_user.profile.resume') }}</div>
+                                                <div class="fw-semibold">
+                                                    @if($profile && !empty($profile->cv_path))
+                                                        <a href="{{ Storage::url($profile->cv_path) }}" target="_blank" class="text-success text-decoration-none">
+                                                            <i class="fas fa-download me-1"></i>{{ __('site.dashboard_user.profile.resume_view') }}
+                                                        </a>
+                                                    @else
+                                                        <span class="text-muted">{{ __('site.dashboard_user.profile.resume_missing') }}</span>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Skills -->
+                                @if($profile && !empty($profile->skills))
+                                    <div class="col-12">
+                                        <div class="border rounded p-3">
+                                            <div class="d-flex align-items-start mb-2">
+                                                <div class="text-primary me-2">
+                                                    <i class="fas fa-tools"></i>
+                                                </div>
+                                                <div class="small text-muted">{{ __('site.dashboard_user.profile.skills') }}</div>
+                                            </div>
+                                            <div class="d-flex flex-wrap gap-2">
+                                                @php
+                                                    $skills = array_filter(array_map('trim', explode(',', $profile->skills)));
+                                                @endphp
+                                                @foreach($skills as $skill)
+                                                    <span class="badge bg-light text-primary border border-primary">{{ $skill }}</span>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
+
+                                <!-- Website -->
                                 @if($profile && !empty($profile->website))
-                                    <div class="col-auto">
+                                    <div class="col-12">
                                         <a href="{{ $profile->website }}" target="_blank" class="btn btn-sm btn-outline-primary">
                                             <i class="fas fa-globe me-1"></i>{{ __('site.dashboard_user.profile.website') }}
                                         </a>

@@ -8,6 +8,19 @@
         </p>
     </header>
 
+    @if ($errors->updatePassword->any())
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <strong>{{ __('Please correct the following errors:') }}</strong>
+            <ul class="mb-0 mt-2">
+                @foreach ($errors->updatePassword->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
     <form method="post" action="{{ route('password.update') }}">
         @csrf
         @method('put')
@@ -15,7 +28,7 @@
         <div class="mb-3">
             <label for="update_password_current_password"
                 class="form-label fw-medium">{{ __('site.profile_form.password.current') }}</label>
-            <input type="password" class="form-control form-control-lg" id="update_password_current_password"
+            <input type="password" class="form-control form-control-lg @error('current_password', 'updatePassword') is-invalid @enderror" id="update_password_current_password"
                 name="current_password" autocomplete="current-password"
                 style="border-radius: 15px; border: 2px solid #e9ecef;">
             @if ($errors->updatePassword->get('current_password'))
@@ -29,7 +42,7 @@
 
         <div class="mb-3">
             <label for="update_password_password" class="form-label fw-medium">{{ __('site.profile_form.password.new') }}</label>
-            <input type="password" class="form-control form-control-lg" id="update_password_password" name="password"
+            <input type="password" class="form-control form-control-lg @error('password', 'updatePassword') is-invalid @enderror" id="update_password_password" name="password"
                 autocomplete="new-password" style="border-radius: 15px; border: 2px solid #e9ecef;">
             @if ($errors->updatePassword->get('password'))
                 <div class="text-danger small mt-1">
@@ -43,7 +56,7 @@
         <div class="mb-4">
             <label for="update_password_password_confirmation"
                 class="form-label fw-medium">{{ __('site.profile_form.password.confirm') }}</label>
-            <input type="password" class="form-control form-control-lg" id="update_password_password_confirmation"
+            <input type="password" class="form-control form-control-lg @error('password_confirmation', 'updatePassword') is-invalid @enderror" id="update_password_password_confirmation"
                 name="password_confirmation" autocomplete="new-password"
                 style="border-radius: 15px; border: 2px solid #e9ecef;">
             @if ($errors->updatePassword->get('password_confirmation'))
@@ -60,14 +73,17 @@
                 style="background: var(--gradient-3); border: none; border-radius: 25px;">
                 <i class="fas fa-shield-alt me-2"></i>{{ __('site.profile_form.password.button') }}
             </button>
-
-            @if (session('status') === 'password-updated')
-                <div class="alert alert-success d-inline-block mb-0 py-2 px-3"
-                    style="border-radius: 15px; font-size: 0.875rem;" x-data="{ show: true }" x-show="show"
-                    x-init="setTimeout(() => show = false, 3000)">
-                    <i class="fas fa-check-circle me-1"></i>{{ __('site.profile_form.password.updated') }}
-                </div>
-            @endif
         </div>
     </form>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Auto-focus first password input with error
+            var firstErrorInput = document.querySelector('#update_password_current_password.is-invalid, #update_password_password.is-invalid, #update_password_password_confirmation.is-invalid');
+            if (firstErrorInput) {
+                firstErrorInput.focus();
+                firstErrorInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        });
+    </script>
 </section>

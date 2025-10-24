@@ -453,6 +453,27 @@ return [
         'button' => 'Download PDF',
     ],
 
+    'footer' => [
+        'company_name' => 'House of Management',
+        'company_tagline' => 'for Studies and Consultations',
+        'office_address_title' => 'Office Address',
+        'mail_address_title' => 'Mail Address',
+        'electronic_address_title' => 'Electronic Address',
+        'useful_links_title' => 'Useful Links',
+        'email' => 'Email',
+        'call' => 'Call',
+        'tel' => 'Tel.',
+        'fax' => 'Fax.',
+        'email_label' => 'E-mail:',
+        'website_label' => 'Website:',
+        'services' => 'Services',
+        'our_focus' => 'Our Focus & Approach',
+        'clients' => 'Clients',
+        'partners' => 'Partners',
+        'back_to_top' => 'Back to Top',
+        'all_rights_reserved' => 'All rights reserved.',
+    ],
+
     'dashboard_user' => [
         'header' => [
             'title' => 'Dashboard',
@@ -624,6 +645,98 @@ return [
         ],
     ],
 
+    'profile_completion' => [
+        'title' => 'Profile Completion',
+        'profile' => 'Profile',
+        'complete_all' => 'All profile requirements are complete!',
+        'complete_prompt' => 'Complete: :fields',
+        'complete_more' => ' and :count more',
+        'fields' => [
+            'name' => 'Name',
+            'headline' => 'Professional headline',
+            'location' => 'Location',
+            'current_position' => 'Current position',
+            'experience_years' => 'Experience level',
+            'skills' => 'Skills',
+            'about' => 'About section',
+            'education' => 'Education',
+            'linkedin_url' => 'LinkedIn profile',
+            'cv_path' => 'Resume/CV',
+        ],
+    ],
+
+    'applications_index' => [
+        'header' => [
+            'title' => 'My Applications',
+            'subtitle' => 'Track and manage all your job applications in one place.',
+            'dashboard' => 'Dashboard',
+            'browse_jobs' => 'Browse Jobs',
+        ],
+        'stats' => [
+            'total' => 'Total Applications',
+            'pending' => 'Pending Review',
+            'accepted' => 'Accepted',
+            'monthly' => 'This Month',
+        ],
+        'filters' => [
+            'title' => 'Filter Applications',
+            'search_label' => 'Search Applications',
+            'search_placeholder' => 'Job title, company...',
+            'status_label' => 'Status',
+            'status' => [
+                'all' => 'All Statuses',
+            ],
+            'sort_label' => 'Sort By',
+            'sort' => [
+                'newest' => 'Newest First',
+                'oldest' => 'Oldest First',
+                'job_title' => 'Job Title',
+                'company' => 'Company',
+            ],
+            'submit' => 'Filter',
+        ],
+        'status' => [
+            'labels' => [
+                'pending' => 'Pending',
+                'reviewed' => 'Reviewed',
+                'accepted' => 'Accepted',
+                'rejected' => 'Rejected',
+            ],
+        ],
+        'list' => [
+            'deleted_job' => 'Deleted Job',
+            'job_deleted_note' => 'This job is no longer available.',
+            'view_job' => 'View Job',
+            'job_unavailable' => 'Job Unavailable',
+            'download_cv' => 'CV',
+            'reference' => 'Application #:id',
+            'applied_on' => 'Applied: :date',
+            'date_format' => 'M d, Y',
+            'toggle' => 'Details',
+        ],
+        'details' => [
+            'cover_letter' => [
+                'title' => 'Cover Letter',
+            ],
+            'questions' => [
+                'title' => 'Application Questions',
+                'empty' => 'No additional questions were answered.',
+            ],
+            'documents' => [
+                'title' => 'Supporting Documents',
+                'empty' => 'No supporting documents were uploaded.',
+                'download' => 'Download',
+            ],
+        ],
+        'empty' => [
+            'title' => 'No Applications Found',
+            'filtered' => 'No applications match your current filters. Try adjusting your search criteria.',
+            'default' => 'You haven\'t submitted any job applications yet. Start exploring opportunities!',
+            'reset' => 'Clear Filters',
+            'browse' => 'Browse Jobs',
+        ],
+    ],
+
     'profile_form' => [
         'profile_information' => [
             'title' => 'Profile Information',
@@ -655,7 +768,7 @@ return [
                     ],
                 ],
                 'website' => [
-                    'label' => 'Website/Portfolio',
+                    'label' => 'Website/Portfolio (Optional)',
                     'placeholder' => 'https://your-website.com',
                 ],
                 'linkedin' => [
@@ -716,6 +829,59 @@ return [
             'password_placeholder' => 'Enter your password to confirm',
             'cancel' => 'Cancel',
         ],
+    ],
+
+    'flash' => [
+        'success' => 'Success!',
+        'error' => 'Error!',
+        'warning' => 'Warning!',
+        'info' => 'Information',
+        'profile_updated' => 'Your profile has been updated successfully.',
+        'password_updated' => 'Your password has been updated successfully.',
+        'verification_link_sent' => 'A new verification link has been sent to your email address.',
+        'application_submitted' => 'Your application has been submitted successfully!',
+        'application_error' => 'There was an error submitting your application. Please try again.',
+        'login_success' => 'You have been logged in successfully.',
+        'logout_success' => 'You have been logged out successfully.',
+        'settings_saved' => 'Settings have been saved successfully.',
+        'email_verified' => 'Your email has been verified successfully.',
+        'unauthorized' => 'You are not authorized to perform this action.',
+        'not_found' => 'The requested resource was not found.',
+        'validation_error' => 'Please fix the errors in the form and try again.',
+        'saved_successfully' => 'Saved successfully!',
+        'deleted_successfully' => 'Deleted successfully!',
+        'updated_successfully' => 'Updated successfully!',
+        'restored_successfully' => 'Restored successfully!',
+
+        // Job-related messages
+        'job_created' => 'Job created successfully.',
+        'job_updated' => 'Job updated successfully.',
+        'job_deleted' => 'Job deleted successfully.',
+        'job_restored' => 'Job restored successfully.',
+        'job_permanently_deleted' => 'Job permanently deleted.',
+        'job_deadline_extended' => 'Job deadline extended by 14 days.',
+        'all_jobs_restored' => 'All jobs restored successfully.',
+        'all_jobs_deleted' => 'All jobs permanently deleted.',
+        'job_deadline_passed' => 'This job application deadline has passed. You can no longer apply for this position.',
+        'job_no_longer_accepting' => 'This job is no longer accepting applications.',
+        'already_applied' => 'You have already applied for this job.',
+
+        // Category-related messages
+        'category_created' => 'Category created successfully.',
+        'category_updated' => 'Category and subcategories updated successfully.',
+        'category_deleted' => 'Category deleted successfully.',
+        'category_cannot_delete' => 'Cannot delete category with existing jobs. Please move or delete the jobs first.',
+
+        // Admin-related messages
+        'admin_created' => 'Admin created successfully.',
+        'admin_updated' => 'Admin updated successfully.',
+        'admin_deleted' => 'Admin deleted successfully.',
+        'cannot_delete_self' => 'You cannot delete your own account.',
+        'admin_status_updated' => 'Admin :status successfully.',
+
+        // Notification messages
+        'notifications_marked_read' => 'All notifications marked as read.',
+        'notification_not_found' => 'Notification not found.',
     ],
 
     'confirm' => [

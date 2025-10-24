@@ -23,6 +23,17 @@
                 @php
                     $questionFormData = old('questions', []);
                     $documentFormData = old('documents', []);
+                    $defaultDeadlineDate = $defaultDeadline->format('Y-m-d');
+                    $defaultDeadlineDisplay = $defaultDeadline->format('F d, Y');
+                    $useCustomDeadlineValue = old('use_custom_deadline');
+                    $deadlineOldValue = old('deadline');
+
+                    if ($useCustomDeadlineValue === null) {
+                        $useCustomDeadlineValue = $deadlineOldValue && $deadlineOldValue !== $defaultDeadlineDate ? '1' : '0';
+                    }
+
+                    $useCustomDeadline = $useCustomDeadlineValue === '1';
+                    $deadlineInputValue = $deadlineOldValue ?: $defaultDeadlineDate;
                 @endphp
 
                 <!-- Basic Information -->
@@ -161,13 +172,42 @@
                         <!-- Application Deadline -->
                         <div class="md:col-span-2">
                             <label for="deadline" class="block text-sm font-medium text-gray-700 mb-1">Application
-                                Deadline
-                                *</label>
-                            <input type="date" id="deadline" name="deadline" value="{{ old('deadline') }}" required
-                                min="{{ date('Y-m-d', strtotime('+1 day')) }}"
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 @error('deadline') border-red-500 @enderror">
+                                Deadline *</label>
+                            <input type="hidden" name="use_custom_deadline" id="use_custom_deadline"
+                                value="{{ $useCustomDeadline ? '1' : '0' }}">
+
+                            <div id="default-deadline-panel"
+                                class="{{ $useCustomDeadline ? 'hidden' : '' }} bg-blue-50 border border-blue-200 rounded-lg p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                                <div class="text-sm text-blue-900">
+                                    <p>
+                                        This job will close on
+                                        <span class="font-semibold">{{ $defaultDeadlineDisplay }}</span>
+                                        ({{ $defaultDeadlineDays }} days from today).
+                                    </p>
+                                </div>
+                                <button type="button" id="show-custom-deadline"
+                                    class="mt-3 sm:mt-0 inline-flex items-center text-sm font-medium text-blue-700 hover:text-blue-900">
+                                    <i class="fas fa-calendar-alt mr-2"></i>Use custom deadline
+                                </button>
+                            </div>
+
+                            <div id="custom-deadline-panel"
+                                class="{{ $useCustomDeadline ? '' : 'hidden' }} mt-3 bg-gray-50 border border-gray-200 rounded-lg p-4">
+                                <div class="flex flex-col sm:flex-row sm:items-center sm:space-x-3 space-y-3 sm:space-y-0">
+                                    <input type="date" id="deadline" name="deadline" value="{{ $deadlineInputValue }}"
+                                        required min="{{ date('Y-m-d', strtotime('+1 day')) }}"
+                                        class="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 @error('deadline') border-red-500 @enderror">
+                                    <button type="button" id="use-default-deadline"
+                                        class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800">
+                                        <i class="fas fa-undo mr-2"></i>Use 14-day default
+                                    </button>
+                                </div>
+                                <p class="mt-2 text-xs text-gray-500">Select a custom deadline if you need a different
+                                    date.</p>
+                            </div>
+
                             @error('deadline')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
                     </div>
@@ -384,10 +424,53 @@
 
     <script>
         const categoriesData = @json($categories);
+        const defaultDeadlineDate = '{{ $defaultDeadlineDate }}';
+        const useCustomDeadlineInput = document.getElementById('use_custom_deadline');
+        const defaultDeadlinePanel = document.getElementById('default-deadline-panel');
+        const customDeadlinePanel = document.getElementById('custom-deadline-panel');
+        const showCustomDeadlineButton = document.getElementById('show-custom-deadline');
+        const useDefaultDeadlineButton = document.getElementById('use-default-deadline');
+        const deadlineInput = document.getElementById('deadline');
         const questionRowsContainer = document.getElementById('question-rows');
         const documentRowsContainer = document.getElementById('document-rows');
         let questionIndex = questionRowsContainer ? questionRowsContainer.querySelectorAll('.question-row').length : 0;
         let documentIndex = documentRowsContainer ? documentRowsContainer.querySelectorAll('.document-row').length : 0;
+
+        function activateDefaultDeadline({ resetValue = true } = {}) {
+            if (useCustomDeadlineInput) {
+                useCustomDeadlineInput.value = '0';
+            }
+
+            if (resetValue && deadlineInput) {
+                deadlineInput.value = defaultDeadlineDate;
+            }
+
+            if (customDeadlinePanel) {
+                customDeadlinePanel.classList.add('hidden');
+            }
+
+            if (defaultDeadlinePanel) {
+                defaultDeadlinePanel.classList.remove('hidden');
+            }
+        }
+
+        function activateCustomDeadline({ focus = true } = {}) {
+            if (useCustomDeadlineInput) {
+                useCustomDeadlineInput.value = '1';
+            }
+
+            if (defaultDeadlinePanel) {
+                defaultDeadlinePanel.classList.add('hidden');
+            }
+
+            if (customDeadlinePanel) {
+                customDeadlinePanel.classList.remove('hidden');
+            }
+
+            if (focus && deadlineInput) {
+                deadlineInput.focus();
+            }
+        }
 
         function createEl(tag, attrs = {}, children = []) {
             const el = document.createElement(tag);
@@ -604,13 +687,30 @@
         }
 
         function setDeadlineMin() {
-            const deadlineInput = document.getElementById('deadline');
             if (deadlineInput) {
                 deadlineInput.min = new Date(Date.now() + 86400000).toISOString().split('T')[0];
             }
         }
 
         document.addEventListener('DOMContentLoaded', function () {
+            if (useCustomDeadlineInput && useCustomDeadlineInput.value === '1') {
+                activateCustomDeadline({ focus: false });
+            } else {
+                activateDefaultDeadline({ resetValue: !deadlineInput || deadlineInput.value === '' });
+            }
+
+            if (deadlineInput && !deadlineInput.value) {
+                deadlineInput.value = defaultDeadlineDate;
+            }
+
+            if (showCustomDeadlineButton) {
+                showCustomDeadlineButton.addEventListener('click', () => activateCustomDeadline());
+            }
+
+            if (useDefaultDeadlineButton) {
+                useDefaultDeadlineButton.addEventListener('click', () => activateDefaultDeadline({ resetValue: true }));
+            }
+
             setDeadlineMin();
             updateSubcategories();
 

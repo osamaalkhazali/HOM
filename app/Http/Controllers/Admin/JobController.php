@@ -84,7 +84,10 @@ class JobController extends Controller
   public function create()
   {
     $categories = Category::with('subCategories')->get();
-    return view('admin.jobs.create', compact('categories'));
+        $defaultDeadline = now()->addDays(14);
+        $defaultDeadlineDays = 14;
+
+        return view('admin.jobs.create', compact('categories', 'defaultDeadline', 'defaultDeadlineDays'));
   }
 
   /**
@@ -92,8 +95,16 @@ class JobController extends Controller
    */
   public function store(Request $request)
   {
-    // Validate basic fields first
-    $validated = $request->validate([
+        $useCustomDeadline = $request->boolean('use_custom_deadline');
+
+        if (!$useCustomDeadline) {
+            $request->merge([
+                'deadline' => now()->addDays(14)->toDateString(),
+            ]);
+        }
+
+        // Validate basic fields first
+        $validated = $request->validate([
       'title' => 'required|string|max:255',
       'title_ar' => 'nullable|string|max:255',
       'description' => 'required|string',
@@ -122,6 +133,7 @@ class JobController extends Controller
     unset($validated['questions'], $validated['documents']);
 
     $validated['posted_by'] = auth('admin')->id();
+        $validated['is_active'] = $validated['status'] === 'active';
 
     DB::transaction(function () use ($validated, $questionsInput, $documentsInput) {
       $job = Job::create($validated);
@@ -185,7 +197,9 @@ class JobController extends Controller
     $documentsInput = $validated['documents'] ?? [];
     unset($validated['questions'], $validated['documents']);
 
-    DB::transaction(function () use ($job, $validated, $questionsInput, $documentsInput) {
+        $validated['is_active'] = $validated['status'] === 'active';
+
+        DB::transaction(function () use ($job, $validated, $questionsInput, $documentsInput) {
       $job->update($validated);
       $this->syncJobQuestions($job, $questionsInput);
       $this->syncJobDocuments($job, $documentsInput);
@@ -203,9 +217,22 @@ class JobController extends Controller
     return redirect()->route('admin.jobs.index')->with('success', 'Job deleted successfully');
   }
 
-  /**
-   * Display a listing of deleted jobs
-   */
+    /**
+     * Extend the job application deadline by 14 days.
+     */
+    public function extendDeadline(Job $job)
+    {
+        $job->deadline = $job->deadline
+            ? $job->deadline->copy()->addDays(14)
+            : now()->addDays(14);
+        $job->save();
+
+        return back()->with('success', 'Job deadline extended by 14 days.');
+    }
+
+    /**
+     * Display a listing of deleted jobs
+     */
   public function deleted(Request $request)
   {
     $query = Job::onlyTrashed()->with(['category', 'subCategory', 'postedBy', 'applications']);

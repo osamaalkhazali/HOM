@@ -38,6 +38,8 @@ class DashboardController extends Controller
     // Get user profile for dashboard display
     $profile = $user->profile;
 
-    return view('dashboard', compact('user', 'recentApplications', 'stats', 'hasCv', 'profile'));
+    $profileCompletion = $user->profileCompletionStatus();
+
+    return view('dashboard', compact('user', 'recentApplications', 'stats', 'hasCv', 'profile', 'profileCompletion'));
   }
 }

@@ -92,7 +92,13 @@ class JobController extends Controller
             abort(404);
         }
 
-        $job->load(['subCategory.category', 'postedBy', 'applications']);
+        $job->load([
+            'subCategory.category',
+            'postedBy',
+            'applications',
+            'questions',
+            'documents',
+        ]);
 
         // Get related jobs from the same subcategory
         $relatedJobs = Job::with(['subCategory.category'])
@@ -271,9 +277,14 @@ class JobController extends Controller
     public function myApplications(Request $request)
     {
         $userId = Auth::id();
-        $query = Application::with(['job' => function ($q) {
-            $q->withTrashed(); // Include soft-deleted jobs
-        }, 'job.subCategory.category'])
+        $query = Application::with([
+            'job' => function ($q) {
+                $q->withTrashed()
+                    ->with(['subCategory.category', 'questions', 'documents']);
+            },
+            'questionAnswers.question',
+            'documents.jobDocument',
+        ])
             ->where('user_id', $userId);
 
         // Filter by search
@@ -317,5 +328,4 @@ class JobController extends Controller
         return view('applications.index', compact('applications'));
     }
 }
-
 

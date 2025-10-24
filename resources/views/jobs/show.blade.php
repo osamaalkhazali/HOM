@@ -106,6 +106,70 @@
                         </div>
                     </div>
 
+                    @if ($job->questions->isNotEmpty() || $job->documents->isNotEmpty())
+                        <div class="row g-4 mb-4">
+                            @if ($job->questions->isNotEmpty())
+                                <div class="col-md-6">
+                                    <div class="panel h-100 shadow-soft">
+                                        <div class="panel-header">
+                                            <h5 class="panel-title mb-0">
+                                                <i class="fas fa-question-circle me-2"></i>{{ __('site.jobs.apply.sections.questions_title') }}
+                                            </h5>
+                                        </div>
+                                        <div class="panel-body">
+                                            <p class="text-muted small mb-3">{{ __('site.jobs.apply.sections.questions_help') }}</p>
+                                            <ol class="mb-0 ps-3">
+                                                @foreach ($job->questions as $question)
+                                                    @php
+                                                        $questionLabel = app()->getLocale() === 'ar' && filled($question->question_ar)
+                                                            ? $question->question_ar
+                                                            : $question->question;
+                                                    @endphp
+                                                    <li class="mb-2">
+                                                        <div class="fw-semibold">{{ $questionLabel }}</div>
+                                                        <span class="badge rounded-pill {{ $question->is_required ? 'bg-danger-subtle text-danger' : 'bg-secondary-subtle text-secondary' }} mt-1">
+                                                            {{ $question->is_required ? __('Required') : __('site.jobs.apply.sections.optional') }}
+                                                        </span>
+                                                    </li>
+                                                @endforeach
+                                            </ol>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+
+                            @if ($job->documents->isNotEmpty())
+                                <div class="col-md-6">
+                                    <div class="panel h-100 shadow-soft">
+                                        <div class="panel-header">
+                                            <h5 class="panel-title mb-0">
+                                                <i class="fas fa-paperclip me-2"></i>{{ __('site.jobs.apply.sections.documents_title') }}
+                                            </h5>
+                                        </div>
+                                        <div class="panel-body">
+                                            <p class="text-muted small mb-3">{{ __('site.jobs.apply.sections.documents_help') }}</p>
+                                            <ul class="list-unstyled mb-0">
+                                                @foreach ($job->documents as $document)
+                                                    @php
+                                                        $documentLabel = app()->getLocale() === 'ar' && filled($document->name_ar)
+                                                            ? $document->name_ar
+                                                            : $document->name;
+                                                    @endphp
+                                                    <li class="d-flex align-items-center justify-content-between mb-2 bg-light rounded px-3 py-2">
+                                                        <div>{{ $documentLabel }}</div>
+                                                        <span class="badge rounded-pill {{ $document->is_required ? 'bg-danger-subtle text-danger' : 'bg-secondary-subtle text-secondary' }}">
+                                                            {{ $document->is_required ? __('Required') : __('site.jobs.apply.sections.optional') }}
+                                                        </span>
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+                        </div>
+                    @endif
+
                     <!-- Requirements & Benefits -->
                     <div class="row g-4 mb-4">
                         @if ($job->requirements)
@@ -426,6 +490,5 @@
         }
     </script>
 </x-app-layout>
-
 
 

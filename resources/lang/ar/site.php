@@ -283,6 +283,28 @@ $base['profile'] = array_replace($base['profile'], [
     'subtitle' => 'تعرّف إلى خدمات HOM وقدراتها',
     'button' => 'تحميل الملف',
 ]);
+
+$base['footer'] = [
+    'company_name' => 'بيت الإدارة',
+    'company_tagline' => 'للدراسات والاستشارات',
+    'office_address_title' => 'عنوان المكتب',
+    'mail_address_title' => 'العنوان البريدي',
+    'electronic_address_title' => 'العنوان الإلكتروني',
+    'useful_links_title' => 'روابط مفيدة',
+    'email' => 'البريد الإلكتروني',
+    'call' => 'اتصل',
+    'tel' => 'هاتف:',
+    'fax' => 'فاكس:',
+    'email_label' => 'البريد الإلكتروني:',
+    'website_label' => 'الموقع:',
+    'services' => 'خدماتنا',
+    'our_focus' => 'تركيزنا ومنهجيتنا',
+    'clients' => 'عملاؤنا',
+    'partners' => 'شركاؤنا',
+    'back_to_top' => 'العودة للأعلى',
+    'all_rights_reserved' => 'جميع الحقوق محفوظة.',
+];
+
 // Jobs
 $base['jobs'] = array_replace_recursive($base['jobs'], [
     'at' => 'لدى',
@@ -562,6 +584,98 @@ $base['profile_edit'] = array_replace_recursive($base['profile_edit'], [
     ],
 ]);
 
+$base['profile_completion'] = array_replace($base['profile_completion'], [
+    'title' => 'اكتمال الملف الشخصي',
+    'profile' => 'الملف الشخصي',
+    'complete_all' => 'اكتملت جميع متطلبات الملف الشخصي!',
+    'complete_prompt' => 'أكمل: :fields',
+    'complete_more' => ' و :count أخرى',
+    'fields' => [
+        'name' => 'الاسم',
+        'headline' => 'اللقب المهني',
+        'location' => 'الموقع',
+        'current_position' => 'المنصب الحالي',
+        'experience_years' => 'مستوى الخبرة',
+        'skills' => 'المهارات',
+        'about' => 'نبذة التعريف',
+        'education' => 'التعليم',
+        'linkedin_url' => 'ملف لينكدإن',
+        'cv_path' => 'السيرة الذاتية',
+    ],
+]);
+
+$base['applications_index'] = array_replace_recursive($base['applications_index'], [
+    'header' => [
+        'title' => 'طلباتي',
+        'subtitle' => 'تابع وأدر جميع طلبات التوظيف الخاصة بك في مكان واحد.',
+        'dashboard' => 'لوحة التحكم',
+        'browse_jobs' => 'تصفح الوظائف',
+    ],
+    'stats' => [
+        'total' => 'إجمالي الطلبات',
+        'pending' => 'بانتظار المراجعة',
+        'accepted' => 'مقبولة',
+        'monthly' => 'هذا الشهر',
+    ],
+    'filters' => [
+        'title' => 'تصفية الطلبات',
+        'search_label' => 'بحث في الطلبات',
+        'search_placeholder' => 'عنوان الوظيفة، الشركة...',
+        'status_label' => 'الحالة',
+        'status' => [
+            'all' => 'جميع الحالات',
+        ],
+        'sort_label' => 'ترتيب حسب',
+        'sort' => [
+            'newest' => 'الأحدث أولاً',
+            'oldest' => 'الأقدم أولاً',
+            'job_title' => 'عنوان الوظيفة',
+            'company' => 'الشركة',
+        ],
+        'submit' => 'تصفية',
+    ],
+    'status' => [
+        'labels' => [
+            'pending' => 'قيد المراجعة',
+            'reviewed' => 'تمت المراجعة',
+            'accepted' => 'مقبولة',
+            'rejected' => 'مرفوضة',
+        ],
+    ],
+    'list' => [
+        'deleted_job' => 'وظيفة محذوفة',
+        'job_deleted_note' => 'هذه الوظيفة لم تعد متاحة.',
+        'view_job' => 'عرض الوظيفة',
+        'job_unavailable' => 'الوظيفة غير متاحة',
+        'download_cv' => 'السيرة الذاتية',
+        'reference' => 'طلب رقم :id',
+        'applied_on' => 'تم التقديم: :date',
+        'date_format' => 'd F Y',
+        'toggle' => 'التفاصيل',
+    ],
+    'details' => [
+        'cover_letter' => [
+            'title' => 'خطاب التغطية',
+        ],
+        'questions' => [
+            'title' => 'أسئلة التقديم',
+            'empty' => 'لم يتم الإجابة على أسئلة إضافية.',
+        ],
+        'documents' => [
+            'title' => 'المستندات الداعمة',
+            'empty' => 'لم يتم رفع أي مستندات داعمة.',
+            'download' => 'تنزيل',
+        ],
+    ],
+    'empty' => [
+        'title' => 'لا توجد طلبات',
+        'filtered' => 'لا توجد طلبات مطابقة لخيارات التصفية الحالية. جرّب تعديل معايير البحث.',
+        'default' => 'لم تقم بإرسال أي طلبات حتى الآن. ابدأ باستكشاف الفرص!',
+        'reset' => 'مسح التصفية',
+        'browse' => 'تصفح الوظائف',
+    ],
+]);
+
 $base['profile_form'] = array_replace_recursive($base['profile_form'], [
     'profile_information' => [
         'title' => 'معلومات الملف الشخصي',
@@ -593,7 +707,7 @@ $base['profile_form'] = array_replace_recursive($base['profile_form'], [
                 ],
             ],
             'website' => [
-                'label' => 'الموقع الإلكتروني/المعرض',
+                'label' => 'الموقع الإلكتروني/المعرض (اختياري)',
                 'placeholder' => 'https://your-website.com',
             ],
             'linkedin' => [
@@ -655,6 +769,59 @@ $base['profile_form'] = array_replace_recursive($base['profile_form'], [
         'cancel' => 'إلغاء',
     ],
 ]);
+
+$base['flash'] = [
+    'success' => 'نجح!',
+    'error' => 'خطأ!',
+    'warning' => 'تحذير!',
+    'info' => 'معلومة',
+    'profile_updated' => 'تم تحديث ملفك الشخصي بنجاح.',
+    'password_updated' => 'تم تحديث كلمة المرور بنجاح.',
+    'verification_link_sent' => 'تم إرسال رابط تفعيل جديد إلى بريدك الإلكتروني.',
+    'application_submitted' => 'تم إرسال طلبك بنجاح!',
+    'application_error' => 'حدث خطأ أثناء إرسال طلبك. يرجى المحاولة مرة أخرى.',
+    'login_success' => 'تم تسجيل الدخول بنجاح.',
+    'logout_success' => 'تم تسجيل الخروج بنجاح.',
+    'settings_saved' => 'تم حفظ الإعدادات بنجاح.',
+    'email_verified' => 'تم التحقق من بريدك الإلكتروني بنجاح.',
+    'unauthorized' => 'غير مصرح لك بتنفيذ هذا الإجراء.',
+    'not_found' => 'المورد المطلوب غير موجود.',
+    'validation_error' => 'يرجى تصحيح الأخطاء في النموذج والمحاولة مرة أخرى.',
+    'saved_successfully' => 'تم الحفظ بنجاح!',
+    'deleted_successfully' => 'تم الحذف بنجاح!',
+    'updated_successfully' => 'تم التحديث بنجاح!',
+    'restored_successfully' => 'تمت الاستعادة بنجاح!',
+
+    // رسائل متعلقة بالوظائف
+    'job_created' => 'تم إنشاء الوظيفة بنجاح.',
+    'job_updated' => 'تم تحديث الوظيفة بنجاح.',
+    'job_deleted' => 'تم حذف الوظيفة بنجاح.',
+    'job_restored' => 'تمت استعادة الوظيفة بنجاح.',
+    'job_permanently_deleted' => 'تم حذف الوظيفة نهائياً.',
+    'job_deadline_extended' => 'تم تمديد موعد التقديم للوظيفة 14 يوماً.',
+    'all_jobs_restored' => 'تمت استعادة جميع الوظائف بنجاح.',
+    'all_jobs_deleted' => 'تم حذف جميع الوظائف نهائياً.',
+    'job_deadline_passed' => 'انتهى الموعد النهائي للتقديم على هذه الوظيفة. لم يعد بإمكانك التقدم لهذا المنصب.',
+    'job_no_longer_accepting' => 'هذه الوظيفة لم تعد تقبل طلبات جديدة.',
+    'already_applied' => 'لقد تقدمت بالفعل لهذه الوظيفة.',
+
+    // رسائل متعلقة بالتصنيفات
+    'category_created' => 'تم إنشاء التصنيف بنجاح.',
+    'category_updated' => 'تم تحديث التصنيف والتصنيفات الفرعية بنجاح.',
+    'category_deleted' => 'تم حذف التصنيف بنجاح.',
+    'category_cannot_delete' => 'لا يمكن حذف التصنيف الذي يحتوي على وظائف. يرجى نقل أو حذف الوظائف أولاً.',
+
+    // رسائل متعلقة بالمسؤولين
+    'admin_created' => 'تم إنشاء حساب المسؤول بنجاح.',
+    'admin_updated' => 'تم تحديث حساب المسؤول بنجاح.',
+    'admin_deleted' => 'تم حذف حساب المسؤول بنجاح.',
+    'cannot_delete_self' => 'لا يمكنك حذف حسابك الخاص.',
+    'admin_status_updated' => 'تم :status المسؤول بنجاح.',
+
+    // رسائل الإشعارات
+    'notifications_marked_read' => 'تم تحديد جميع الإشعارات كمقروءة.',
+    'notification_not_found' => 'الإشعار غير موجود.',
+];
 
 $base['confirm'] = array_replace_recursive($base['confirm'], [
     'title' => 'تأكيد الإجراء',
