@@ -14,8 +14,8 @@
         <div class="space-y-2">
             @forelse($notifications as $notification)
                 <div class="p-3 rounded {{ $notification->read_at ? 'bg-gray-50' : 'bg-blue-50' }}">
-                    <div class="font-medium">{{ $notification->data['title'] ?? 'Notification' }}</div>
-                    <div class="text-gray-600">{{ $notification->data['message'] ?? '' }}</div>
+                    <div class="font-medium">{{ $notification->data['title_' . app()->getLocale()] ?? $notification->data['title'] ?? __('site.nav.notifications') }}</div>
+                    <div class="text-gray-600">{{ $notification->data['message_' . app()->getLocale()] ?? $notification->data['message'] ?? '' }}</div>
                     <a href="{{ route('admin.notifications.open', $notification->id) }}"
                         class="text-blue-600 text-sm">Open</a>
                 </div>

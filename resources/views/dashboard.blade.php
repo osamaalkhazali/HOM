@@ -260,7 +260,7 @@
                                             <li><a class="dropdown-item" href="{{ route('applications.index') }}">{{ __('site.dashboard_user.applications.filters.all') }}</a></li>
                                             <li><a class="dropdown-item" href="{{ route('applications.index', ['status' => 'pending']) }}">{{ __('site.dashboard_user.applications.filters.pending') }}</a></li>
                                             <li><a class="dropdown-item" href="{{ route('applications.index', ['status' => 'reviewed']) }}">{{ __('site.dashboard_user.applications.filters.reviewed') }}</a></li>
-                                            <li><a class="dropdown-item" href="{{ route('applications.index', ['status' => 'accepted']) }}">{{ __('site.dashboard_user.applications.filters.accepted') }}</a></li>
+                                            <li><a class="dropdown-item" href="{{ route('applications.index', ['status' => 'hired']) }}">{{ __('site.dashboard_user.applications.filters.hired') }}</a></li>
                                             <li><a class="dropdown-item" href="{{ route('applications.index', ['status' => 'rejected']) }}">{{ __('site.dashboard_user.applications.filters.rejected') }}</a></li>
                                         </ul>
                                     </div>
@@ -429,8 +429,8 @@
                                 <div class="col-6">
                                     <div class="quick-action">
                                         <div class="quick-icon"><i class="fas fa-check"></i></div>
-                                        <small class="d-block text-muted">{{ __('site.dashboard_user.metrics.accepted') }}</small>
-                                        <div class="fw-bold">{{ $stats['accepted'] }}</div>
+                                        <small class="d-block text-muted">{{ __('site.dashboard_user.metrics.hired') }}</small>
+                                        <div class="fw-bold">{{ $stats['hired'] }}</div>
                                     </div>
                                 </div>
                                 <div class="col-6">

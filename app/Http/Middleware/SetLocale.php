@@ -15,12 +15,23 @@ class SetLocale
             return $next($request);
         }
 
-        $locale = session('locale', config('app.locale'));
-        if (!in_array($locale, config('app.available_locales', [config('app.locale')]))) {
+        $availableLocales = config('app.available_locales', [config('app.locale')]);
+        $locale = session('locale');
+
+        $user = $request->user();
+        if ($user && in_array($user->preferred_language, $availableLocales, true)) {
+            $locale = $user->preferred_language;
+        }
+
+        if (! $locale || !in_array($locale, $availableLocales, true)) {
             $locale = config('app.locale');
         }
 
         App::setLocale($locale);
+
+        if (session('locale') !== $locale) {
+            session(['locale' => $locale]);
+        }
 
         return $next($request);
     }

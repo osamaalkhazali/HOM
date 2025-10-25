@@ -17,6 +17,8 @@ return new class extends Migration
       $table->string('name')->comment('Document name in English');
       $table->string('name_ar')->nullable()->comment('Document name in Arabic');
       $table->text('notes')->nullable();
+            $table->string('file_path')->nullable();
+            $table->string('original_name')->nullable();
       $table->boolean('is_submitted')->default(false);
       $table->timestamp('submitted_at')->nullable();
       $table->timestamps();

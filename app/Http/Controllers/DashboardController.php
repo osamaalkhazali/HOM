@@ -31,7 +31,7 @@ class DashboardController extends Controller
     $stats = [
       'total' => $user->applications->count(),
       'pending' => $user->applications->where('status', 'pending')->count(),
-      'accepted' => $user->applications->where('status', 'accepted')->count(),
+      'hired' => $user->applications->where('status', 'hired')->count(),
       'reviewed' => $user->applications->where('status', 'reviewed')->count(),
     ];
 

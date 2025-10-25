@@ -9,8 +9,7 @@ use App\Models\Category;
 use App\Models\SubCategory;
 use App\Models\Application;
 use App\Models\Admin;
-use App\Notifications\ApplicationSubmitted;
-use App\Notifications\NewApplicationReceived;
+use App\Notifications\ApplicationStatusNotification;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
@@ -127,19 +126,19 @@ class JobController extends Controller
         // Check if job is expired
         if ($job->isExpired()) {
             return redirect()->route('jobs.show', $job)
-                ->with('error', 'This job application deadline has passed. You can no longer apply for this position.');
+                ->with('error', __('site.flash.job_deadline_passed'));
         }
 
         // Check if job is active
         if (!$job->isActive()) {
             return redirect()->route('jobs.show', $job)
-                ->with('error', 'This job is no longer accepting applications.');
+                ->with('error', __('site.flash.job_no_longer_accepting'));
         }
 
         // Check if user has already applied
         if ($job->applications()->where('user_id', Auth::id())->exists()) {
             return redirect()->route('jobs.show', $job)
-                ->with('error', 'You have already applied for this job.');
+                ->with('error', __('site.flash.already_applied'));
         }
 
         // Load job-specific requirements
@@ -159,19 +158,19 @@ class JobController extends Controller
         // Check if job is expired
         if ($job->isExpired()) {
             return redirect()->route('jobs.show', $job)
-                ->with('error', 'This job application deadline has passed. You can no longer apply for this position.');
+                ->with('error', __('site.flash.job_deadline_passed'));
         }
 
         // Check if job is active
         if (!$job->isActive()) {
             return redirect()->route('jobs.show', $job)
-                ->with('error', 'This job is no longer accepting applications.');
+                ->with('error', __('site.flash.job_no_longer_accepting'));
         }
 
         // Check if user has already applied
         if ($job->applications()->where('user_id', Auth::id())->exists()) {
             return redirect()->route('jobs.show', $job)
-                ->with('error', 'You have already applied for this job.');
+                ->with('error', __('site.flash.already_applied'));
         }
 
         $job->load(['questions', 'documents']);
@@ -259,16 +258,18 @@ class JobController extends Controller
         try {
             $application->load(['job', 'user']);
 
-            Notification::send($user, new ApplicationSubmitted($application));
+            Notification::send($user, new ApplicationStatusNotification($application, 'pending', 'user'));
 
             $admins = Admin::active()->get();
-            Notification::send($admins, new NewApplicationReceived($application));
+            if ($admins->isNotEmpty()) {
+                Notification::send($admins, new ApplicationStatusNotification($application, 'pending', 'admin'));
+            }
         } catch (\Throwable $e) {
             report($e);
         }
 
         return redirect()->route('jobs.show', $job)
-            ->with('success', 'Your application has been submitted successfully!');
+            ->with('success', __('site.flash.application_submitted'));
     }
 
     /**
@@ -349,7 +350,7 @@ class JobController extends Controller
 
         // Validate that the application status allows document uploads
         if (!in_array($application->status, ['documents_requested', 'documents_submitted'])) {
-            return redirect()->back()->with('error', 'Document upload is not available for this application status.');
+            return redirect()->back()->with('error', __('site.flash.documents_upload_unavailable'));
         }
 
         $validated = $request->validate([
@@ -391,6 +392,23 @@ class JobController extends Controller
             // Update application status if all documents are submitted
             if ($allSubmitted && $application->status === 'documents_requested') {
                 $application->update(['status' => 'documents_submitted']);
+
+                $application->load(['job', 'user']);
+
+                if ($application->user) {
+                    Notification::send(
+                        $application->user,
+                        new ApplicationStatusNotification($application, 'documents_submitted', 'user')
+                    );
+                }
+
+                $admins = Admin::active()->get();
+                if ($admins->isNotEmpty()) {
+                    Notification::send(
+                        $admins,
+                        new ApplicationStatusNotification($application, 'documents_submitted', 'admin')
+                    );
+                }
             }
 
             DB::commit();
@@ -402,7 +420,7 @@ class JobController extends Controller
             throw $e;
         }
 
-        return redirect()->back()->with('success', 'Documents uploaded successfully!');
+        return redirect()->back()->with('success', __('site.flash.documents_uploaded'));
     }
 }
 

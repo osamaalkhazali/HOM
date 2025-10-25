@@ -16,8 +16,8 @@
                     <li class="list-group-item d-flex justify-content-between align-items-start {{ $notification->read_at ? '' : 'bg-light' }}"
                         style="border-radius: 10px; margin-bottom: 8px;">
                         <div class="ms-2 me-auto">
-                            <div class="fw-bold">{{ $notification->data['title'] ?? 'Notification' }}</div>
-                            {{ $notification->data['message'] ?? '' }}
+                            <div class="fw-bold">{{ $notification->data['title_' . app()->getLocale()] ?? $notification->data['title'] ?? __('site.nav.notifications') }}</div>
+                            {{ $notification->data['message_' . app()->getLocale()] ?? $notification->data['message'] ?? '' }}
                         </div>
                         <a href="{{ route('notifications.open', $notification->id) }}" class="btn btn-sm btn-primary"
                             style="border-radius: 8px;">Open</a>

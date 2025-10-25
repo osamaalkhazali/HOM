@@ -365,6 +365,20 @@ $base['jobs'] = array_replace_recursive($base['jobs'], [
         'job_expired' => 'انتهت صلاحية هذا الإعلان الوظيفي.',
         'share_prompt' => 'شارك الوظيفة',
     ],
+    'apply_panel' => [
+        'heading' => 'التقديم',
+        'expired_alert' => 'انتهى الموعد النهائي للتقديم',
+        'expired_button' => 'تم إغلاق التقديم',
+        'inactive_alert' => 'لم تعد هذه الوظيفة تستقبل طلبات جديدة.',
+        'inactive_button' => 'لا يتم استقبال طلبات حالياً',
+        'already_applied_alert' => 'لقد تقدمت بالفعل لهذه الوظيفة',
+        'already_applied_button' => 'تم إرسال الطلب',
+        'missing_cv_alert' => 'يرجى رفع سيرتك الذاتية في الملف الشخصي للتقديم',
+        'missing_cv_button' => 'رفع السيرة الذاتية أولاً',
+        'guest_heading' => 'مستعد للتقديم؟',
+        'guest_login' => 'تسجيل الدخول',
+        'guest_register' => 'إنشاء حساب',
+    ],
     'apply' => [
         'header' => [
             'title' => 'التقدم للوظيفة',
@@ -538,6 +552,7 @@ $base['dashboard_user'] = array_replace_recursive($base['dashboard_user'], [
         'pending' => 'بانتظار المراجعة',
         'under_reviewing' => 'جارٍ المراجعة',
         'reviewed' => 'تمت المراجعة المبدئية',
+        'hired' => 'تم التوظيف',
         'documents_requested' => 'وثائق مطلوبة',
     ],
     'quick_actions' => [
@@ -833,6 +848,8 @@ $base['flash'] = [
     'verification_link_sent' => 'تم إرسال رابط تفعيل جديد إلى بريدك الإلكتروني.',
     'application_submitted' => 'تم إرسال طلبك بنجاح!',
     'application_error' => 'حدث خطأ أثناء إرسال طلبك. يرجى المحاولة مرة أخرى.',
+    'documents_uploaded' => 'تم رفع المستندات بنجاح!',
+    'documents_upload_unavailable' => 'لا يمكن رفع المستندات في حالة الطلب الحالية.',
     'login_success' => 'تم تسجيل الدخول بنجاح.',
     'logout_success' => 'تم تسجيل الخروج بنجاح.',
     'settings_saved' => 'تم حفظ الإعدادات بنجاح.',
@@ -876,6 +893,85 @@ $base['flash'] = [
     'notifications_marked_read' => 'تم تحديد جميع الإشعارات كمقروءة.',
     'notification_not_found' => 'الإشعار غير موجود.',
 ];
+
+$base['notifications_center'] = array_replace_recursive($base['notifications_center'] ?? [], [
+    'applications' => [
+        'common' => [
+            'fallback_title' => 'تم تحديث حالة الطلب',
+            'fallback_message' => 'تم تحديث الحالة إلى :status لوظيفة ":job".',
+            'deleted_job' => 'وظيفة محذوفة',
+            'deleted_user' => 'متقدم محذوف',
+        ],
+        'user' => [
+            'pending' => [
+                'title' => 'تم استلام طلبك',
+                'message' => 'تم استلام طلبك لوظيفة ":job" وسنتواصل معك قريباً.',
+            ],
+            'under_reviewing' => [
+                'title' => 'طلبك قيد المراجعة',
+                'message' => 'طلبك لوظيفة ":job" قيد المراجعة من قبل فريقنا.',
+            ],
+            'reviewed' => [
+                'title' => 'اكتمل تقييم طلبك',
+                'message' => 'اكتمل التقييم الأولي لطلبك لوظيفة ":job". سنبلغك بالخطوة التالية قريباً.',
+            ],
+            'shortlisted' => [
+                'title' => 'تم ترشيحك للقائمة القصيرة',
+                'message' => 'خبر سار! تم ترشيحك للقائمة القصيرة لوظيفة ":job"، وسنتواصل معك لتحديد الخطوات القادمة.',
+            ],
+            'documents_requested' => [
+                'title' => 'نحتاج مستندات إضافية',
+                'message' => 'نرجو تزويدنا بالمستندات المطلوبة لوظيفة ":job" عبر لوحة التحكم لديك.',
+            ],
+            'documents_submitted' => [
+                'title' => 'تم استلام المستندات',
+                'message' => 'شكراً لك! تم استلام جميع المستندات المطلوبة لوظيفة ":job".',
+            ],
+            'rejected' => [
+                'title' => 'تحديث بخصوص طلبك',
+                'message' => 'نعتذر، تم إغلاق طلبك لوظيفة ":job". شكراً لاهتمامك بالانضمام إلينا.',
+            ],
+            'hired' => [
+                'title' => 'تهانينا! تم اختيارك',
+                'message' => 'تهانينا! تم اختيارك لوظيفة ":job" وسنتواصل معك لاستكمال إجراءات التعيين.',
+            ],
+        ],
+        'admin' => [
+            'pending' => [
+                'title' => 'تم استلام طلب جديد',
+                'message' => 'تم استلام طلب جديد لوظيفة ":job" من :applicant.',
+            ],
+            'under_reviewing' => [
+                'title' => 'تم نقل الطلب إلى قيد المراجعة',
+                'message' => 'تم نقل طلب وظيفة ":job" إلى حالة قيد المراجعة.',
+            ],
+            'reviewed' => [
+                'title' => 'تم وضع علامة تمت المراجعة',
+                'message' => 'تم وضع علامة تمت المراجعة على طلب وظيفة ":job".',
+            ],
+            'shortlisted' => [
+                'title' => 'تم ترشيح متقدم',
+                'message' => 'تم ترشيح :applicant للقائمة القصيرة لوظيفة ":job".',
+            ],
+            'documents_requested' => [
+                'title' => 'تم طلب مستندات',
+                'message' => 'تم إرسال طلب مستندات إلى :applicant لوظيفة ":job".',
+            ],
+            'documents_submitted' => [
+                'title' => 'تم رفع المستندات',
+                'message' => ':applicant قام برفع المستندات المطلوبة لوظيفة ":job".',
+            ],
+            'rejected' => [
+                'title' => 'تم رفض الطلب',
+                'message' => 'تم تعيين حالة الرفض لطلب وظيفة ":job".',
+            ],
+            'hired' => [
+                'title' => 'تم تعيين متقدم',
+                'message' => 'تم تعيين :applicant كموظف لوظيفة ":job".',
+            ],
+        ],
+    ],
+]);
 
 $base['confirm'] = array_replace_recursive($base['confirm'], [
     'title' => 'تأكيد الإجراء',

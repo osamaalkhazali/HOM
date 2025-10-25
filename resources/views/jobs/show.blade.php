@@ -294,38 +294,38 @@
                     <div class="panel mb-4 shadow-soft">
                         <div class="panel-header">
                             <h5 class="panel-title mb-0">
-                                <i class="fas fa-paper-plane me-2"></i>Application
+                                <i class="fas fa-paper-plane me-2"></i>{{ __('site.jobs.apply_panel.heading') }}
                             </h5>
                         </div>
                         <div class="panel-body text-center py-4">
                             @auth
                                 @if ($job->isExpired())
                                     <div class="alert alert-danger mb-3" role="alert">
-                                        <i class="fas fa-calendar-times me-2"></i>Application deadline has passed
+                                        <i class="fas fa-calendar-times me-2"></i>{{ __('site.jobs.apply_panel.expired_alert') }}
                                     </div>
                                     <button class="btn btn-secondary btn-lg w-100" disabled>
-                                        <i class="fas fa-times me-2"></i>Applications Closed
+                                        <i class="fas fa-times me-2"></i>{{ __('site.jobs.apply_panel.expired_button') }}
                                     </button>
                                 @elseif ($job->isInactive())
                                     <div class="alert alert-warning mb-3" role="alert">
-                                        <i class="fas fa-pause-circle me-2"></i>{{ __('site.jobs.messages.job_closed') }}
+                                        <i class="fas fa-pause-circle me-2"></i>{{ __('site.jobs.apply_panel.inactive_alert') }}
                                     </div>
                                     <button class="btn btn-warning btn-lg w-100" disabled>
-                                        <i class="fas fa-pause me-2"></i>Not Accepting Applications
+                                        <i class="fas fa-pause me-2"></i>{{ __('site.jobs.apply_panel.inactive_button') }}
                                     </button>
                                 @elseif ($hasApplied)
                                     <div class="alert alert-success mb-3" role="alert">
-                                        <i class="fas fa-check-circle me-2"></i>You have already applied for this position
+                                        <i class="fas fa-check-circle me-2"></i>{{ __('site.jobs.apply_panel.already_applied_alert') }}
                                     </div>
                                     <button class="btn btn-success btn-lg w-100" disabled>
-                                        <i class="fas fa-check me-2"></i>Application Submitted
+                                        <i class="fas fa-check me-2"></i>{{ __('site.jobs.apply_panel.already_applied_button') }}
                                     </button>
                                 @elseif (!$hasCv)
                                     <div class="alert alert-warning mb-3" role="alert">
-                                        <i class="fas fa-upload me-2"></i>Please upload your CV to your profile to apply
+                                        <i class="fas fa-upload me-2"></i>{{ __('site.jobs.apply_panel.missing_cv_alert') }}
                                     </div>
                                     <a href="{{ route('profile.edit') }}" class="btn btn-warning btn-lg w-100">
-                                        <i class="fas fa-upload me-2"></i>Upload CV First
+                                        <i class="fas fa-upload me-2"></i>{{ __('site.jobs.apply_panel.missing_cv_button') }}
                                     </a>
                                 @else
                                     <a href="{{ route('jobs.apply', $job) }}" class="btn btn-success btn-lg w-100 pulse-btn">
@@ -333,13 +333,13 @@
                                     </a>
                                 @endif
                             @else
-                                <h5 class="mb-3 text-primary">Ready to Apply?</h5>
+                                <h5 class="mb-3 text-primary">{{ __('site.jobs.apply_panel.guest_heading') }}</h5>
                                 <div class="d-grid gap-2">
                                     <a href="{{ route('login') }}" class="btn btn-primary btn-lg">
-                                        <i class="fas fa-sign-in-alt me-2"></i>Login
+                                        <i class="fas fa-sign-in-alt me-2"></i>{{ __('site.jobs.apply_panel.guest_login') }}
                                     </a>
                                     <a href="{{ route('register') }}" class="btn btn-outline-primary btn-lg">
-                                        <i class="fas fa-user-plus me-2"></i>Register
+                                        <i class="fas fa-user-plus me-2"></i>{{ __('site.jobs.apply_panel.guest_register') }}
                                     </a>
                                 </div>
                             @endauth

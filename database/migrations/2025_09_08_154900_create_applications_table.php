@@ -17,7 +17,16 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->string('cv_path', 255);
             $table->text('cover_letter')->nullable();
-            $table->enum('status', ['pending', 'reviewed', 'shortlisted', 'rejected', 'hired'])->default('pending');
+            $table->enum('status', [
+                'pending',
+                'under_reviewing',
+                'reviewed',
+                'shortlisted',
+                'documents_requested',
+                'documents_submitted',
+                'rejected',
+                'hired',
+            ])->default('pending');
             $table->timestamps();
             $table->softDeletes();
         });

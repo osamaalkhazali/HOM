@@ -399,6 +399,20 @@ return [
             'job_expired' => 'This job posting has expired.',
             'share_prompt' => 'Share Job',
         ],
+        'apply_panel' => [
+            'heading' => 'Application',
+            'expired_alert' => 'Application deadline has passed',
+            'expired_button' => 'Applications Closed',
+            'inactive_alert' => 'This job is no longer accepting applications.',
+            'inactive_button' => 'Not Accepting Applications',
+            'already_applied_alert' => 'You have already applied for this position',
+            'already_applied_button' => 'Application Submitted',
+            'missing_cv_alert' => 'Please upload your CV to your profile to apply',
+            'missing_cv_button' => 'Upload CV First',
+            'guest_heading' => 'Ready to Apply?',
+            'guest_login' => 'Login',
+            'guest_register' => 'Register',
+        ],
         'apply' => [
             'header' => [
                 'title' => 'Apply for Job',
@@ -557,6 +571,7 @@ return [
             'pending' => 'Pending',
             'under_reviewing' => 'Under Reviewing',
             'reviewed' => 'Reviewed',
+            'hired' => 'Hired',
             'documents_requested' => 'Documents Requested',
         ],
         'quick_actions' => [
@@ -894,6 +909,8 @@ return [
         'verification_link_sent' => 'A new verification link has been sent to your email address.',
         'application_submitted' => 'Your application has been submitted successfully!',
         'application_error' => 'There was an error submitting your application. Please try again.',
+        'documents_uploaded' => 'Documents uploaded successfully!',
+        'documents_upload_unavailable' => 'Document upload is not available for this application status.',
         'login_success' => 'You have been logged in successfully.',
         'logout_success' => 'You have been logged out successfully.',
         'settings_saved' => 'Settings have been saved successfully.',
@@ -936,6 +953,85 @@ return [
         // Notification messages
         'notifications_marked_read' => 'All notifications marked as read.',
         'notification_not_found' => 'Notification not found.',
+    ],
+
+    'notifications_center' => [
+        'applications' => [
+            'common' => [
+                'fallback_title' => 'Application status updated',
+                'fallback_message' => 'Status updated to :status for ":job".',
+                'deleted_job' => 'Deleted Job',
+                'deleted_user' => 'Deleted Candidate',
+            ],
+            'user' => [
+                'pending' => [
+                    'title' => 'Application Received',
+                    'message' => 'Thanks! We received your application for ":job". Our team will review it soon.',
+                ],
+                'under_reviewing' => [
+                    'title' => 'Application Under Review',
+                    'message' => 'Your application for ":job" is now under review by our recruitment team.',
+                ],
+                'reviewed' => [
+                    'title' => 'Application Reviewed',
+                    'message' => 'The initial review of your application for ":job" is complete. We will update you about the next steps shortly.',
+                ],
+                'shortlisted' => [
+                    'title' => 'Shortlisted for ":job"',
+                    'message' => 'Great news! You have been shortlisted for ":job". We will reach out to schedule the next stage soon.',
+                ],
+                'documents_requested' => [
+                    'title' => 'Supporting Documents Requested',
+                    'message' => 'We need additional documents for ":job". Please upload the requested files from your applications dashboard.',
+                ],
+                'documents_submitted' => [
+                    'title' => 'Documents Received',
+                    'message' => 'Thanks! We received all requested documents for ":job". We will review them shortly.',
+                ],
+                'rejected' => [
+                    'title' => 'Application Update',
+                    'message' => 'After careful consideration, we will not be moving forward with your application for ":job". Thank you for your interest in joining us.',
+                ],
+                'hired' => [
+                    'title' => 'Welcome to the Team!',
+                    'message' => 'Congratulations! You have been selected for ":job". We will contact you with onboarding details shortly.',
+                ],
+            ],
+            'admin' => [
+                'pending' => [
+                    'title' => 'New Application Submitted',
+                    'message' => ':applicant submitted an application for ":job".',
+                ],
+                'under_reviewing' => [
+                    'title' => 'Status Changed: Under Review',
+                    'message' => 'Application for ":job" moved to Under Review.',
+                ],
+                'reviewed' => [
+                    'title' => 'Status Changed: Reviewed',
+                    'message' => 'Application for ":job" marked as Reviewed.',
+                ],
+                'shortlisted' => [
+                    'title' => 'Candidate Shortlisted',
+                    'message' => ':applicant has been shortlisted for ":job".',
+                ],
+                'documents_requested' => [
+                    'title' => 'Documents Requested',
+                    'message' => 'Document request sent to :applicant for ":job".',
+                ],
+                'documents_submitted' => [
+                    'title' => 'Documents Submitted',
+                    'message' => ':applicant uploaded the requested documents for ":job".',
+                ],
+                'rejected' => [
+                    'title' => 'Application Rejected',
+                    'message' => 'Application for ":job" marked as Rejected.',
+                ],
+                'hired' => [
+                    'title' => 'Candidate Hired',
+                    'message' => ':applicant marked as Hired for ":job".',
+                ],
+            ],
+        ],
     ],
 
     'confirm' => [

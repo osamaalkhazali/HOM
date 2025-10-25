@@ -28,8 +28,8 @@
                                     <div class="flex items-start gap-2">
                                         <i class="fas fa-circle mt-1" style="font-size: 0.6rem; color: var(--primary-color);"></i>
                                         <div>
-                                            <div class="font-medium">{{ $notification->data['title'] ?? 'Notification' }}</div>
-                                            <div class="text-gray-500">{{ $notification->data['message'] ?? '' }}</div>
+                                            <div class="font-medium">{{ $notification->data['title_' . app()->getLocale()] ?? $notification->data['title'] ?? __('site.nav.notifications') }}</div>
+                                            <div class="text-gray-500">{{ $notification->data['message_' . app()->getLocale()] ?? $notification->data['message'] ?? '' }}</div>
                                         </div>
                                     </div>
                                 </a>

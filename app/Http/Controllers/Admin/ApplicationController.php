@@ -6,8 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Application;
 use App\Models\Job;
 use App\Models\ApplicationDocumentRequest;
+use App\Models\Admin;
 use Illuminate\Http\Request;
-use App\Notifications\ApplicationStatusChanged;
+use App\Notifications\ApplicationStatusNotification;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -369,16 +370,31 @@ class ApplicationController extends Controller
     }
 
     $oldStatus = $application->status;
-    $application->update($validated);
+    $newStatus = $validated['status'];
 
-    // Notify the applicant about status change
-    try {
-      $application->load(['job', 'user']);
-      if ($application->user) {
-        Notification::send($application->user, new ApplicationStatusChanged($application, $oldStatus, $application->status));
+    $application->update(['status' => $newStatus]);
+
+    if ($oldStatus !== $newStatus) {
+      try {
+        $application->load(['job', 'user']);
+
+        if ($application->user) {
+          Notification::send(
+            $application->user,
+            new ApplicationStatusNotification($application, $newStatus, 'user')
+          );
+        }
+
+        $admins = Admin::active()->get();
+        if ($admins->isNotEmpty()) {
+          Notification::send(
+            $admins,
+            new ApplicationStatusNotification($application, $newStatus, 'admin')
+          );
+        }
+      } catch (\Throwable $e) {
+        report($e);
       }
-    } catch (\Throwable $e) {
-      report($e);
     }
 
     return redirect()->back()->with('success', 'Application status updated successfully');
@@ -395,8 +411,40 @@ class ApplicationController extends Controller
       'status' => 'required|in:pending,under_reviewing,reviewed,shortlisted,documents_requested,documents_submitted,rejected,hired'
     ]);
 
-    Application::whereIn('id', $validated['application_ids'])
-      ->update(['status' => $validated['status']]);
+    $newStatus = $validated['status'];
+    $applications = Application::with(['job', 'user'])
+      ->whereIn('id', $validated['application_ids'])
+      ->get();
+
+    if ($applications->isEmpty()) {
+      return redirect()->back()->with('warning', 'No applications were updated.');
+    }
+
+    $admins = Admin::active()->get();
+
+    foreach ($applications as $app) {
+      $oldStatus = $app->status;
+
+      $app->update(['status' => $newStatus]);
+
+      if ($oldStatus === $newStatus) {
+        continue;
+      }
+
+      if ($app->user) {
+        Notification::send(
+          $app->user,
+          new ApplicationStatusNotification($app, $newStatus, 'user')
+        );
+      }
+
+      if ($admins->isNotEmpty()) {
+        Notification::send(
+          $admins,
+          new ApplicationStatusNotification($app, $newStatus, 'admin')
+        );
+      }
+    }
 
     $count = count($validated['application_ids']);
     return redirect()->back()->with('success', "Successfully updated {$count} applications");

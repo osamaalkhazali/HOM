@@ -14,6 +14,8 @@ use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Admin\AdminNotificationController;
 use Illuminate\Http\Request;
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/locale', function (Request $request) {
@@ -21,9 +23,19 @@ Route::post('/locale', function (Request $request) {
         'locale' => 'required|in:' . implode(',', config('app.available_locales')),
     ]);
 
-    session(['locale' => $validated['locale']]);
+    $locale = $validated['locale'];
 
-    return back();
+    session(['locale' => $locale]);
+
+    if (Auth::check()) {
+        $user = Auth::user();
+
+        if ($user instanceof User && $user->preferred_language !== $locale) {
+            $user->forceFill(['preferred_language' => $locale])->save();
+        }
+    }
+
+    return back()->with('locale_status_locale', $locale);
 })->name('locale.switch');
 
 Route::get('/', function () {

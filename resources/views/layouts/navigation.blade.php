@@ -253,8 +253,8 @@
                                     <a class="dropdown-item d-flex align-items-start gap-2" href="{{ route('notifications.open', $notification->id) }}">
                                         <i class="fas fa-circle mt-1" style="font-size: 0.6rem; color: var(--primary-color);"></i>
                                         <div>
-                                            <div class="fw-semibold">{{ $notification->data['title'] ?? 'Notification' }}</div>
-                                            <div class="small text-muted">{{ $notification->data['message'] ?? '' }}</div>
+                                            <div class="fw-semibold">{{ $notification->data['title_' . $locale] ?? $notification->data['title'] ?? __('site.nav.notifications') }}</div>
+                                            <div class="small text-muted">{{ $notification->data['message_' . $locale] ?? $notification->data['message'] ?? '' }}</div>
                                         </div>
                                     </a>
                                 </li>

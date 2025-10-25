@@ -113,6 +113,22 @@
 <body id="top" class="app {{ $isRtl ? 'rtl' : 'ltr' }}">
     @include('layouts.navigation')
 
+    @php
+        $flashLocale = session('locale_status_locale');
+    @endphp
+    @if ($flashLocale)
+        @php
+            $languageKey = $flashLocale === 'ar' ? 'arabic' : 'english';
+            $languageLabel = __('site.nav.language.' . $languageKey);
+            $statusMessage = __('auth.language.updated', ['language' => $languageLabel]);
+        @endphp
+        <div class="container mt-4">
+            <div class="alert alert-success text-center" role="alert">
+                {{ $statusMessage }}
+            </div>
+        </div>
+    @endif
+
     <!-- Page Content -->
     <main>
         @isset($header)

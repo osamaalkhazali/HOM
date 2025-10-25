@@ -14,14 +14,18 @@ return new class extends Migration
         Schema::create('jobs', function (Blueprint $table) {
             $table->id();
             $table->string('title', 160)->index();
+            $table->string('title_ar', 160)->nullable();
             $table->longText('description');
+            $table->longText('description_ar')->nullable();
             // Direct category is optional
             $table->foreignId('category_id')->nullable()->constrained()->restrictOnDelete();
             // Sub-category is now optional as well
             $table->foreignId('sub_category_id')->nullable()->constrained()->restrictOnDelete();
             $table->string('company', 160)->index();
+            $table->string('company_ar', 160)->nullable();
             $table->decimal('salary', 10, 2)->nullable();
             $table->string('location', 160)->index();
+            $table->string('location_ar', 160)->nullable();
             $table->enum('level', ['entry', 'mid', 'senior', 'executive'])->index();
             $table->date('deadline')->index();
             $table->boolean('is_active')->default(true)->index();
