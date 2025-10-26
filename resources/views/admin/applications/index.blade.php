@@ -4,14 +4,6 @@
 
 @section('content')
 <div class="space-y-6">
-    <!-- Header -->
-    <div class="flex justify-between items-center">
-        <div>
-            <h1 class="text-2xl font-semibold text-gray-900">Application Management</h1>
-            <p class="mt-1 text-sm text-gray-600">Review and manage all job applications submitted by users</p>
-        </div>
-    </div>
-
     @php
         $statusSummary = [
             ['key' => 'pending', 'icon' => 'fas fa-clock', 'bg' => 'bg-yellow-100', 'iconColor' => 'text-yellow-600'],
@@ -22,7 +14,62 @@
             ['key' => 'documents_submitted', 'icon' => 'fas fa-file-upload', 'bg' => 'bg-teal-100', 'iconColor' => 'text-teal-600'],
             ['key' => 'hired', 'icon' => 'fas fa-check', 'bg' => 'bg-green-100', 'iconColor' => 'text-green-600'],
         ];
+
+        $exportFormats = [
+            'excel' => ['label' => 'Excel', 'icon' => 'fas fa-file-excel text-green-600'],
+            'csv' => ['label' => 'CSV', 'icon' => 'fas fa-file-code text-amber-600'],
+            'pdf' => ['label' => 'PDF', 'icon' => 'fas fa-file-pdf text-red-600'],
+        ];
+
+        $filteredParams = $exportQuery ?? [];
+        unset($filteredParams['scope'], $filteredParams['format']);
+
+        $advancedFilterKeys = ['status', 'job_id', 'category_id', 'has_answers', 'has_documents', 'has_cover_letter', 'date_from', 'date_to'];
+        $advancedActive = collect($advancedFilterKeys)->contains(fn ($key) => filled(request($key)));
     @endphp
+
+    <!-- Header -->
+    <div class="flex flex-wrap items-center justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-semibold text-gray-900">Application Management</h1>
+            <p class="mt-1 text-sm text-gray-600">Review and manage all job applications submitted by users</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <div class="relative">
+                <button type="button"
+                        class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                        data-dropdown-toggle="applications-export-menu"
+                        aria-expanded="false">
+                    <i class="fas fa-download"></i>
+                    <span>Export</span>
+                    <i class="fas fa-chevron-down text-xs"></i>
+                </button>
+                <div id="applications-export-menu"
+                     class="hidden absolute right-0 mt-2 w-60 bg-white border border-gray-200 rounded-lg shadow-lg z-30"
+                     data-dropdown-menu>
+                    <div class="py-2 text-sm text-gray-700">
+                        <div class="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wide">Current results</div>
+                        @foreach($exportFormats as $formatKey => $formatMeta)
+                            <a href="{{ route('admin.applications.export', array_merge(['format' => $formatKey, 'scope' => 'filtered'], $filteredParams)) }}"
+                               class="flex items-center gap-3 px-4 py-2 hover:bg-gray-50 transition-colors">
+                                <i class="{{ $formatMeta['icon'] }}"></i>
+                                <span>{{ $formatMeta['label'] }} (Filtered)</span>
+                            </a>
+                        @endforeach
+                        <div class="my-2 border-t border-gray-100"></div>
+                        <div class="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wide">All records</div>
+                        @foreach($exportFormats as $formatKey => $formatMeta)
+                            <a href="{{ route('admin.applications.export', ['format' => $formatKey, 'scope' => 'all']) }}"
+                               class="flex items-center gap-3 px-4 py-2 hover:bg-gray-50 transition-colors">
+                                <i class="{{ $formatMeta['icon'] }}"></i>
+                                <span>{{ $formatMeta['label'] }} (All)</span>
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Stats Cards - Compact Two Rows -->
     <div class="bg-white rounded-lg shadow px-6 py-3">
@@ -58,127 +105,136 @@
 
     <!-- Filters -->
     <div class="bg-white rounded-lg shadow">
-        <form method="GET" action="{{ route('admin.applications.index') }}" class="p-6">
+        <form method="GET" action="{{ route('admin.applications.index') }}" class="p-6 space-y-4">
             @php
                 $statusOptions = ['pending', 'under_reviewing', 'reviewed', 'shortlisted', 'documents_requested', 'documents_submitted', 'rejected', 'hired'];
             @endphp
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <!-- Search -->
-                <div class="md:col-span-2">
-                    <label for="search" class="block text-sm font-medium text-gray-700 mb-1">Search</label>
-                    <input type="text" name="search" id="search" value="{{ request('search') }}"
-                        placeholder="Applicant name, email, phone, skills, job title, company, cover letter, answers..."
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <div class="flex flex-col gap-3 md:flex-row md:items-center md:gap-4">
+                <div class="flex-1">
+                    <label for="search" class="sr-only">Search applications</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                            <i class="fas fa-search"></i>
+                        </span>
+                        <input type="text" name="search" id="search" value="{{ request('search') }}"
+                               placeholder="Search applicants, jobs, answers, notes..."
+                               class="w-full border border-gray-300 rounded-lg px-3 py-2 pl-10 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
                 </div>
-
-                <!-- Status Filter -->
-                <div>
-                    <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                    <select name="status" id="status"
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value="">All Status</option>
-                        @foreach ($statusOptions as $statusOption)
-                            @php
-                                $labelEn = __('site.application_statuses.' . $statusOption, [], 'en');
-                                $labelAr = __('site.application_statuses.' . $statusOption, [], 'ar');
-                            @endphp
-                            <option value="{{ $statusOption }}" {{ request('status') === $statusOption ? 'selected' : '' }}>
-                                {{ $labelEn }} ({{ $labelAr }})
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <!-- Job Filter -->
-                <div>
-                    <label for="job_id" class="block text-sm font-medium text-gray-700 mb-1">Job</label>
-                    <select name="job_id" id="job_id"
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value="">All Jobs</option>
-                        @foreach ($jobs as $job)
-                            <option value="{{ $job->id }}" {{ request('job_id') == $job->id ? 'selected' : '' }}>
-                                {{ $job->title }} - {{ $job->company }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <!-- Category Filter -->
-                <div>
-                    <label for="category_id" class="block text-sm font-medium text-gray-700 mb-1">Category</label>
-                    <select name="category_id" id="category_id"
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value="">All Categories</option>
-                        @foreach ($categories as $category)
-                            <option value="{{ $category->id }}" {{ request('category_id') == $category->id ? 'selected' : '' }}>
-                                {{ $category->admin_label ?: $category->name }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <!-- Has Answers Filter -->
-                <div>
-                    <label for="has_answers" class="block text-sm font-medium text-gray-700 mb-1">Question Answers</label>
-                    <select name="has_answers" id="has_answers"
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value="">All Applications</option>
-                        <option value="yes" {{ request('has_answers') === 'yes' ? 'selected' : '' }}>With Answers</option>
-                        <option value="no" {{ request('has_answers') === 'no' ? 'selected' : '' }}>No Answers</option>
-                    </select>
-                </div>
-
-                <!-- Has Documents Filter -->
-                <div>
-                    <label for="has_documents" class="block text-sm font-medium text-gray-700 mb-1">Additional Documents</label>
-                    <select name="has_documents" id="has_documents"
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value="">All Applications</option>
-                        <option value="yes" {{ request('has_documents') === 'yes' ? 'selected' : '' }}>With Documents</option>
-                        <option value="no" {{ request('has_documents') === 'no' ? 'selected' : '' }}>No Documents</option>
-                    </select>
-                </div>
-
-                <!-- Has Cover Letter Filter -->
-                <div>
-                    <label for="has_cover_letter" class="block text-sm font-medium text-gray-700 mb-1">Cover Letter</label>
-                    <select name="has_cover_letter" id="has_cover_letter"
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value="">All Applications</option>
-                        <option value="yes" {{ request('has_cover_letter') === 'yes' ? 'selected' : '' }}>With Cover Letter</option>
-                        <option value="no" {{ request('has_cover_letter') === 'no' ? 'selected' : '' }}>No Cover Letter</option>
-                    </select>
-                </div>
-
-                <!-- Actions -->
-                <div class="flex items-end space-x-2">
+                <div class="flex items-center gap-2 flex-wrap">
                     <button type="submit"
-                            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
-                        <i class="fas fa-search mr-1"></i>Filter
+                            class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
+                        <i class="fas fa-filter"></i>
+                        <span>Apply</span>
                     </button>
                     <a href="{{ route('admin.applications.index') }}"
-                       class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors">
-                        <i class="fas fa-times mr-1"></i>Clear
+                       class="inline-flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg transition-colors">
+                        <i class="fas fa-rotate-left"></i>
+                        <span>Clear</span>
                     </a>
+                    <button type="button"
+                            class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
+                            id="applications-advanced-toggle"
+                            data-advanced-toggle="applications-advanced-filters"
+                            data-label-show="Show advanced filters"
+                            data-label-hide="Hide advanced filters"
+                            aria-expanded="{{ $advancedActive ? 'true' : 'false' }}">
+                        <i class="fas fa-sliders-h"></i>
+                        <span data-label>{{ $advancedActive ? 'Hide advanced filters' : 'Show advanced filters' }}</span>
+                    </button>
                 </div>
             </div>
 
-            <!-- Date Range Filters -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                <div>
-                    <label for="date_from" class="block text-sm font-medium text-gray-700 mb-1">From Date</label>
-                    <input type="date" name="date_from" id="date_from" value="{{ request('date_from') }}"
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                </div>
-                <div>
-                    <label for="date_to" class="block text-sm font-medium text-gray-700 mb-1">To Date</label>
-                    <input type="date" name="date_to" id="date_to" value="{{ request('date_to') }}"
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <div id="applications-advanced-filters" class="mt-4 {{ $advancedActive ? '' : 'hidden' }}">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div>
+                        <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                        <select name="status" id="status"
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">All Status</option>
+                            @foreach ($statusOptions as $statusOption)
+                                @php
+                                    $labelEn = __('site.application_statuses.' . $statusOption, [], 'en');
+                                    $labelAr = __('site.application_statuses.' . $statusOption, [], 'ar');
+                                @endphp
+                                <option value="{{ $statusOption }}" {{ request('status') === $statusOption ? 'selected' : '' }}>
+                                    {{ $labelEn }} ({{ $labelAr }})
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="job_id" class="block text-sm font-medium text-gray-700 mb-1">Job</label>
+                        <select name="job_id" id="job_id"
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">All Jobs</option>
+                            @foreach ($jobs as $job)
+                                <option value="{{ $job->id }}" {{ request('job_id') == $job->id ? 'selected' : '' }}>
+                                    {{ $job->title }} - {{ $job->company }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="category_id" class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                        <select name="category_id" id="category_id"
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">All Categories</option>
+                            @foreach ($categories as $category)
+                                <option value="{{ $category->id }}" {{ request('category_id') == $category->id ? 'selected' : '' }}>
+                                    {{ $category->admin_label ?: $category->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="has_answers" class="block text-sm font-medium text-gray-700 mb-1">Question Answers</label>
+                        <select name="has_answers" id="has_answers"
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">All Applications</option>
+                            <option value="yes" {{ request('has_answers') === 'yes' ? 'selected' : '' }}>With Answers</option>
+                            <option value="no" {{ request('has_answers') === 'no' ? 'selected' : '' }}>No Answers</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="has_documents" class="block text-sm font-medium text-gray-700 mb-1">Additional Documents</label>
+                        <select name="has_documents" id="has_documents"
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">All Applications</option>
+                            <option value="yes" {{ request('has_documents') === 'yes' ? 'selected' : '' }}>With Documents</option>
+                            <option value="no" {{ request('has_documents') === 'no' ? 'selected' : '' }}>No Documents</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="has_cover_letter" class="block text-sm font-medium text-gray-700 mb-1">Cover Letter</label>
+                        <select name="has_cover_letter" id="has_cover_letter"
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">All Applications</option>
+                            <option value="yes" {{ request('has_cover_letter') === 'yes' ? 'selected' : '' }}>With Cover Letter</option>
+                            <option value="no" {{ request('has_cover_letter') === 'no' ? 'selected' : '' }}>No Cover Letter</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="date_from" class="block text-sm font-medium text-gray-700 mb-1">From Date</label>
+                        <input type="date" name="date_from" id="date_from" value="{{ request('date_from') }}"
+                               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+
+                    <div>
+                        <label for="date_to" class="block text-sm font-medium text-gray-700 mb-1">To Date</label>
+                        <input type="date" name="date_to" id="date_to" value="{{ request('date_to') }}"
+                               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
                 </div>
             </div>
         </form>
     </div>
-
     <!-- Bulk Actions -->
     <div class="bg-white rounded-lg shadow p-4" id="bulk-actions" style="display: none;">
         <div class="flex items-center justify-between">
@@ -530,5 +586,75 @@
         document.getElementById('select-all').checked = false;
         updateSelection();
     }
+
+    (() => {
+        const dropdownButtons = document.querySelectorAll('[data-dropdown-toggle]');
+        const dropdownMenus = document.querySelectorAll('[data-dropdown-menu]');
+
+        dropdownButtons.forEach(button => {
+            const targetId = button.getAttribute('data-dropdown-toggle');
+            const menu = document.getElementById(targetId);
+            if (!menu) {
+                return;
+            }
+
+            button.addEventListener('click', event => {
+                event.preventDefault();
+                event.stopPropagation();
+
+                dropdownMenus.forEach(otherMenu => {
+                    if (otherMenu !== menu) {
+                        otherMenu.classList.add('hidden');
+                        const otherButton = document.querySelector(`[data-dropdown-toggle="${otherMenu.id}"]`);
+                        if (otherButton) {
+                            otherButton.setAttribute('aria-expanded', 'false');
+                        }
+                    }
+                });
+
+                const isHidden = menu.classList.contains('hidden');
+                menu.classList.toggle('hidden', !isHidden);
+                button.setAttribute('aria-expanded', isHidden ? 'true' : 'false');
+            });
+        });
+
+        dropdownMenus.forEach(menu => {
+            menu.addEventListener('click', event => event.stopPropagation());
+        });
+
+        document.addEventListener('click', () => {
+            dropdownMenus.forEach(menu => {
+                if (!menu.classList.contains('hidden')) {
+                    menu.classList.add('hidden');
+                    const button = document.querySelector(`[data-dropdown-toggle="${menu.id}"]`);
+                    if (button) {
+                        button.setAttribute('aria-expanded', 'false');
+                    }
+                }
+            });
+        });
+
+        const advancedToggles = document.querySelectorAll('[data-advanced-toggle]');
+        advancedToggles.forEach(button => {
+            const targetId = button.getAttribute('data-advanced-toggle');
+            const target = document.getElementById(targetId);
+            if (!target) {
+                return;
+            }
+
+            button.addEventListener('click', () => {
+                const willHide = !target.classList.contains('hidden');
+                target.classList.toggle('hidden');
+                button.setAttribute('aria-expanded', willHide ? 'false' : 'true');
+
+                const label = button.querySelector('[data-label]');
+                if (label) {
+                    const showText = button.getAttribute('data-label-show');
+                    const hideText = button.getAttribute('data-label-hide');
+                    label.textContent = willHide ? showText : hideText;
+                }
+            });
+        });
+    })();
 </script>
 @endsection

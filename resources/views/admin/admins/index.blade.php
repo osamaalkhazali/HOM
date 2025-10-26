@@ -4,16 +4,65 @@
 
 @section('content')
     <div class="space-y-6">
+        @php
+            $exportFormats = [
+                'excel' => ['label' => 'Excel', 'icon' => 'fas fa-file-excel text-green-600'],
+                'csv' => ['label' => 'CSV', 'icon' => 'fas fa-file-code text-amber-600'],
+                'pdf' => ['label' => 'PDF', 'icon' => 'fas fa-file-pdf text-red-600'],
+            ];
+
+            $filteredParams = $exportQuery ?? [];
+            unset($filteredParams['scope'], $filteredParams['format']);
+
+            $advancedFilterKeys = ['status', 'role'];
+            $advancedActive = collect($advancedFilterKeys)->contains(fn ($key) => filled(request($key)));
+        @endphp
+
         <!-- Header -->
-        <div class="flex justify-between items-center">
+        <div class="flex flex-wrap items-center justify-between gap-4">
             <div>
                 <h1 class="text-2xl font-semibold text-gray-900">Admin Management</h1>
                 <p class="mt-1 text-sm text-gray-600">Manage administrator accounts and permissions</p>
             </div>
-            <a href="{{ route('admin.admins.create') }}"
-                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
-                <i class="fas fa-plus mr-2"></i>Add New Admin
-            </a>
+            <div class="flex items-center gap-2 flex-wrap">
+                <a href="{{ route('admin.admins.create') }}"
+                   class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                    <i class="fas fa-plus mr-2"></i>Add New Admin
+                </a>
+                <div class="relative">
+                    <button type="button"
+                            class="inline-flex items-center gap-2 bg-gray-800 hover:bg-gray-900 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                            data-dropdown-toggle="admins-export-menu"
+                            aria-expanded="false">
+                        <i class="fas fa-download"></i>
+                        <span>Export</span>
+                        <i class="fas fa-chevron-down text-xs"></i>
+                    </button>
+                    <div id="admins-export-menu"
+                         class="hidden absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-lg shadow-lg z-30"
+                         data-dropdown-menu>
+                        <div class="py-2 text-sm text-gray-700">
+                            <div class="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wide">Current results</div>
+                            @foreach($exportFormats as $formatKey => $formatMeta)
+                                <a href="{{ route('admin.admins.export', array_merge(['format' => $formatKey, 'scope' => 'filtered'], $filteredParams)) }}"
+                                   class="flex items-center gap-3 px-4 py-2 hover:bg-gray-50 transition-colors">
+                                    <i class="{{ $formatMeta['icon'] }}"></i>
+                                    <span>{{ $formatMeta['label'] }} (Filtered)</span>
+                                </a>
+                            @endforeach
+                            <div class="my-2 border-t border-gray-100"></div>
+                            <div class="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wide">All records</div>
+                            @foreach($exportFormats as $formatKey => $formatMeta)
+                                <a href="{{ route('admin.admins.export', ['format' => $formatKey, 'scope' => 'all']) }}"
+                                   class="flex items-center gap-3 px-4 py-2 hover:bg-gray-50 transition-colors">
+                                    <i class="{{ $formatMeta['icon'] }}"></i>
+                                    <span>{{ $formatMeta['label'] }} (All)</span>
+                                </a>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Stats Cards -->
@@ -69,55 +118,67 @@
 
         <!-- Filters -->
         <div class="bg-white rounded-lg shadow">
-            <form method="GET" action="{{ route('admin.admins.index') }}" class="p-6">
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <!-- Search -->
-                    <div>
-                        <label for="search" class="block text-sm font-medium text-gray-700 mb-1">Search</label>
-                        <input type="text" id="search" name="search" value="{{ request('search') }}"
-                            placeholder="Search by name or email..."
-                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <form method="GET" action="{{ route('admin.admins.index') }}" class="p-6 space-y-4">
+                <div class="flex flex-col gap-3 md:flex-row md:items-center md:gap-4">
+                    <div class="flex-1">
+                        <label for="search" class="sr-only">Search admins</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                                <i class="fas fa-search"></i>
+                            </span>
+                            <input type="text" id="search" name="search" value="{{ request('search') }}"
+                                   placeholder="Search by name or email..."
+                                   class="w-full border border-gray-300 rounded-lg px-3 py-2 pl-10 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
                     </div>
-
-                    <!-- Status Filter -->
-                    <div>
-                        <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                        <select id="status" name="status"
-                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option value="">All Statuses</option>
-                            <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>Active</option>
-                            <option value="inactive" {{ request('status') === 'inactive' ? 'selected' : '' }}>Inactive
-                            </option>
-                        </select>
-                    </div>
-
-                    <!-- Role Filter -->
-                    <div>
-                        <label for="role" class="block text-sm font-medium text-gray-700 mb-1">Role</label>
-                        <select id="role" name="role"
-                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option value="">All Roles</option>
-                            <option value="super_admin" {{ request('role') === 'super_admin' ? 'selected' : '' }}>Super
-                                Admin</option>
-                            <option value="admin" {{ request('role') === 'admin' ? 'selected' : '' }}>Admin</option>
-                        </select>
-                    </div>
-
-                    <!-- Actions -->
-                    <div class="flex items-end space-x-2">
+                    <div class="flex items-center gap-2 flex-wrap">
                         <button type="submit"
-                            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
-                            <i class="fas fa-search mr-1"></i>Filter
+                                class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
+                            <i class="fas fa-filter"></i>
+                            <span>Apply</span>
                         </button>
                         <a href="{{ route('admin.admins.index') }}"
-                            class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors">
-                            <i class="fas fa-times mr-1"></i>Clear
+                           class="inline-flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg transition-colors">
+                            <i class="fas fa-rotate-left"></i>
+                            <span>Clear</span>
                         </a>
+                        <button type="button"
+                                class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50"
+                                id="admins-advanced-toggle"
+                                data-advanced-toggle="admins-advanced-filters"
+                                data-label-show="Show advanced filters"
+                                data-label-hide="Hide advanced filters"
+                                aria-expanded="{{ $advancedActive ? 'true' : 'false' }}">
+                            <i class="fas fa-sliders-h"></i>
+                            <span data-label>{{ $advancedActive ? 'Hide advanced filters' : 'Show advanced filters' }}</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="admins-advanced-filters" class="mt-2 {{ $advancedActive ? '' : 'hidden' }}">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                            <select id="status" name="status"
+                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="">All Statuses</option>
+                                <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>Active</option>
+                                <option value="inactive" {{ request('status') === 'inactive' ? 'selected' : '' }}>Inactive</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="role" class="block text-sm font-medium text-gray-700 mb-1">Role</label>
+                            <select id="role" name="role"
+                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="">All Roles</option>
+                                <option value="super_admin" {{ request('role') === 'super_admin' ? 'selected' : '' }}>Super Admin</option>
+                                <option value="admin" {{ request('role') === 'admin' ? 'selected' : '' }}>Admin</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
             </form>
         </div>
-
         <!-- Admins Table -->
         <div class="bg-white rounded-lg shadow overflow-hidden">
             <div class="px-6 py-4 border-b border-gray-200">
@@ -280,4 +341,76 @@
             @endif
         </div>
     </div>
+
+    <script>
+        (() => {
+            const dropdownButtons = document.querySelectorAll('[data-dropdown-toggle]');
+            const dropdownMenus = document.querySelectorAll('[data-dropdown-menu]');
+
+            dropdownButtons.forEach(button => {
+                const targetId = button.getAttribute('data-dropdown-toggle');
+                const menu = document.getElementById(targetId);
+                if (!menu) {
+                    return;
+                }
+
+                button.addEventListener('click', event => {
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    dropdownMenus.forEach(otherMenu => {
+                        if (otherMenu !== menu) {
+                            otherMenu.classList.add('hidden');
+                            const otherButton = document.querySelector(`[data-dropdown-toggle="${otherMenu.id}"]`);
+                            if (otherButton) {
+                                otherButton.setAttribute('aria-expanded', 'false');
+                            }
+                        }
+                    });
+
+                    const isHidden = menu.classList.contains('hidden');
+                    menu.classList.toggle('hidden', !isHidden);
+                    button.setAttribute('aria-expanded', isHidden ? 'true' : 'false');
+                });
+            });
+
+            dropdownMenus.forEach(menu => {
+                menu.addEventListener('click', event => event.stopPropagation());
+            });
+
+            document.addEventListener('click', () => {
+                dropdownMenus.forEach(menu => {
+                    if (!menu.classList.contains('hidden')) {
+                        menu.classList.add('hidden');
+                        const button = document.querySelector(`[data-dropdown-toggle="${menu.id}"]`);
+                        if (button) {
+                            button.setAttribute('aria-expanded', 'false');
+                        }
+                    }
+                });
+            });
+
+            const advancedToggles = document.querySelectorAll('[data-advanced-toggle]');
+            advancedToggles.forEach(button => {
+                const targetId = button.getAttribute('data-advanced-toggle');
+                const target = document.getElementById(targetId);
+                if (!target) {
+                    return;
+                }
+
+                button.addEventListener('click', () => {
+                    const willHide = !target.classList.contains('hidden');
+                    target.classList.toggle('hidden');
+                    button.setAttribute('aria-expanded', willHide ? 'false' : 'true');
+
+                    const label = button.querySelector('[data-label]');
+                    if (label) {
+                        const showText = button.getAttribute('data-label-show');
+                        const hideText = button.getAttribute('data-label-hide');
+                        label.textContent = willHide ? showText : hideText;
+                    }
+                });
+            });
+        })();
+    </script>
 @endsection

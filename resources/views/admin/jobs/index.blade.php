@@ -3,150 +3,203 @@
 @section('title', 'Job Management')
 
 @section('content')
+    @php
+        $exportFormats = [
+            'excel' => ['label' => 'Excel', 'icon' => 'fas fa-file-excel text-green-600'],
+            'csv' => ['label' => 'CSV', 'icon' => 'fas fa-file-code text-amber-600'],
+            'pdf' => ['label' => 'PDF', 'icon' => 'fas fa-file-pdf text-red-600'],
+        ];
+
+        $filteredParams = $exportQuery ?? [];
+        unset($filteredParams['scope'], $filteredParams['format']);
+
+        $advancedFilterKeys = ['category', 'status', 'level', 'deadline_status', 'has_applications', 'has_questions', 'has_documents', 'sort', 'direction'];
+        $advancedActive = collect($advancedFilterKeys)->contains(fn ($key) => filled(request($key)));
+    @endphp
+
     <!-- Header -->
-    <div class="mb-8 flex justify-between items-center">
+    <div class="mb-8 flex flex-wrap items-center justify-between gap-4">
         <div>
             <h1 class="text-3xl font-bold text-gray-900">Job Management</h1>
             <p class="text-gray-600 mt-2">Manage all job postings and their status on your portal.</p>
         </div>
-        <a href="{{ route('admin.jobs.create') }}"
-            class="bg-green-600 text-white px-4 py-2 rounded-md text-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">
-            <i class="fas fa-plus mr-2"></i>Add New Job
-        </a>
+        <div class="flex items-center gap-2 flex-wrap">
+            <a href="{{ route('admin.jobs.create') }}"
+               class="bg-green-600 text-white px-4 py-2 rounded-md text-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">
+                <i class="fas fa-plus mr-2"></i>Add New Job
+            </a>
+            <div class="relative">
+                <button type="button"
+                        class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+                        data-dropdown-toggle="jobs-export-menu"
+                        aria-expanded="false">
+                    <i class="fas fa-download"></i>
+                    <span>Export</span>
+                    <i class="fas fa-chevron-down text-xs"></i>
+                </button>
+                <div id="jobs-export-menu"
+                     class="hidden absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-lg shadow-lg z-30"
+                     data-dropdown-menu>
+                    <div class="py-2 text-sm text-gray-700">
+                        <div class="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wide">Current results</div>
+                        @foreach($exportFormats as $formatKey => $formatMeta)
+                            <a href="{{ route('admin.jobs.export', array_merge(['format' => $formatKey, 'scope' => 'filtered'], $filteredParams)) }}"
+                               class="flex items-center gap-3 px-4 py-2 hover:bg-gray-50 transition-colors">
+                                <i class="{{ $formatMeta['icon'] }}"></i>
+                                <span>{{ $formatMeta['label'] }} (Filtered)</span>
+                            </a>
+                        @endforeach
+                        <div class="my-2 border-t border-gray-100"></div>
+                        <div class="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wide">All records</div>
+                        @foreach($exportFormats as $formatKey => $formatMeta)
+                            <a href="{{ route('admin.jobs.export', ['format' => $formatKey, 'scope' => 'all']) }}"
+                               class="flex items-center gap-3 px-4 py-2 hover:bg-gray-50 transition-colors">
+                                <i class="{{ $formatMeta['icon'] }}"></i>
+                                <span>{{ $formatMeta['label'] }} (All)</span>
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Filters -->
     <div class="bg-white rounded-lg shadow mb-6">
         <div class="p-6">
             <form method="GET" action="{{ route('admin.jobs.index') }}" class="space-y-4">
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <!-- Search -->
-                    <div class="md:col-span-2">
-                        <label for="search" class="block text-sm font-medium text-gray-700 mb-1">Search</label>
-                        <input type="text" name="search" id="search" value="{{ request('search') }}"
-                            placeholder="Title, description, company, location, category, questions, documents..."
-                            class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <div class="flex flex-col gap-3 md:flex-row md:items-center md:gap-4">
+                    <div class="flex-1">
+                        <label for="search" class="sr-only">Search jobs</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                                <i class="fas fa-search"></i>
+                            </span>
+                            <input type="text" name="search" id="search" value="{{ request('search') }}"
+                                   placeholder="Search titles, companies, locations, requirements..."
+                                   class="w-full border border-gray-300 rounded-md px-3 py-2 pl-10 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
                     </div>
-
-                    <!-- Category Filter -->
-                    <div>
-                        <label for="category" class="block text-sm font-medium text-gray-700 mb-1">Category</label>
-                        <select name="category" id="category"
-                            class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option value="">All Categories</option>
-                            @foreach ($categories as $category)
-                                <option value="{{ $category->id }}"
-                                    {{ request('category') == $category->id ? 'selected' : '' }}>
-                                    {{ $category->admin_label ?: $category->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <!-- Status Filter -->
-                    <div>
-                        <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                        <select name="status" id="status"
-                            class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option value="">All Status</option>
-                            <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>Active</option>
-                            <option value="inactive" {{ request('status') === 'inactive' ? 'selected' : '' }}>Inactive</option>
-                            <option value="draft" {{ request('status') === 'draft' ? 'selected' : '' }}>Draft</option>
-                        </select>
-                    </div>
-
-                    <!-- Level Filter -->
-                    <div>
-                        <label for="level" class="block text-sm font-medium text-gray-700 mb-1">Experience Level</label>
-                        <select name="level" id="level"
-                            class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option value="">All Levels</option>
-                            @foreach (['entry', 'mid', 'senior', 'executive'] as $levelKey)
-                                <option value="{{ $levelKey }}" {{ request('level') === $levelKey ? 'selected' : '' }}>
-                                    {{ trans('site.jobs.levels.' . $levelKey, [], 'en') }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <!-- Deadline Status -->
-                    <div>
-                        <label for="deadline_status" class="block text-sm font-medium text-gray-700 mb-1">Deadline</label>
-                        <select name="deadline_status" id="deadline_status"
-                            class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option value="">All Jobs</option>
-                            <option value="active" {{ request('deadline_status') === 'active' ? 'selected' : '' }}>Active (Not Expired)</option>
-                            <option value="expired" {{ request('deadline_status') === 'expired' ? 'selected' : '' }}>Expired</option>
-                        </select>
-                    </div>
-
-                    <!-- Has Applications -->
-                    <div>
-                        <label for="has_applications" class="block text-sm font-medium text-gray-700 mb-1">Applications</label>
-                        <select name="has_applications" id="has_applications"
-                            class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option value="">All Jobs</option>
-                            <option value="yes" {{ request('has_applications') === 'yes' ? 'selected' : '' }}>With Applications</option>
-                            <option value="no" {{ request('has_applications') === 'no' ? 'selected' : '' }}>No Applications</option>
-                        </select>
-                    </div>
-
-                    <!-- Has Questions -->
-                    <div>
-                        <label for="has_questions" class="block text-sm font-medium text-gray-700 mb-1">Questions</label>
-                        <select name="has_questions" id="has_questions"
-                            class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option value="">All Jobs</option>
-                            <option value="yes" {{ request('has_questions') === 'yes' ? 'selected' : '' }}>With Questions</option>
-                            <option value="no" {{ request('has_questions') === 'no' ? 'selected' : '' }}>No Questions</option>
-                        </select>
-                    </div>
-
-                    <!-- Has Documents -->
-                    <div>
-                        <label for="has_documents" class="block text-sm font-medium text-gray-700 mb-1">Documents</label>
-                        <select name="has_documents" id="has_documents"
-                            class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option value="">All Jobs</option>
-                            <option value="yes" {{ request('has_documents') === 'yes' ? 'selected' : '' }}>With Documents</option>
-                            <option value="no" {{ request('has_documents') === 'no' ? 'selected' : '' }}>No Documents</option>
-                        </select>
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <button type="submit"
+                                class="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md text-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <i class="fas fa-filter"></i>
+                            <span>Apply</span>
+                        </button>
+                        <a href="{{ route('admin.jobs.index') }}"
+                           class="inline-flex items-center gap-2 bg-gray-100 text-gray-700 px-4 py-2 rounded-md text-sm hover:bg-gray-200">
+                            <i class="fas fa-rotate-left"></i>
+                            <span>Clear</span>
+                        </a>
+                        <button type="button"
+                                class="inline-flex items-center gap-2 px-4 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50 text-sm"
+                                id="jobs-advanced-toggle"
+                                data-advanced-toggle="jobs-advanced-filters"
+                                data-label-show="Show advanced filters"
+                                data-label-hide="Hide advanced filters"
+                                aria-expanded="{{ $advancedActive ? 'true' : 'false' }}">
+                            <i class="fas fa-sliders-h"></i>
+                            <span data-label>{{ $advancedActive ? 'Hide advanced filters' : 'Show advanced filters' }}</span>
+                        </button>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <!-- Sort -->
-                    <div>
-                        <label for="sort" class="block text-sm font-medium text-gray-700 mb-1">Sort By</label>
-                        <div class="flex space-x-2">
-                            <select name="sort" id="sort"
-                                class="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                <option value="created_at" {{ request('sort') === 'created_at' ? 'selected' : '' }}>Post
-                                    Date</option>
-                                <option value="title" {{ request('sort') === 'title' ? 'selected' : '' }}>Title</option>
-                                <option value="company" {{ request('sort') === 'company' ? 'selected' : '' }}>Company
-                                </option>
-                                <option value="deadline" {{ request('sort') === 'deadline' ? 'selected' : '' }}>Deadline
-                                </option>
-                            </select>
-                            <select name="direction"
-                                class="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                <option value="desc" {{ request('direction') === 'desc' ? 'selected' : '' }}>↓</option>
-                                <option value="asc" {{ request('direction') === 'asc' ? 'selected' : '' }}>↑</option>
+                <div id="jobs-advanced-filters" class="mt-4 {{ $advancedActive ? '' : 'hidden' }}">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div>
+                            <label for="category" class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                            <select name="category" id="category"
+                                    class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="">All Categories</option>
+                                @foreach ($categories as $category)
+                                    <option value="{{ $category->id }}" {{ request('category') == $category->id ? 'selected' : '' }}>
+                                        {{ $category->admin_label ?: $category->name }}
+                                    </option>
+                                @endforeach
                             </select>
                         </div>
-                    </div>
 
-                    <!-- Actions -->
-                    <div class="flex items-end space-x-3">
-                        <button type="submit"
-                            class="bg-blue-600 text-white px-4 py-2 rounded-md text-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <i class="fas fa-search mr-2"></i>Filter
-                        </button>
-                        <a href="{{ route('admin.jobs.index') }}"
-                            class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md text-sm hover:bg-gray-400">
-                            <i class="fas fa-times mr-2"></i>Clear
-                        </a>
+                        <div>
+                            <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                            <select name="status" id="status"
+                                    class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="">All Status</option>
+                                <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>Active</option>
+                                <option value="inactive" {{ request('status') === 'inactive' ? 'selected' : '' }}>Inactive</option>
+                                <option value="draft" {{ request('status') === 'draft' ? 'selected' : '' }}>Draft</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="level" class="block text-sm font-medium text-gray-700 mb-1">Experience Level</label>
+                            <select name="level" id="level"
+                                    class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="">All Levels</option>
+                                @foreach (['entry', 'mid', 'senior', 'executive'] as $levelKey)
+                                    <option value="{{ $levelKey }}" {{ request('level') === $levelKey ? 'selected' : '' }}>
+                                        {{ trans('site.jobs.levels.' . $levelKey, [], 'en') }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="deadline_status" class="block text-sm font-medium text-gray-700 mb-1">Deadline</label>
+                            <select name="deadline_status" id="deadline_status"
+                                    class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="">All Jobs</option>
+                                <option value="active" {{ request('deadline_status') === 'active' ? 'selected' : '' }}>Active (Not Expired)</option>
+                                <option value="expired" {{ request('deadline_status') === 'expired' ? 'selected' : '' }}>Expired</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="has_applications" class="block text-sm font-medium text-gray-700 mb-1">Applications</label>
+                            <select name="has_applications" id="has_applications"
+                                    class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="">All Jobs</option>
+                                <option value="yes" {{ request('has_applications') === 'yes' ? 'selected' : '' }}>With Applications</option>
+                                <option value="no" {{ request('has_applications') === 'no' ? 'selected' : '' }}>No Applications</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="has_questions" class="block text-sm font-medium text-gray-700 mb-1">Questions</label>
+                            <select name="has_questions" id="has_questions"
+                                    class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="">All Jobs</option>
+                                <option value="yes" {{ request('has_questions') === 'yes' ? 'selected' : '' }}>With Questions</option>
+                                <option value="no" {{ request('has_questions') === 'no' ? 'selected' : '' }}>No Questions</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="has_documents" class="block text-sm font-medium text-gray-700 mb-1">Documents</label>
+                            <select name="has_documents" id="has_documents"
+                                    class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="">All Jobs</option>
+                                <option value="yes" {{ request('has_documents') === 'yes' ? 'selected' : '' }}>With Documents</option>
+                                <option value="no" {{ request('has_documents') === 'no' ? 'selected' : '' }}>No Documents</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="sort" class="block text-sm font-medium text-gray-700 mb-1">Sort By</label>
+                            <div class="flex space-x-2">
+                                <select name="sort" id="sort"
+                                        class="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="created_at" {{ request('sort') === 'created_at' ? 'selected' : '' }}>Post Date</option>
+                                    <option value="title" {{ request('sort') === 'title' ? 'selected' : '' }}>Title</option>
+                                    <option value="company" {{ request('sort') === 'company' ? 'selected' : '' }}>Company</option>
+                                    <option value="deadline" {{ request('sort') === 'deadline' ? 'selected' : '' }}>Deadline</option>
+                                </select>
+                                <select name="direction"
+                                        class="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="desc" {{ request('direction') === 'desc' ? 'selected' : '' }}>↓</option>
+                                    <option value="asc" {{ request('direction') === 'asc' ? 'selected' : '' }}>↑</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -156,7 +209,6 @@
             </form>
         </div>
     </div>
-
     <!-- Jobs Table -->
     <div class="bg-white rounded-lg shadow overflow-hidden">
         <div class="overflow-x-auto">
@@ -296,4 +348,76 @@
             </div>
         @endif
     </div>
+
+    <script>
+        (() => {
+            const dropdownButtons = document.querySelectorAll('[data-dropdown-toggle]');
+            const dropdownMenus = document.querySelectorAll('[data-dropdown-menu]');
+
+            dropdownButtons.forEach(button => {
+                const targetId = button.getAttribute('data-dropdown-toggle');
+                const menu = document.getElementById(targetId);
+                if (!menu) {
+                    return;
+                }
+
+                button.addEventListener('click', event => {
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    dropdownMenus.forEach(otherMenu => {
+                        if (otherMenu !== menu) {
+                            otherMenu.classList.add('hidden');
+                            const otherButton = document.querySelector(`[data-dropdown-toggle="${otherMenu.id}"]`);
+                            if (otherButton) {
+                                otherButton.setAttribute('aria-expanded', 'false');
+                            }
+                        }
+                    });
+
+                    const isHidden = menu.classList.contains('hidden');
+                    menu.classList.toggle('hidden', !isHidden);
+                    button.setAttribute('aria-expanded', isHidden ? 'true' : 'false');
+                });
+            });
+
+            dropdownMenus.forEach(menu => {
+                menu.addEventListener('click', event => event.stopPropagation());
+            });
+
+            document.addEventListener('click', () => {
+                dropdownMenus.forEach(menu => {
+                    if (!menu.classList.contains('hidden')) {
+                        menu.classList.add('hidden');
+                        const button = document.querySelector(`[data-dropdown-toggle="${menu.id}"]`);
+                        if (button) {
+                            button.setAttribute('aria-expanded', 'false');
+                        }
+                    }
+                });
+            });
+
+            const advancedToggles = document.querySelectorAll('[data-advanced-toggle]');
+            advancedToggles.forEach(button => {
+                const targetId = button.getAttribute('data-advanced-toggle');
+                const target = document.getElementById(targetId);
+                if (!target) {
+                    return;
+                }
+
+                button.addEventListener('click', () => {
+                    const willHide = !target.classList.contains('hidden');
+                    target.classList.toggle('hidden');
+                    button.setAttribute('aria-expanded', willHide ? 'false' : 'true');
+
+                    const label = button.querySelector('[data-label]');
+                    if (label) {
+                        const showText = button.getAttribute('data-label-show');
+                        const hideText = button.getAttribute('data-label-hide');
+                        label.textContent = willHide ? showText : hideText;
+                    }
+                });
+            });
+        })();
+    </script>
 @endsection

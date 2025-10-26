@@ -4,20 +4,47 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Admin;
+use App\Services\Admin\AdminExportService;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class AdminController extends Controller
 {
+  protected AdminExportService $exportService;
+
+  public function __construct(AdminExportService $exportService)
+  {
+    $this->exportService = $exportService;
+  }
+
   /**
    * Display a listing of admin users.
    */
   public function index(Request $request)
   {
-    $query = Admin::query();
+    $query = $this->baseIndexQuery();
 
-    // Search functionality
+    $this->applyIndexFilters($request, $query);
+    $this->applyIndexSorting($request, $query);
+
+    $admins = $query->paginate(10)->appends($request->query());
+    $exportQuery = $request->except(['page']);
+
+    return view('admin.admins.index', compact('admins', 'exportQuery'));
+  }
+
+  protected function baseIndexQuery(): Builder
+  {
+    return Admin::query();
+  }
+
+  protected function applyIndexFilters(Request $request, Builder $query): void
+  {
     if ($request->filled('search')) {
       $search = $request->get('search');
       $query->where(function ($q) use ($search) {
@@ -26,7 +53,6 @@ class AdminController extends Controller
       });
     }
 
-    // Filter by status (using email_verified_at)
     if ($request->filled('status')) {
       if ($request->get('status') === 'active') {
         $query->whereNotNull('email_verified_at');
@@ -35,7 +61,6 @@ class AdminController extends Controller
       }
     }
 
-    // Filter by role (using is_super)
     if ($request->filled('role')) {
       if ($request->get('role') === 'super_admin') {
         $query->where('is_super', true);
@@ -43,19 +68,119 @@ class AdminController extends Controller
         $query->where('is_super', false);
       }
     }
+  }
 
-    // Sorting
+  protected function applyIndexSorting(Request $request, Builder $query): void
+  {
     $sortBy = $request->get('sort_by', 'created_at');
     $sortDirection = $request->get('sort_direction', 'desc');
 
     $allowedSorts = ['name', 'email', 'created_at', 'last_login_at'];
-    if (in_array($sortBy, $allowedSorts)) {
+    if (in_array($sortBy, $allowedSorts, true)) {
       $query->orderBy($sortBy, $sortDirection);
     }
+  }
 
-    $admins = $query->paginate(10)->appends($request->query());
+  public function export(Request $request, string $format)
+  {
+    $scope = $request->get('scope', 'filtered');
+    $query = $this->baseIndexQuery();
 
-    return view('admin.admins.index', compact('admins'));
+    if ($scope !== 'all') {
+      $this->applyIndexFilters($request, $query);
+    }
+
+    $this->applyIndexSorting($request, $query);
+
+    $admins = $query->get();
+
+    if ($admins->isEmpty()) {
+      return redirect()->route('admin.admins.index', $request->except(['page', 'scope']))
+        ->with('warning', 'No admin accounts available for export with the selected filters.');
+    }
+
+    [$headings, $rows, $meta] = $this->buildAdminExportRows($admins, $request, $scope);
+
+    $fileName = 'admins_' . now()->format('Ymd_His');
+
+    return $this->exportService->download($format, $fileName, $headings, $rows, $meta);
+  }
+
+  /**
+   * @return array{0: array<int, string>, 1: array<int, array<int, string|int|float|null>>, 2: array<string, mixed>}
+   */
+  protected function buildAdminExportRows(Collection $admins, Request $request, string $scope): array
+  {
+    $headings = [
+      'Admin ID',
+      'Name',
+      'Email',
+      'Role',
+      'Active',
+      'Email Verified At',
+      'Last Login At',
+      'Created At',
+      'Updated At',
+    ];
+
+    $rows = $admins->map(function (Admin $admin) {
+      return $this->mapAdminRow($admin);
+    })->all();
+
+    $meta = [
+      'title' => 'Admins Export',
+      'description' => 'Total admins: ' . $admins->count() . ($scope === 'all' ? ' (full dataset)' : ' (filtered)'),
+      'generated_at' => now()->format('Y-m-d H:i'),
+      'filters' => $scope === 'all' ? null : $this->summarizeFilters($request),
+    ];
+
+    return [$headings, $rows, $meta];
+  }
+
+  /**
+   * @return array<int, string|int|float|null>
+   */
+  protected function mapAdminRow(Admin $admin): array
+  {
+    $role = $admin->is_super ? 'Super Admin' : 'Admin';
+    $isActive = $admin->email_verified_at ? 'Yes' : 'No';
+
+    $verifiedAt = $admin->email_verified_at instanceof Carbon
+      ? $admin->email_verified_at->format('Y-m-d H:i')
+      : ($admin->email_verified_at ? Carbon::parse($admin->email_verified_at)->format('Y-m-d H:i') : '—');
+
+    $lastLogin = $admin->last_login_at instanceof Carbon
+      ? $admin->last_login_at->format('Y-m-d H:i')
+      : ($admin->last_login_at ? Carbon::parse($admin->last_login_at)->format('Y-m-d H:i') : '—');
+
+    return [
+      $admin->id,
+      $admin->name ?? '—',
+      $admin->email ?? '—',
+      $role,
+      $isActive,
+      $verifiedAt,
+      $lastLogin,
+      optional($admin->created_at)->format('Y-m-d H:i'),
+      optional($admin->updated_at)->format('Y-m-d H:i'),
+    ];
+  }
+
+  protected function summarizeFilters(Request $request): ?string
+  {
+    $filters = collect($request->except(['page', 'sort_by', 'sort_direction', 'scope', 'format']))
+      ->filter(function ($value) {
+        return !is_null($value) && $value !== '';
+      })
+      ->map(function ($value, $key) {
+        $label = Str::headline(str_replace('_', ' ', $key));
+        if (is_array($value)) {
+          $value = implode(', ', $value);
+        }
+        return $label . ': ' . $value;
+      });
+
+    return $filters->isEmpty() ? null : $filters->join('; ');
   }
 
   /**

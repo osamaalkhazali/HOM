@@ -3,17 +3,64 @@
 @section('title', 'Users & Profiles Management')
 
 @section('content')
+    @php
+        $exportFormats = [
+            'excel' => ['label' => 'Excel', 'icon' => 'fas fa-file-excel text-green-600'],
+            'csv' => ['label' => 'CSV', 'icon' => 'fas fa-file-code text-amber-600'],
+            'pdf' => ['label' => 'PDF', 'icon' => 'fas fa-file-pdf text-red-600'],
+        ];
+
+        $filteredParams = $exportQuery ?? [];
+        unset($filteredParams['scope'], $filteredParams['format']);
+
+        $advancedFilterKeys = ['status', 'verified', 'profile', 'has_cv', 'has_applications', 'experience_min', 'experience_max', 'sort', 'direction'];
+        $advancedActive = collect($advancedFilterKeys)->contains(fn ($key) => filled(request($key)));
+    @endphp
+
     <!-- Header -->
-    <div class="mb-8 flex justify-between items-center">
+    <div class="mb-8 flex flex-wrap items-center justify-between gap-4">
         <div>
             <h1 class="text-3xl font-bold text-gray-900">Users & Profiles Management</h1>
             <p class="text-gray-600 mt-2">Manage user accounts and their professional profiles in one unified view.</p>
         </div>
-        <div class="flex space-x-3">
+        <div class="flex items-center gap-2 flex-wrap">
             <a href="{{ route('admin.users.deleted') }}"
-                class="bg-gray-600 text-white px-4 py-2 rounded-md text-sm hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500">
+               class="bg-gray-600 text-white px-4 py-2 rounded-md text-sm hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500">
                 <i class="fas fa-trash mr-2"></i>Deleted Users ({{ \App\Models\User::onlyTrashed()->count() }})
             </a>
+            <div class="relative">
+                <button type="button"
+                        class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+                        data-dropdown-toggle="users-export-menu"
+                        aria-expanded="false">
+                    <i class="fas fa-download"></i>
+                    <span>Export</span>
+                    <i class="fas fa-chevron-down text-xs"></i>
+                </button>
+                <div id="users-export-menu"
+                     class="hidden absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-lg shadow-lg z-30"
+                     data-dropdown-menu>
+                    <div class="py-2 text-sm text-gray-700">
+                        <div class="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wide">Current results</div>
+                        @foreach($exportFormats as $formatKey => $formatMeta)
+                            <a href="{{ route('admin.users.export', array_merge(['format' => $formatKey, 'scope' => 'filtered'], $filteredParams)) }}"
+                               class="flex items-center gap-3 px-4 py-2 hover:bg-gray-50 transition-colors">
+                                <i class="{{ $formatMeta['icon'] }}"></i>
+                                <span>{{ $formatMeta['label'] }} (Filtered)</span>
+                            </a>
+                        @endforeach
+                        <div class="my-2 border-t border-gray-100"></div>
+                        <div class="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wide">All records</div>
+                        @foreach($exportFormats as $formatKey => $formatMeta)
+                            <a href="{{ route('admin.users.export', ['format' => $formatKey, 'scope' => 'all']) }}"
+                               class="flex items-center gap-3 px-4 py-2 hover:bg-gray-50 transition-colors">
+                                <i class="{{ $formatMeta['icon'] }}"></i>
+                                <span>{{ $formatMeta['label'] }} (All)</span>
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -21,128 +68,133 @@
     <div class="bg-white rounded-lg shadow mb-6">
         <div class="p-6">
             <form method="GET" action="{{ route('admin.users.index') }}" class="space-y-4">
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <!-- Search -->
-                    <div class="md:col-span-2">
-                        <label for="search" class="block text-sm font-medium text-gray-700 mb-1">Search</label>
-                        <input type="text" name="search" id="search" value="{{ request('search') }}"
-                            placeholder="Name, email, phone, position, skills, location, education, jobs applied..."
-                            class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <div class="flex flex-col gap-3 md:flex-row md:items-center md:gap-4">
+                    <div class="flex-1">
+                        <label for="search" class="sr-only">Search users</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                                <i class="fas fa-search"></i>
+                            </span>
+                            <input type="text" name="search" id="search" value="{{ request('search') }}"
+                                   placeholder="Search names, emails, skills, locations..."
+                                   class="w-full border border-gray-300 rounded-md px-3 py-2 pl-10 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
                     </div>
-
-                    <!-- Status Filter -->
-                    <div>
-                        <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Account
-                            Status</label>
-                        <select name="status" id="status"
-                            class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option value="">All Status</option>
-                            <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>Active
-                            </option>
-                            <option value="inactive" {{ request('status') === 'inactive' ? 'selected' : '' }}>Deactivated
-                            </option>
-                        </select>
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <button type="submit"
+                                class="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md text-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <i class="fas fa-filter"></i>
+                            <span>Apply</span>
+                        </button>
+                        <a href="{{ route('admin.users.index') }}"
+                           class="inline-flex items-center gap-2 bg-gray-100 text-gray-700 px-4 py-2 rounded-md text-sm hover:bg-gray-200">
+                            <i class="fas fa-rotate-left"></i>
+                            <span>Clear</span>
+                        </a>
+                        <button type="button"
+                                class="inline-flex items-center gap-2 px-4 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50 text-sm"
+                                id="users-advanced-toggle"
+                                data-advanced-toggle="users-advanced-filters"
+                                data-label-show="Show advanced filters"
+                                data-label-hide="Hide advanced filters"
+                                aria-expanded="{{ $advancedActive ? 'true' : 'false' }}">
+                            <i class="fas fa-sliders-h"></i>
+                            <span data-label>{{ $advancedActive ? 'Hide advanced filters' : 'Show advanced filters' }}</span>
+                        </button>
                     </div>
+                </div>
 
-                    <!-- Email Verification Filter -->
-                    <div>
-                        <label for="verified" class="block text-sm font-medium text-gray-700 mb-1">Email Verified</label>
-                        <select name="verified" id="verified"
-                            class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option value="">All Users</option>
-                            <option value="yes" {{ request('verified') === 'yes' ? 'selected' : '' }}>Verified</option>
-                            <option value="no" {{ request('verified') === 'no' ? 'selected' : '' }}>Not Verified</option>
-                        </select>
-                    </div>
-
-                    <!-- Profile Filter -->
-                    <div>
-                        <label for="profile" class="block text-sm font-medium text-gray-700 mb-1">Profile Status</label>
-                        <select name="profile" id="profile"
-                            class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option value="">All Users</option>
-                            <option value="with_profile" {{ request('profile') === 'with_profile' ? 'selected' : '' }}>With
-                                Profile</option>
-                            <option value="without_profile"
-                                {{ request('profile') === 'without_profile' ? 'selected' : '' }}>Without Profile</option>
-                        </select>
-                    </div>
-
-                    <!-- CV Filter -->
-                    <div>
-                        <label for="has_cv" class="block text-sm font-medium text-gray-700 mb-1">CV Status</label>
-                        <select name="has_cv" id="has_cv"
-                            class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option value="">All Users</option>
-                            <option value="yes" {{ request('has_cv') === 'yes' ? 'selected' : '' }}>With CV</option>
-                            <option value="no" {{ request('has_cv') === 'no' ? 'selected' : '' }}>Without CV</option>
-                        </select>
-                    </div>
-
-                    <!-- Applications Filter -->
-                    <div>
-                        <label for="has_applications" class="block text-sm font-medium text-gray-700 mb-1">Applications</label>
-                        <select name="has_applications" id="has_applications"
-                            class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option value="">All Users</option>
-                            <option value="yes" {{ request('has_applications') === 'yes' ? 'selected' : '' }}>With Applications</option>
-                            <option value="no" {{ request('has_applications') === 'no' ? 'selected' : '' }}>No Applications</option>
-                        </select>
-                    </div>
-
-                    <!-- Experience Range -->
-                    <div>
-                        <label for="experience_min" class="block text-sm font-medium text-gray-700 mb-1">Min Experience (Years)</label>
-                        <input type="number" name="experience_min" id="experience_min" value="{{ request('experience_min') }}"
-                            placeholder="Min years"
-                            class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    </div>
-
-                    <div>
-                        <label for="experience_max" class="block text-sm font-medium text-gray-700 mb-1">Max Experience (Years)</label>
-                        <input type="number" name="experience_max" id="experience_max" value="{{ request('experience_max') }}"
-                            placeholder="Max years"
-                            class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    </div>
-
-                    <!-- Sort -->
-                    <div>
-                        <label for="sort" class="block text-sm font-medium text-gray-700 mb-1">Sort By</label>
-                        <div class="flex space-x-2">
-                            <select name="sort" id="sort"
-                                class="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                <option value="created_at" {{ request('sort') === 'created_at' ? 'selected' : '' }}>
-                                    Registration Date</option>
-                                <option value="name" {{ request('sort') === 'name' ? 'selected' : '' }}>Name</option>
-                                <option value="email" {{ request('sort') === 'email' ? 'selected' : '' }}>Email</option>
+                <div id="users-advanced-filters" class="mt-4 {{ $advancedActive ? '' : 'hidden' }}">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div>
+                            <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Account Status</label>
+                            <select name="status" id="status"
+                                    class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="">All Status</option>
+                                <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>Active</option>
+                                <option value="inactive" {{ request('status') === 'inactive' ? 'selected' : '' }}>Deactivated</option>
                             </select>
-                            <select name="direction"
-                                class="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                <option value="desc" {{ request('direction') === 'desc' ? 'selected' : '' }}>↓</option>
-                                <option value="asc" {{ request('direction') === 'asc' ? 'selected' : '' }}>↑</option>
+                        </div>
+
+                        <div>
+                            <label for="verified" class="block text-sm font-medium text-gray-700 mb-1">Email Verified</label>
+                            <select name="verified" id="verified"
+                                    class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="">All Users</option>
+                                <option value="yes" {{ request('verified') === 'yes' ? 'selected' : '' }}>Verified</option>
+                                <option value="no" {{ request('verified') === 'no' ? 'selected' : '' }}>Not Verified</option>
                             </select>
+                        </div>
+
+                        <div>
+                            <label for="profile" class="block text-sm font-medium text-gray-700 mb-1">Profile Status</label>
+                            <select name="profile" id="profile"
+                                    class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="">All Users</option>
+                                <option value="with_profile" {{ request('profile') === 'with_profile' ? 'selected' : '' }}>With Profile</option>
+                                <option value="without_profile" {{ request('profile') === 'without_profile' ? 'selected' : '' }}>Without Profile</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="has_cv" class="block text-sm font-medium text-gray-700 mb-1">CV Status</label>
+                            <select name="has_cv" id="has_cv"
+                                    class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="">All Users</option>
+                                <option value="yes" {{ request('has_cv') === 'yes' ? 'selected' : '' }}>With CV</option>
+                                <option value="no" {{ request('has_cv') === 'no' ? 'selected' : '' }}>Without CV</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="has_applications" class="block text-sm font-medium text-gray-700 mb-1">Applications</label>
+                            <select name="has_applications" id="has_applications"
+                                    class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="">All Users</option>
+                                <option value="yes" {{ request('has_applications') === 'yes' ? 'selected' : '' }}>With Applications</option>
+                                <option value="no" {{ request('has_applications') === 'no' ? 'selected' : '' }}>No Applications</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="experience_min" class="block text-sm font-medium text-gray-700 mb-1">Min Experience (Years)</label>
+                            <input type="number" name="experience_min" id="experience_min" value="{{ request('experience_min') }}"
+                                   placeholder="Min years"
+                                   class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+
+                        <div>
+                            <label for="experience_max" class="block text-sm font-medium text-gray-700 mb-1">Max Experience (Years)</label>
+                            <input type="number" name="experience_max" id="experience_max" value="{{ request('experience_max') }}"
+                                   placeholder="Max years"
+                                   class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+
+                        <div>
+                            <label for="sort" class="block text-sm font-medium text-gray-700 mb-1">Sort By</label>
+                            <div class="flex space-x-2">
+                                <select name="sort" id="sort"
+                                        class="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="created_at" {{ request('sort') === 'created_at' ? 'selected' : '' }}>Registration Date</option>
+                                    <option value="name" {{ request('sort') === 'name' ? 'selected' : '' }}>Name</option>
+                                    <option value="email" {{ request('sort') === 'email' ? 'selected' : '' }}>Email</option>
+                                </select>
+                                <select name="direction"
+                                        class="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="desc" {{ request('direction') === 'desc' ? 'selected' : '' }}>↓</option>
+                                    <option value="asc" {{ request('direction') === 'asc' ? 'selected' : '' }}>↑</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="flex items-center space-x-3">
-                    <button type="submit"
-                        class="bg-blue-600 text-white px-4 py-2 rounded-md text-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <i class="fas fa-search mr-2"></i>Filter
-                    </button>
-                    <a href="{{ route('admin.users.index') }}"
-                        class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md text-sm hover:bg-gray-400">
-                        <i class="fas fa-times mr-2"></i>Clear
-                    </a>
-                    <div class="text-sm text-gray-600">
-                        Showing {{ $users->firstItem() ?? 0 }} to {{ $users->lastItem() ?? 0 }} of {{ $users->total() }}
-                        users
-                    </div>
+                <div class="text-sm text-gray-600">
+                    Showing {{ $users->firstItem() ?? 0 }} to {{ $users->lastItem() ?? 0 }} of {{ $users->total() }} users
                 </div>
             </form>
         </div>
     </div>
-
     <!-- Users Table -->
     <div class="bg-white rounded-lg shadow overflow-hidden">
         <div class="overflow-x-auto">
@@ -325,4 +377,76 @@
             </div>
         @endif
     </div>
+
+    <script>
+        (() => {
+            const dropdownButtons = document.querySelectorAll('[data-dropdown-toggle]');
+            const dropdownMenus = document.querySelectorAll('[data-dropdown-menu]');
+
+            dropdownButtons.forEach(button => {
+                const targetId = button.getAttribute('data-dropdown-toggle');
+                const menu = document.getElementById(targetId);
+                if (!menu) {
+                    return;
+                }
+
+                button.addEventListener('click', event => {
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    dropdownMenus.forEach(otherMenu => {
+                        if (otherMenu !== menu) {
+                            otherMenu.classList.add('hidden');
+                            const otherButton = document.querySelector(`[data-dropdown-toggle="${otherMenu.id}"]`);
+                            if (otherButton) {
+                                otherButton.setAttribute('aria-expanded', 'false');
+                            }
+                        }
+                    });
+
+                    const isHidden = menu.classList.contains('hidden');
+                    menu.classList.toggle('hidden', !isHidden);
+                    button.setAttribute('aria-expanded', isHidden ? 'true' : 'false');
+                });
+            });
+
+            dropdownMenus.forEach(menu => {
+                menu.addEventListener('click', event => event.stopPropagation());
+            });
+
+            document.addEventListener('click', () => {
+                dropdownMenus.forEach(menu => {
+                    if (!menu.classList.contains('hidden')) {
+                        menu.classList.add('hidden');
+                        const button = document.querySelector(`[data-dropdown-toggle="${menu.id}"]`);
+                        if (button) {
+                            button.setAttribute('aria-expanded', 'false');
+                        }
+                    }
+                });
+            });
+
+            const advancedToggles = document.querySelectorAll('[data-advanced-toggle]');
+            advancedToggles.forEach(button => {
+                const targetId = button.getAttribute('data-advanced-toggle');
+                const target = document.getElementById(targetId);
+                if (!target) {
+                    return;
+                }
+
+                button.addEventListener('click', () => {
+                    const willHide = !target.classList.contains('hidden');
+                    target.classList.toggle('hidden');
+                    button.setAttribute('aria-expanded', willHide ? 'false' : 'true');
+
+                    const label = button.querySelector('[data-label]');
+                    if (label) {
+                        const showText = button.getAttribute('data-label-show');
+                        const hideText = button.getAttribute('data-label-hide');
+                        label.textContent = willHide ? showText : hideText;
+                    }
+                });
+            });
+        })();
+    </script>
 @endsection

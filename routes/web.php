@@ -72,6 +72,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         // User management routes
         Route::get('/users', [UserController::class, 'index'])->name('users.index');
+        Route::get('/users/export/{format}', [UserController::class, 'export'])->name('users.export');
         Route::get('/users/deleted', [UserController::class, 'deleted'])->name('users.deleted');
         Route::post('/users/{id}/restore', [UserController::class, 'restore'])->name('users.restore');
         Route::delete('/users/{id}/force-delete', [UserController::class, 'forceDelete'])->name('users.force-delete');
@@ -81,6 +82,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         // Job management routes
         Route::get('/jobs', [AdminJobController::class, 'index'])->name('jobs.index');
+        Route::get('/jobs/export/{format}', [AdminJobController::class, 'export'])->name('jobs.export');
         Route::get('/jobs/create', [AdminJobController::class, 'create'])->name('jobs.create');
         Route::post('/jobs', [AdminJobController::class, 'store'])->name('jobs.store');
         Route::get('/jobs/deleted', [AdminJobController::class, 'deleted'])->name('jobs.deleted');
@@ -97,6 +99,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         // Application management routes
         Route::get('/applications', [ApplicationController::class, 'index'])->name('applications.index');
+        Route::get('/applications/export/{format}', [ApplicationController::class, 'export'])->name('applications.export');
         Route::get('/applications/{application}', [ApplicationController::class, 'show'])->name('applications.show');
         Route::get('/applications/{application}/edit', [ApplicationController::class, 'edit'])->name('applications.edit');
         Route::put('/applications/{application}', [ApplicationController::class, 'update'])->name('applications.update');
@@ -124,6 +127,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         // Admin management routes (Super Admin only)
         Route::get('/admins', [AdminController::class, 'index'])->name('admins.index');
+        Route::get('/admins/export/{format}', [AdminController::class, 'export'])->name('admins.export');
         Route::get('/admins/create', [AdminController::class, 'create'])->name('admins.create');
         Route::post('/admins', [AdminController::class, 'store'])->name('admins.store');
         Route::get('/admins/{admin}', [AdminController::class, 'show'])->name('admins.show');

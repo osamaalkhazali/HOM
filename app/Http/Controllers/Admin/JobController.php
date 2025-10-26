@@ -6,23 +6,58 @@ use App\Http\Controllers\Controller;
 use App\Models\Job;
 use App\Models\Category;
 use App\Models\SubCategory;
+use App\Services\Admin\AdminExportService;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class JobController extends Controller
 {
-  /**
-   * Display a listing of jobs with filtering and sorting
-   */
+    protected AdminExportService $exportService;
+
+    public function __construct(AdminExportService $exportService)
+    {
+        $this->exportService = $exportService;
+    }
+
+    /**
+     * Display a listing of jobs with filtering and sorting
+     */
   public function index(Request $request)
   {
-        $query = Job::with(['category', 'subCategory', 'postedBy', 'applications', 'questions', 'documents']);
+        $query = $this->baseIndexQuery();
 
-        // Enhanced search functionality - searches across job fields, categories, and related data
+        $this->applyIndexFilters($request, $query);
+        $this->applyIndexSorting($request, $query);
+
+        $jobs = $query->withCount('applications')->paginate(15)->withQueryString();
+        $categories = Category::all();
+        $exportQuery = $request->except(['page']);
+
+        return view('admin.jobs.index', compact('jobs', 'categories', 'exportQuery'));
+    }
+
+    protected function baseIndexQuery(): Builder
+    {
+        return Job::with([
+            'category',
+            'subCategory.category',
+            'postedBy',
+            'applications',
+            'applications.user',
+            'questions',
+            'documents',
+        ]);
+    }
+
+    protected function applyIndexFilters(Request $request, Builder $query): void
+    {
         if ($request->filled('search')) {
       $search = $request->search;
-      $query->where(function ($q) use ($search) {
-                // Search in job basic fields
+            $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
           ->orWhere('title_ar', 'like', "%{$search}%")
           ->orWhere('company', 'like', "%{$search}%")
@@ -33,24 +68,20 @@ class JobController extends Controller
                     ->orWhere('description_ar', 'like', "%{$search}%")
                     ->orWhere('salary', 'like', "%{$search}%")
                     ->orWhere('level', 'like', "%{$search}%")
-                    // Search in category names
                     ->orWhereHas('category', function ($catQuery) use ($search) {
                         $catQuery->where('name', 'like', "%{$search}%")
                             ->orWhere('name_ar', 'like', "%{$search}%")
                             ->orWhere('admin_label', 'like', "%{$search}%");
                     })
-                    // Search in subcategory names
                     ->orWhereHas('subCategory', function ($subCatQuery) use ($search) {
                         $subCatQuery->where('name', 'like', "%{$search}%")
                             ->orWhere('name_ar', 'like', "%{$search}%")
                             ->orWhere('admin_label', 'like', "%{$search}%");
                     })
-                    // Search in job questions
                     ->orWhereHas('questions', function ($questionQuery) use ($search) {
                         $questionQuery->where('question', 'like', "%{$search}%")
                             ->orWhere('question_ar', 'like', "%{$search}%");
                     })
-                    // Search in required documents
                     ->orWhereHas('documents', function ($docQuery) use ($search) {
                         $docQuery->where('name', 'like', "%{$search}%")
                             ->orWhere('name_ar', 'like', "%{$search}%");
@@ -58,29 +89,24 @@ class JobController extends Controller
       });
     }
 
-    // Filter by category
-    if ($request->filled('category')) {
+        if ($request->filled('category')) {
       $query->whereHas('subCategory', function ($q) use ($request) {
         $q->where('category_id', $request->category);
       });
     }
 
-    // Filter by subcategory
-    if ($request->filled('subcategory')) {
+        if ($request->filled('subcategory')) {
       $query->where('sub_category_id', $request->subcategory);
     }
 
-    // Filter by status
-    if ($request->filled('status')) {
+        if ($request->filled('status')) {
       $query->where('status', $request->status);
     }
 
-    // Filter by level
-    if ($request->filled('level')) {
+        if ($request->filled('level')) {
       $query->where('level', $request->level);
     }
 
-        // Filter by jobs with applications
         if ($request->filled('has_applications')) {
             if ($request->has_applications === 'yes') {
                 $query->has('applications');
@@ -89,7 +115,6 @@ class JobController extends Controller
             }
         }
 
-        // Filter by jobs with questions
         if ($request->filled('has_questions')) {
             if ($request->has_questions === 'yes') {
                 $query->has('questions');
@@ -98,7 +123,6 @@ class JobController extends Controller
             }
         }
 
-        // Filter by jobs with required documents
         if ($request->filled('has_documents')) {
             if ($request->has_documents === 'yes') {
                 $query->has('documents');
@@ -107,7 +131,6 @@ class JobController extends Controller
             }
         }
 
-        // Filter by expired/active deadline
         if ($request->filled('deadline_status')) {
             if ($request->deadline_status === 'expired') {
                 $query->where('deadline', '<', now()->toDateString());
@@ -116,27 +139,166 @@ class JobController extends Controller
             }
         }
 
-        // Filter by date range
         if ($request->filled('date_from')) {
       $query->whereDate('created_at', '>=', $request->date_from);
     }
-    if ($request->filled('date_to')) {
+
+        if ($request->filled('date_to')) {
       $query->whereDate('created_at', '<=', $request->date_to);
     }
+    }
 
-    // Sorting
+    protected function applyIndexSorting(Request $request, Builder $query): void
+    {
     $sortBy = $request->get('sort', 'created_at');
     $sortDirection = $request->get('direction', 'desc');
 
     $allowedSorts = ['title', 'company', 'location', 'level', 'created_at', 'deadline'];
-    if (in_array($sortBy, $allowedSorts)) {
+        if (in_array($sortBy, $allowedSorts, true)) {
       $query->orderBy($sortBy, $sortDirection);
     }
+    }
 
-        $jobs = $query->withCount('applications')->paginate(15)->withQueryString();
-    $categories = Category::all();
+    public function export(Request $request, string $format)
+    {
+        $scope = $request->get('scope', 'filtered');
+        $query = $this->baseIndexQuery();
 
-    return view('admin.jobs.index', compact('jobs', 'categories'));
+        if ($scope !== 'all') {
+            $this->applyIndexFilters($request, $query);
+        }
+
+        $this->applyIndexSorting($request, $query);
+
+        $jobs = $query->withCount('applications')->get();
+
+        if ($jobs->isEmpty()) {
+            return redirect()->route('admin.jobs.index', $request->except(['page', 'scope']))
+                ->with('warning', 'No jobs available for export with the selected filters.');
+        }
+
+        [$headings, $rows, $meta] = $this->buildJobExportRows($jobs, $request, $scope);
+
+        $fileName = 'jobs_' . now()->format('Ymd_His');
+
+        return $this->exportService->download($format, $fileName, $headings, $rows, $meta);
+    }
+
+    /**
+     * @return array{0: array<int, string>, 1: array<int, array<int, string|int|float|null>>, 2: array<string, mixed>}
+     */
+    protected function buildJobExportRows(Collection $jobs, Request $request, string $scope): array
+    {
+        $headings = [
+            'Job ID',
+            'Title (EN)',
+            'Title (AR)',
+            'Status',
+            'Active',
+            'Level',
+            'Salary',
+            'Deadline',
+            'Company (EN)',
+            'Company (AR)',
+            'Location (EN)',
+            'Location (AR)',
+            'Category',
+            'Subcategory',
+            'Parent Category',
+            'Posted By',
+            'Created At',
+            'Updated At',
+            'Deleted At',
+            'Applications Count',
+            'Applications Breakdown',
+            'Questions',
+            'Required Documents',
+            'Description (EN)',
+            'Description (AR)',
+        ];
+
+        $rows = $jobs->map(function (Job $job) {
+            return $this->mapJobRow($job);
+        })->all();
+
+        $meta = [
+            'title' => 'Jobs Export',
+            'description' => 'Total jobs: ' . $jobs->count() . ($scope === 'all' ? ' (full dataset)' : ' (filtered)'),
+            'generated_at' => now()->format('Y-m-d H:i'),
+            'filters' => $scope === 'all' ? null : $this->summarizeFilters($request),
+        ];
+
+        return [$headings, $rows, $meta];
+    }
+
+    /**
+     * @return array<int, string|int|float|null>
+     */
+    protected function mapJobRow(Job $job): array
+    {
+        $questions = $job->questions->map(function ($question) {
+            $label = $question->question ?? $question->question_ar ?? 'Question';
+            return $label . ' (' . ($question->is_required ? 'Required' : 'Optional') . ')';
+        })->filter()->join(PHP_EOL);
+
+        $documents = $job->documents->map(function ($doc) {
+            $label = $doc->name ?? $doc->name_ar ?? 'Document';
+            return $label . ' (' . ($doc->is_required ? 'Required' : 'Optional') . ')';
+        })->filter()->join(PHP_EOL);
+
+        $applicationsBreakdown = $job->applications->groupBy('status')->map(function ($group, $status) {
+            return Str::headline($status) . ': ' . $group->count();
+        })->values()->join(PHP_EOL);
+
+        $postedBy = $job->postedBy;
+        $deadline = $job->deadline instanceof Carbon ? $job->deadline->format('Y-m-d') : ($job->deadline ? Carbon::parse($job->deadline)->format('Y-m-d') : '—');
+
+        $salary = $job->salary !== null ? number_format((float)$job->salary, 2) : '—';
+
+        return [
+            $job->id,
+            $job->title ?? '—',
+            $job->title_ar ?? '—',
+            Str::headline($job->status ?? ''),
+            $job->is_active ? 'Yes' : 'No',
+            Str::headline($job->level ?? ''),
+            $salary,
+            $deadline,
+            $job->company ?? '—',
+            $job->company_ar ?? '—',
+            $job->location ?? '—',
+            $job->location_ar ?? '—',
+            optional($job->category)->name ?? '—',
+            optional($job->subCategory)->name ?? '—',
+            optional($job->subCategory?->category)->name ?? '—',
+            $postedBy ? ($postedBy->name . ' <' . $postedBy->email . '>') : '—',
+            optional($job->created_at)->format('Y-m-d H:i'),
+            optional($job->updated_at)->format('Y-m-d H:i'),
+            optional($job->deleted_at)->format('Y-m-d H:i'),
+            $job->applications_count ?? $job->applications->count(),
+            $applicationsBreakdown ?: '—',
+            $questions ?: '—',
+            $documents ?: '—',
+            $job->description ?? '—',
+            $job->description_ar ?? '—',
+        ];
+    }
+
+    protected function summarizeFilters(Request $request): ?string
+    {
+        $filters = collect($request->except(['page', 'sort', 'direction', 'scope', 'format']))
+            ->filter(function ($value) {
+                return !is_null($value) && $value !== '';
+            })
+            ->map(function ($value, $key) {
+                $label = Str::headline(str_replace('_', ' ', $key));
+                if (is_array($value)) {
+                    $value = implode(', ', $value);
+                }
+                return $label . ': ' . $value;
+            });
+
+        return $filters->isEmpty() ? null : $filters->join('; ');
   }
 
   /**

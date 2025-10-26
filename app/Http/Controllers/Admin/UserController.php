@@ -4,27 +4,58 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\Admin\AdminExportService;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class UserController extends Controller
 {
+  protected AdminExportService $exportService;
+
+  public function __construct(AdminExportService $exportService)
+  {
+    $this->exportService = $exportService;
+  }
+
   /**
    * Display a listing of users with filtering and sorting
    */
   public function index(Request $request)
   {
-    $query = User::with(['profile', 'applications.job']);
+    $query = $this->baseIndexQuery();
 
-    // Enhanced search functionality - searches across user, profile, and application data
+    $this->applyIndexFilters($request, $query);
+    $this->applyIndexSorting($request, $query);
+
+    $users = $query->withCount('applications')->paginate(15)->withQueryString();
+    $exportQuery = $request->except(['page']);
+
+    return view('admin.users.index', compact('users', 'exportQuery'));
+  }
+
+  protected function baseIndexQuery(): Builder
+  {
+    return User::with([
+      'profile',
+      'applications.job',
+      'applications.job.category',
+      'applications.job.subCategory',
+    ]);
+  }
+
+  protected function applyIndexFilters(Request $request, Builder $query): void
+  {
     if ($request->filled('search')) {
       $search = $request->search;
       $query->where(function ($q) use ($search) {
-        // Search in user basic fields
         $q->where('name', 'like', "%{$search}%")
           ->orWhere('email', 'like', "%{$search}%")
           ->orWhere('phone', 'like', "%{$search}%")
-          // Search in profile fields
           ->orWhereHas('profile', function ($profileQuery) use ($search) {
             $profileQuery->where('headline', 'like', "%{$search}%")
               ->orWhere('current_position', 'like', "%{$search}%")
@@ -35,8 +66,7 @@ class UserController extends Controller
               ->orWhere('website', 'like', "%{$search}%")
               ->orWhere('linkedin_url', 'like', "%{$search}%")
               ->orWhere('experience_years', 'like', "%{$search}%");
-          })
-          // Search in applied jobs
+        })
           ->orWhereHas('applications.job', function ($jobQuery) use ($search) {
             $jobQuery->where('title', 'like', "%{$search}%")
               ->orWhere('title_ar', 'like', "%{$search}%")
@@ -46,7 +76,6 @@ class UserController extends Controller
       });
     }
 
-    // Filter by account status (active/inactive)
     if ($request->filled('status')) {
       if ($request->status === 'active') {
         $query->where('is_active', true);
@@ -55,7 +84,6 @@ class UserController extends Controller
       }
     }
 
-    // Filter by email verification
     if ($request->filled('verified')) {
       if ($request->verified === 'yes') {
         $query->whereNotNull('email_verified_at');
@@ -64,7 +92,6 @@ class UserController extends Controller
       }
     }
 
-    // Filter by profile existence
     if ($request->filled('profile')) {
       if ($request->profile === 'with_profile') {
         $query->has('profile');
@@ -73,7 +100,6 @@ class UserController extends Controller
       }
     }
 
-    // Filter by CV existence
     if ($request->filled('has_cv')) {
       if ($request->has_cv === 'yes') {
         $query->whereHas('profile', function ($q) {
@@ -88,7 +114,6 @@ class UserController extends Controller
       }
     }
 
-    // Filter by users with applications
     if ($request->filled('has_applications')) {
       if ($request->has_applications === 'yes') {
         $query->has('applications');
@@ -97,38 +122,188 @@ class UserController extends Controller
       }
     }
 
-    // Filter by experience years range
     if ($request->filled('experience_min')) {
       $query->whereHas('profile', function ($q) use ($request) {
         $q->where('experience_years', '>=', $request->experience_min);
       });
     }
+
     if ($request->filled('experience_max')) {
       $query->whereHas('profile', function ($q) use ($request) {
         $q->where('experience_years', '<=', $request->experience_max);
       });
     }
 
-    // Filter by registration date range
     if ($request->filled('date_from')) {
       $query->whereDate('created_at', '>=', $request->date_from);
     }
+
     if ($request->filled('date_to')) {
       $query->whereDate('created_at', '<=', $request->date_to);
     }
+  }
 
-    // Sorting
+  protected function applyIndexSorting(Request $request, Builder $query): void
+  {
     $sortBy = $request->get('sort', 'created_at');
     $sortDirection = $request->get('direction', 'desc');
 
     $allowedSorts = ['name', 'email', 'created_at', 'email_verified_at'];
-    if (in_array($sortBy, $allowedSorts)) {
+    if (in_array($sortBy, $allowedSorts, true)) {
       $query->orderBy($sortBy, $sortDirection);
     }
+  }
 
-    $users = $query->withCount('applications')->paginate(15)->withQueryString();
+  public function export(Request $request, string $format)
+  {
+    $scope = $request->get('scope', 'filtered');
+    $query = $this->baseIndexQuery();
 
-    return view('admin.users.index', compact('users'));
+    if ($scope !== 'all') {
+      $this->applyIndexFilters($request, $query);
+    }
+
+    $this->applyIndexSorting($request, $query);
+
+    $users = $query->withCount('applications')->get();
+
+    if ($users->isEmpty()) {
+      return redirect()->route('admin.users.index', $request->except(['page', 'scope']))
+        ->with('warning', 'No users available for export with the selected filters.');
+    }
+
+    [$headings, $rows, $meta] = $this->buildUserExportRows($users, $request, $scope);
+
+    $fileName = 'users_' . now()->format('Ymd_His');
+
+    return $this->exportService->download($format, $fileName, $headings, $rows, $meta);
+  }
+
+  /**
+   * @return array{0: array<int, string>, 1: array<int, array<int, string|int|float|null>>, 2: array<string, mixed>}
+   */
+  protected function buildUserExportRows(Collection $users, Request $request, string $scope): array
+  {
+    $headings = [
+      'User ID',
+      'Name',
+      'Email',
+      'Phone',
+      'Preferred Language',
+      'Active',
+      'Email Verified',
+      'Registered At',
+      'Updated At',
+      'Deleted At',
+      'Applications Count',
+      'Applications Breakdown',
+      'Applications Detail',
+      'Profile Headline',
+      'Current Position',
+      'Experience (Years)',
+      'Skills',
+      'Location',
+      'About',
+      'Education',
+      'Website',
+      'LinkedIn',
+      'CV Path',
+      'CV URL',
+      'Profile Created At',
+      'Profile Updated At',
+    ];
+
+    $rows = $users->map(function (User $user) {
+      return $this->mapUserRow($user);
+    })->all();
+
+    $meta = [
+      'title' => 'Users Export',
+      'description' => 'Total users: ' . $users->count() . ($scope === 'all' ? ' (full dataset)' : ' (filtered)'),
+      'generated_at' => now()->format('Y-m-d H:i'),
+      'filters' => $scope === 'all' ? null : $this->summarizeFilters($request),
+    ];
+
+    return [$headings, $rows, $meta];
+  }
+
+  /**
+   * @return array<int, string|int|float|null>
+   */
+  protected function mapUserRow(User $user): array
+  {
+    $profile = $user->profile;
+    $cvPath = $profile?->cv_path;
+    $cvUrl = $cvPath ? Storage::url($cvPath) : null;
+
+    $applicationsBreakdown = $user->applications->groupBy('status')->map(function ($group, $status) {
+      return Str::headline($status) . ': ' . $group->count();
+    })->values()->join(PHP_EOL);
+
+    $applicationsDetail = $user->applications->map(function ($application) {
+      $job = $application->job;
+      $jobLabel = $job ? ($job->title . ' (' . ($job->company ?? 'Company') . ')') : 'Deleted Job';
+      $status = Str::headline($application->status ?? '');
+      $appliedAt = $application->created_at ? Carbon::parse($application->created_at)->format('Y-m-d') : 'N/A';
+      return $jobLabel . ' - ' . $status . ' [' . $appliedAt . ']';
+    })->filter()->join(PHP_EOL);
+
+    $emailVerified = $user->email_verified_at instanceof Carbon
+      ? $user->email_verified_at->format('Y-m-d H:i')
+      : ($user->email_verified_at ? Carbon::parse($user->email_verified_at)->format('Y-m-d H:i') : null);
+
+    $profileCreatedAt = $profile && $profile->created_at
+      ? Carbon::parse($profile->created_at)->format('Y-m-d H:i')
+      : null;
+    $profileUpdatedAt = $profile && $profile->updated_at
+      ? Carbon::parse($profile->updated_at)->format('Y-m-d H:i')
+      : null;
+
+    return [
+      $user->id,
+      $user->name ?? '—',
+      $user->email ?? '—',
+      $user->phone ?? '—',
+      $user->preferred_language ?? '—',
+      $user->is_active ? 'Yes' : 'No',
+      $emailVerified ?? 'No',
+      optional($user->created_at)->format('Y-m-d H:i'),
+      optional($user->updated_at)->format('Y-m-d H:i'),
+      optional($user->deleted_at)->format('Y-m-d H:i'),
+      $user->applications_count ?? $user->applications->count(),
+      $applicationsBreakdown ?: '—',
+      $applicationsDetail ?: '—',
+      optional($profile)->headline ?? '—',
+      optional($profile)->current_position ?? '—',
+      optional($profile)->experience_years ?? '—',
+      optional($profile)->skills ?? '—',
+      optional($profile)->location ?? '—',
+      optional($profile)->about ?? '—',
+      optional($profile)->education ?? '—',
+      optional($profile)->website ?? '—',
+      optional($profile)->linkedin_url ?? '—',
+      $cvPath ?? '—',
+      $cvUrl ?? '—',
+      $profileCreatedAt ?? '—',
+      $profileUpdatedAt ?? '—',
+    ];
+  }
+
+  protected function summarizeFilters(Request $request): ?string
+  {
+    $filters = collect($request->except(['page', 'sort', 'direction', 'scope', 'format']))
+      ->filter(function ($value) {
+        return !is_null($value) && $value !== '';
+      })
+      ->map(function ($value, $key) {
+        $label = Str::headline(str_replace('_', ' ', $key));
+        if (is_array($value)) {
+          $value = implode(', ', $value);
+        }
+        return $label . ': ' . $value;
+      });
+
+    return $filters->isEmpty() ? null : $filters->join('; ');
   }
 
   /**

@@ -7,20 +7,47 @@ use App\Models\Application;
 use App\Models\Job;
 use App\Models\ApplicationDocumentRequest;
 use App\Models\Admin;
-use Illuminate\Http\Request;
 use App\Notifications\ApplicationStatusNotification;
-use Illuminate\Support\Facades\Notification;
+use App\Services\Admin\AdminExportService;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class ApplicationController extends Controller
 {
-  /**
-   * Display a listing of applications with filtering and sorting
-   */
+    protected AdminExportService $exportService;
+
+    public function __construct(AdminExportService $exportService)
+    {
+        $this->exportService = $exportService;
+    }
+
+    /**
+     * Display a listing of applications with filtering and sorting
+     */
   public function index(Request $request)
   {
-    $query = Application::with([
+        $query = $this->baseQuery();
+
+        $this->applyFilters($request, $query);
+        $this->applySorting($request, $query);
+
+        $applications = $query->paginate(15)->withQueryString();
+        $jobs = Job::select('id', 'title', 'company')->get();
+        $categories = \App\Models\Category::all();
+        $exportQuery = $request->except(['page']);
+
+        return view('admin.applications.index', compact('applications', 'jobs', 'categories', 'exportQuery'));
+    }
+
+    protected function baseQuery(): Builder
+    {
+        return Application::with([
       'user' => function ($q) {
         $q->withTrashed();
       },
@@ -28,67 +55,61 @@ class ApplicationController extends Controller
       'job' => function ($q) {
         $q->withTrashed();
       },
+            'job.category',
       'job.subCategory.category',
-      'questionAnswers',
-      'documents',
-      'documentRequests'
+            'questionAnswers.question',
+            'documents.jobDocument',
+            'documentRequests',
     ]);
+    }
 
-    // Enhanced search functionality - searches across applicant, job, and application data
+    protected function applyFilters(Request $request, Builder $query): void
+    {
     if ($request->filled('search')) {
       $search = $request->search;
-      $query->where(function ($q) use ($search) {
-        // Search in applicant data
+            $query->where(function ($q) use ($search) {
         $q->whereHas('user', function ($userQuery) use ($search) {
           $userQuery->withTrashed()
             ->where('name', 'like', "%{$search}%")
             ->orWhere('email', 'like', "%{$search}%")
-            ->orWhere('phone', 'like', "%{$search}%")
-            // Search in applicant's profile
+                        ->orWhere('phone', 'like', "%{$search}%")
             ->orWhereHas('profile', function ($profileQuery) use ($search) {
               $profileQuery->where('headline', 'like', "%{$search}%")
                 ->orWhere('current_position', 'like', "%{$search}%")
                 ->orWhere('skills', 'like', "%{$search}%")
                 ->orWhere('location', 'like', "%{$search}%");
             });
-        })
-          // Search in job data
-          ->orWhereHas('job', function ($jobQuery) use ($search) {
+                })
+                    ->orWhereHas('job', function ($jobQuery) use ($search) {
           $jobQuery->where('title', 'like', "%{$search}%")
-              ->orWhere('title_ar', 'like', "%{$search}%")
-              ->orWhere('company', 'like', "%{$search}%")
-              ->orWhere('company_ar', 'like', "%{$search}%")
-              ->orWhere('location', 'like', "%{$search}%")
-              ->orWhere('location_ar', 'like', "%{$search}%");
-          })
-          // Search in cover letter
-          ->orWhere('cover_letter', 'like', "%{$search}%")
-          // Search in question answers
-          ->orWhereHas('questionAnswers', function ($answerQuery) use ($search) {
-            $answerQuery->where('answer', 'like', "%{$search}%");
+                        ->orWhere('title_ar', 'like', "%{$search}%")
+                        ->orWhere('company', 'like', "%{$search}%")
+                        ->orWhere('company_ar', 'like', "%{$search}%")
+                        ->orWhere('location', 'like', "%{$search}%")
+                        ->orWhere('location_ar', 'like', "%{$search}%");
+                })
+                    ->orWhere('cover_letter', 'like', "%{$search}%")
+                    ->orWhereHas('questionAnswers', function ($answerQuery) use ($search) {
+                        $answerQuery->where('answer', 'like', "%{$search}%");
         });
       });
     }
 
-    // Filter by status
-    if ($request->filled('status')) {
+        if ($request->filled('status')) {
       $query->where('status', $request->status);
     }
 
-    // Filter by job
-    if ($request->filled('job_id')) {
+        if ($request->filled('job_id')) {
       $query->where('job_id', $request->job_id);
     }
 
-    // Filter by category
-    if ($request->filled('category_id')) {
+        if ($request->filled('category_id')) {
       $query->whereHas('job.subCategory', function ($q) use ($request) {
         $q->where('category_id', $request->category_id);
       });
     }
 
-    // Filter by applications with question answers
-    if ($request->filled('has_answers')) {
+        if ($request->filled('has_answers')) {
       if ($request->has_answers === 'yes') {
         $query->has('questionAnswers');
       } elseif ($request->has_answers === 'no') {
@@ -96,8 +117,7 @@ class ApplicationController extends Controller
       }
     }
 
-    // Filter by applications with additional documents
-    if ($request->filled('has_documents')) {
+        if ($request->filled('has_documents')) {
       if ($request->has_documents === 'yes') {
         $query->has('documents');
       } elseif ($request->has_documents === 'no') {
@@ -105,8 +125,7 @@ class ApplicationController extends Controller
       }
     }
 
-    // Filter by applications with cover letter
-    if ($request->filled('has_cover_letter')) {
+        if ($request->filled('has_cover_letter')) {
       if ($request->has_cover_letter === 'yes') {
         $query->whereNotNull('cover_letter')->where('cover_letter', '!=', '');
       } elseif ($request->has_cover_letter === 'no') {
@@ -116,36 +135,211 @@ class ApplicationController extends Controller
       }
     }
 
-    // Filter by date range
-    if ($request->filled('date_from')) {
+        if ($request->filled('date_from')) {
       $query->whereDate('created_at', '>=', $request->date_from);
     }
-    if ($request->filled('date_to')) {
+
+        if ($request->filled('date_to')) {
       $query->whereDate('created_at', '<=', $request->date_to);
     }
+    }
 
-    // Sorting
+    protected function applySorting(Request $request, Builder $query): void
+    {
     $sortBy = $request->get('sort', 'created_at');
     $sortDirection = $request->get('direction', 'desc');
 
     $allowedSorts = ['created_at', 'status'];
-    if (in_array($sortBy, $allowedSorts)) {
+        if (in_array($sortBy, $allowedSorts, true)) {
       $query->orderBy($sortBy, $sortDirection);
-    } elseif ($sortBy === 'user_name') {
+            return;
+        }
+
+        if ($sortBy === 'user_name') {
       $query->join('users', 'applications.user_id', '=', 'users.id')
         ->orderBy('users.name', $sortDirection)
         ->select('applications.*');
-    } elseif ($sortBy === 'job_title') {
+            return;
+        }
+
+        if ($sortBy === 'job_title') {
       $query->join('jobs', 'applications.job_id', '=', 'jobs.id')
         ->orderBy('jobs.title', $sortDirection)
         ->select('applications.*');
     }
+    }
 
-    $applications = $query->paginate(15)->withQueryString();
-    $jobs = Job::select('id', 'title', 'company')->get();
-    $categories = \App\Models\Category::all();
+    public function export(Request $request, string $format)
+    {
+        $scope = $request->get('scope', 'filtered');
+        $query = $this->baseQuery();
 
-    return view('admin.applications.index', compact('applications', 'jobs', 'categories'));
+        if ($scope !== 'all') {
+            $this->applyFilters($request, $query);
+        }
+
+        $this->applySorting($request, $query);
+
+        $applications = $query->get();
+
+        if ($applications->isEmpty()) {
+            return redirect()->route('admin.applications.index', $request->except(['page', 'scope']))
+                ->with('warning', 'No applications available for export with the selected filters.');
+        }
+
+        [$headings, $rows, $meta] = $this->buildApplicationExportRows($applications, $request, $scope);
+
+        $fileName = 'applications_' . now()->format('Ymd_His');
+
+        return $this->exportService->download($format, $fileName, $headings, $rows, $meta);
+    }
+
+    /**
+     * @return array{0: array<int, string>, 1: array<int, array<int, string|int|float|null>>, 2: array<string, mixed>}
+     */
+    protected function buildApplicationExportRows(Collection $applications, Request $request, string $scope): array
+    {
+        $headings = [
+            'Application ID',
+            'Status',
+            'Applied At',
+            'Updated At',
+            'Applicant Name',
+            'Applicant Email',
+            'Applicant Phone',
+            'Preferred Language',
+            'User Active',
+            'Email Verified',
+            'User Soft Deleted',
+            'Profile Headline',
+            'Profile Position',
+            'Profile Experience (Years)',
+            'Profile Skills',
+            'Profile Location',
+            'Profile About',
+            'CV Path',
+            'CV URL',
+            'Job Title (EN)',
+            'Job Title (AR)',
+            'Job Status',
+            'Job Company (EN)',
+            'Job Company (AR)',
+            'Job Location (EN)',
+            'Job Location (AR)',
+            'Job Category',
+            'Job Subcategory',
+            'Job Level',
+            'Job Deadline',
+            'Salary',
+            'Cover Letter',
+            'Question Answers',
+            'Requested Documents',
+            'Uploaded Documents',
+        ];
+
+        $rows = $applications->map(function (Application $application) {
+            return $this->mapApplicationRow($application);
+        })->all();
+
+        $meta = [
+            'title' => 'Applications Export',
+            'description' => 'Total applications: ' . $applications->count() . ($scope === 'all' ? ' (full dataset)' : ' (filtered)'),
+            'generated_at' => now()->format('Y-m-d H:i'),
+            'filters' => $scope === 'all' ? null : $this->summarizeFilters($request),
+        ];
+
+        return [$headings, $rows, $meta];
+    }
+
+    /**
+     * @return array<int, string|int|float|null>
+     */
+    protected function mapApplicationRow(Application $application): array
+    {
+        $user = $application->user;
+        $profile = $user?->profile;
+        $job = $application->job;
+
+        $questionAnswers = $application->questionAnswers->map(function ($answer) {
+            $question = $answer->question;
+            $label = $question?->question ?? $question?->question_ar ?? ('Question #' . $answer->id);
+            return trim($label . ': ' . $answer->answer);
+        })->filter()->join(PHP_EOL);
+
+        $requestedDocuments = $application->documentRequests->map(function ($request) {
+            $status = $request->is_submitted ? 'Submitted' : 'Pending';
+            $fileStatus = $request->file_path ? 'File: ' . $request->original_name : 'No file';
+            $submittedAt = $request->submitted_at ? 'Submitted at ' . $request->submitted_at->format('Y-m-d H:i') : null;
+            $parts = array_filter([$status, $fileStatus, $submittedAt]);
+            return trim(($request->name ?: 'Document') . ' [' . implode(' | ', $parts) . ']');
+        })->filter()->join(PHP_EOL);
+
+        $uploadedDocuments = $application->documents->map(function ($doc) {
+            $jobDocument = $doc->jobDocument;
+            $name = $jobDocument?->name ?? $doc->original_name ?? 'Document';
+            return $name . ': ' . ($doc->original_name ?? 'Unknown file');
+        })->filter()->join(PHP_EOL);
+
+        $cvPath = $application->cv_path ?: ($profile->cv_path ?? null);
+        $cvUrl = $cvPath ? Storage::url($cvPath) : null;
+
+        $deadline = $job && $job->deadline ? $job->deadline->format('Y-m-d') : '—';
+        $salary = $job && $job->salary !== null ? number_format((float)$job->salary, 2) : '—';
+
+        return [
+            $application->id,
+            Str::headline($application->status),
+            optional($application->created_at)->format('Y-m-d H:i'),
+            optional($application->updated_at)->format('Y-m-d H:i'),
+            $user->name ?? '—',
+            $user->email ?? '—',
+            $user->phone ?? '—',
+            $user->preferred_language ?? '—',
+            $user ? ($user->is_active ? 'Active' : 'Inactive') : '—',
+            $user ? ($user->email_verified_at ? 'Verified' : 'Not verified') : '—',
+            $user && $user->trashed() ? 'Yes' : 'No',
+            $profile->headline ?? '—',
+            $profile->current_position ?? '—',
+            $profile->experience_years ?? '—',
+            $profile->skills ?? '—',
+            $profile->location ?? '—',
+            $profile->about ?? '—',
+            $cvPath ?? '—',
+            $cvUrl ?? '—',
+            $job->title ?? '—',
+            $job->title_ar ?? '—',
+            $job ? Str::headline($job->status) : '—',
+            $job->company ?? '—',
+            $job->company_ar ?? '—',
+            $job->location ?? '—',
+            $job->location_ar ?? '—',
+            optional($job->category)->name ?? '—',
+            optional($job->subCategory)->name ?? '—',
+            $job ? Str::headline($job->level) : '—',
+            $deadline,
+            $salary,
+            $application->cover_letter ?? '—',
+            $questionAnswers ?: '—',
+            $requestedDocuments ?: '—',
+            $uploadedDocuments ?: '—',
+        ];
+    }
+
+    protected function summarizeFilters(Request $request): ?string
+    {
+        $filters = collect($request->except(['page', 'sort', 'direction', 'scope', 'format']))
+            ->filter(function ($value) {
+                return !is_null($value) && $value !== '';
+            })
+            ->map(function ($value, $key) {
+                $label = Str::headline(str_replace('_', ' ', $key));
+                if (is_array($value)) {
+                    $value = implode(', ', $value);
+                }
+                return $label . ': ' . $value;
+            });
+
+        return $filters->isEmpty() ? null : $filters->join('; ');
   }
 
   /**
