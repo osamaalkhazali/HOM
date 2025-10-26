@@ -42,9 +42,27 @@ class RegisteredUserController extends Controller
             'preferred_language' => app()->getLocale(),
         ]);
 
-        event(new Registered($user));
+        $mailSent = true;
+
+        try {
+            event(new Registered($user));
+        } catch (\Throwable $e) {
+            // Log the error but continue with registration
+            \Log::error('Failed to send verification email during registration', [
+                'user_id' => $user->id,
+                'email' => $user->email,
+                'error' => $e->getMessage(),
+            ]);
+
+            $mailSent = false;
+        }
 
         Auth::login($user);
+
+        if (!$mailSent) {
+            return redirect(route('dashboard', absolute: false))
+                ->with('warning', __('site.flash.registration_success_mail_failed'));
+        }
 
         return redirect(route('dashboard', absolute: false));
     }

@@ -9,7 +9,12 @@
 
         <div class="mb-3">
             <label for="password" class="form-label">{{ __('auth.confirm.password_label') }}</label>
-            <input id="password" type="password" name="password" class="form-control" required autocomplete="current-password">
+            <div class="position-relative">
+                <input id="password" type="password" name="password" class="form-control pe-5" required autocomplete="current-password">
+                <button type="button" class="btn btn-link position-absolute top-50 end-0 translate-middle-y text-muted" onclick="togglePasswordVisibility('password', this)" style="text-decoration: none;">
+                    <i class="fas fa-eye"></i>
+                </button>
+            </div>
             @error('password')
                 <div class="text-danger small mt-1">{{ $message }}</div>
             @enderror
@@ -19,4 +24,21 @@
             <button type="submit" class="btn btn-primary px-4" style="border-radius: 10px; background: var(--primary-color); border: none;">{{ __('auth.confirm.submit') }}</button>
         </div>
     </form>
+
+    <script>
+        function togglePasswordVisibility(inputId, button) {
+            const input = document.getElementById(inputId);
+            const icon = button.querySelector('i');
+
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+    </script>
 </x-guest-layout>

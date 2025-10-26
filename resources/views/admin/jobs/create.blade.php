@@ -118,7 +118,7 @@
                                 @foreach ($categories as $category)
                                     <option value="{{ $category->id }}"
                                         {{ old('category_id') == $category->id ? 'selected' : '' }}>
-                                        {{ $category->admin_label ?: $category->name }}
+                                        {{ $category->name }}
                                     </option>
                                 @endforeach
                             </select>
@@ -139,7 +139,7 @@
                                         @foreach ($category->subCategories as $subCategory)
                                             <option value="{{ $subCategory->id }}"
                                                 {{ old('sub_category_id') == $subCategory->id ? 'selected' : '' }}>
-                                                {{ $subCategory->admin_label ?: $subCategory->name }}
+                                                {{ $subCategory->name }}
                                             </option>
                                         @endforeach
                                     @endforeach
@@ -640,7 +640,7 @@
                     category.sub_categories.forEach(subcat => {
                         const option = document.createElement('option');
                         option.value = subcat.id;
-                        option.textContent = subcat.admin_label ?? subcat.name;
+                        option.textContent = subcat.name;
                         if (preselected && String(preselected) === String(subcat.id)) {
                             option.selected = true;
                         }

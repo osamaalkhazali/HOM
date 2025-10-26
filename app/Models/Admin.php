@@ -48,4 +48,12 @@ class Admin extends Authenticatable
     {
         return $query->where('is_super', true);
     }
+
+    /**
+     * Determine if this admin should receive application email notifications.
+     */
+    public function wantsApplicationEmails(): bool
+    {
+        return $this->is_super === true;
+    }
 }

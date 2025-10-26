@@ -60,6 +60,21 @@
         </div>
 
         <div class="mb-3">
+            <label for="phone" class="form-label fw-medium">{{ __('site.profile_form.profile_information.fields.phone.label') }}</label>
+            <input type="tel" class="form-control form-control-lg @error('phone') is-invalid @enderror" id="phone" name="phone"
+                value="{{ old('phone', $user->phone) }}"
+                placeholder="{{ __('site.profile_form.profile_information.fields.phone.placeholder') }}"
+                style="border-radius: 15px; border: 2px solid #e9ecef;">
+            @if ($errors->get('phone'))
+                <div class="text-danger small mt-1">
+                    @foreach ($errors->get('phone') as $error)
+                        {{ $error }}
+                    @endforeach
+                </div>
+            @endif
+        </div>
+
+        <div class="mb-3">
             <label for="headline" class="form-label fw-medium">{{ __('site.profile_form.profile_information.fields.headline.label') }}</label>
             <input type="text" class="form-control form-control-lg @error('headline') is-invalid @enderror" id="headline" name="headline"
                 value="{{ old('headline', $user->profile->headline ?? '') }}"
@@ -428,7 +443,7 @@
                 var widget = $(COMPLETION_WIDGET_ID);
                 if (!widget) return;
 
-                var inputs = document.querySelectorAll('[name="name"], [name="email"], [name="headline"], [name="location"], [name="website"], [name="linkedin_url"], [name="education"], [name="current_position"], [name="experience_years"], [name="skills"], [name="about"], #cv');
+                var inputs = document.querySelectorAll('[name="name"], [name="email"], [name="phone"], [name="headline"], [name="location"], [name="website"], [name="linkedin_url"], [name="education"], [name="current_position"], [name="experience_years"], [name="skills"], [name="about"], #cv');
 
                 inputs.forEach(function(input) {
                     var eventName = input.type === 'file' ? 'change' : 'input';

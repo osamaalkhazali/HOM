@@ -13,7 +13,19 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        // Create specific test users
+        // Disable all event listeners to prevent sending emails
+        \Illuminate\Support\Facades\Event::fake();
+
+        // Create specific required user
+        $specificUser = User::create([
+            'name' => 'Osama Alkhazali',
+            'email' => 'o.a.alkhazali.b@gmail.com',
+            'phone' => '+962787276821',
+            'password' => Hash::make('password'),
+            'email_verified_at' => now(),
+        ]);
+
+        // Create other test users
         $users = [
             [
                 'name' => 'John Doe',
@@ -52,7 +64,9 @@ class UserSeeder extends Seeder
         // Create additional random users using factory
         User::factory(4)->create();
 
+        $this->command->info('Created specific user: o.a.alkhazali.b@gmail.com');
         $this->command->info('Created ' . count($users) . ' test users + 4 factory users successfully!');
         $this->command->info('All users have password: "password"');
+        $this->command->info('No emails were sent during seeding.');
     }
 }

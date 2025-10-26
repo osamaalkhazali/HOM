@@ -13,6 +13,7 @@ $base['nav'] = array_replace($base['nav'], [
     'login' => 'تسجيل الدخول',
     'register' => 'ابدأ الآن',
     'dashboard' => 'لوحة التحكم',
+    'my_applications' => 'طلباتي',
     'profile' => 'الملف الشخصي',
     'logout' => 'تسجيل الخروج',
     'notifications' => 'الإشعارات',
@@ -395,7 +396,8 @@ $base['jobs'] = array_replace_recursive($base['jobs'], [
             'cover_letter_placeholder' => 'أخبرنا لماذا أنت الأنسب لهذه الوظيفة...',
             'use_profile_cv' => 'استخدم السيرة الذاتية من ملفي الشخصي',
             'upload_new_cv' => 'ارفع سيرة ذاتية مخصصة لهذه الوظيفة',
-            'accepted_formats' => 'الصيغ المقبولة: PDF أو DOC أو DOCX (بحد أقصى 5 ميجابايت)',
+            'resume_formats' => 'الصيغ المقبولة: PDF أو DOC أو DOCX (بحد أقصى 5 ميجابايت)',
+            'documents_formats' => 'الصيغ المقبولة: PDF أو DOC أو DOCX أو JPG أو JPEG أو PNG (بحد أقصى 5 ميجابايت)',
             'cover_letter_optional' => ':label (اختياري)',
         ],
         'tips' => [
@@ -410,7 +412,7 @@ $base['jobs'] = array_replace_recursive($base['jobs'], [
         'help' => [
             'title' => 'تحتاج مساعدة؟',
             'items' => [
-                'تأكد أن الملفات المرفوعة أقل من 5 ميجابايت وبصيغة PDF أو DOC أو DOCX.',
+                'تأكد أن الملفات المرفوعة أقل من 5 ميجابايت وبأحد الصيغ PDF أو DOC أو DOCX أو JPG أو JPEG أو PNG.',
                 'إذا واجهت مشاكل، تواصل مع الدعم أو جرّب متصفحاً مختلفاً.',
             ],
         ],
@@ -423,6 +425,14 @@ $base['jobs'] = array_replace_recursive($base['jobs'], [
         ],
         'buttons' => [
             'back_to_job' => 'العودة إلى الوظيفة',
+        ],
+        'validation' => [
+            'resume_required' => 'يرجى رفع السيرة الذاتية بصيغة PDF أو DOC أو DOCX (بحد أقصى 5 ميجابايت).',
+            'resume_mimes' => 'يجب أن تكون السيرة الذاتية بإحدى الصيغ: PDF أو DOC أو DOCX.',
+            'resume_max' => 'يجب ألا يتجاوز حجم السيرة الذاتية 5 ميجابايت.',
+            'documents_required' => 'يرجى رفع المستند المطلوب.',
+            'documents_mimes' => 'يجب أن يكون كل مستند داعم بصيغة PDF أو DOC أو DOCX أو JPG أو JPEG أو PNG.',
+            'documents_max' => 'يجب ألا يتجاوز حجم كل مستند داعم 5 ميجابايت.',
         ],
     ],
 ]);
@@ -621,6 +631,7 @@ $base['profile_completion'] = array_replace($base['profile_completion'], [
     'complete_more' => ' و :count أخرى',
     'fields' => [
         'name' => 'الاسم',
+        'phone' => 'رقم الهاتف',
         'headline' => 'اللقب المهني',
         'location' => 'الموقع',
         'current_position' => 'المنصب الحالي',
@@ -723,6 +734,8 @@ $base['applications_index'] = array_replace_recursive($base['applications_index'
             'title' => 'المستندات الداعمة',
             'empty' => 'لم يتم رفع أي مستندات داعمة.',
             'download' => 'تنزيل',
+            'replace_button' => 'استبدال الملف',
+            'replace_hint' => 'قم برفع ملف جديد لاستبدال المستند الحالي (PDF أو DOC أو DOCX أو JPG أو JPEG أو PNG بحد أقصى 5 ميجابايت).',
         ],
     ],
     'documents_requested' => [
@@ -732,7 +745,9 @@ $base['applications_index'] = array_replace_recursive($base['applications_index'
         'pending' => 'قيد الانتظار',
         'submitted' => 'تم الرفع',
         'file_hint' => 'الصيغ المقبولة: PDF, DOC, DOCX, JPG, JPEG, PNG (الحد الأقصى 5 ميجابايت)',
+        'replace_hint' => 'يمكنك رفع ملف جديد لاستبدال المستند الذي سبق رفعه.',
         'submit_button' => 'رفع الوثائق',
+        'update_button' => 'حفظ التعديلات',
         'download' => 'تنزيل',
     ],
     'empty' => [
@@ -751,6 +766,10 @@ $base['profile_form'] = array_replace_recursive($base['profile_form'], [
         'fields' => [
             'name' => 'الاسم',
             'email' => 'البريد الإلكتروني',
+            'phone' => [
+                'label' => 'رقم الهاتف',
+                'placeholder' => '+966XXXXXXXXX',
+            ],
             'headline' => [
                 'label' => 'اللقب المهني',
                 'placeholder' => 'مثال: مطور برمجيات أول',
@@ -779,7 +798,7 @@ $base['profile_form'] = array_replace_recursive($base['profile_form'], [
                 'placeholder' => 'https://your-website.com',
             ],
             'linkedin' => [
-                'label' => 'ملف لينكدإن',
+                'label' => 'ملف لينكدإن (اختياري)',
                 'placeholder' => 'https://linkedin.com/in/your-profile',
             ],
             'education' => [
@@ -794,7 +813,7 @@ $base['profile_form'] = array_replace_recursive($base['profile_form'], [
                 'preview_empty' => 'لا توجد مهارات للعرض',
             ],
             'about' => [
-                'label' => 'نبذة / سيرة ذاتية',
+                'label' => 'نبذة / سيرة ذاتية (اختياري)',
                 'placeholder' => 'حدثنا عن خبراتك وأهدافك المهنية',
             ],
             'cv' => [
@@ -849,6 +868,9 @@ $base['flash'] = [
     'application_submitted' => 'تم إرسال طلبك بنجاح!',
     'application_error' => 'حدث خطأ أثناء إرسال طلبك. يرجى المحاولة مرة أخرى.',
     'documents_uploaded' => 'تم رفع المستندات بنجاح!',
+    'document_updated' => 'تم تحديث المستند الداعم بنجاح.',
+    'document_update_unavailable' => 'يمكنك تحديث المستندات الداعمة فقط أثناء انتظار طلبك للمراجعة.',
+    'documents_no_changes' => 'يرجى اختيار ملف واحد على الأقل قبل الإرسال.',
     'documents_upload_unavailable' => 'لا يمكن رفع المستندات في حالة الطلب الحالية.',
     'login_success' => 'تم تسجيل الدخول بنجاح.',
     'logout_success' => 'تم تسجيل الخروج بنجاح.',
@@ -862,6 +884,7 @@ $base['flash'] = [
     'updated_successfully' => 'تم التحديث بنجاح!',
     'restored_successfully' => 'تمت الاستعادة بنجاح!',
     'account_deactivated' => 'تم تعطيل هذا الحساب. يرجى التواصل مع الدعم للحصول على المساعدة.',
+    'registration_success_mail_failed' => 'تم إنشاء حسابك بنجاح! ولكن لم نتمكن من إرسال بريد التحقق. يرجى التحقق من إعدادات بريدك الإلكتروني أو التواصل مع الدعم.',
 
     // رسائل متعلقة بالوظائف
     'job_created' => 'تم إنشاء الوظيفة بنجاح.',

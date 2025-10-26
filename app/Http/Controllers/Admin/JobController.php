@@ -70,13 +70,11 @@ class JobController extends Controller
                     ->orWhere('level', 'like', "%{$search}%")
                     ->orWhereHas('category', function ($catQuery) use ($search) {
                         $catQuery->where('name', 'like', "%{$search}%")
-                            ->orWhere('name_ar', 'like', "%{$search}%")
-                            ->orWhere('admin_label', 'like', "%{$search}%");
+                        ->orWhere('name_ar', 'like', "%{$search}%");
                     })
                     ->orWhereHas('subCategory', function ($subCatQuery) use ($search) {
                         $subCatQuery->where('name', 'like', "%{$search}%")
-                            ->orWhere('name_ar', 'like', "%{$search}%")
-                            ->orWhere('admin_label', 'like', "%{$search}%");
+                        ->orWhere('name_ar', 'like', "%{$search}%");
                     })
                     ->orWhereHas('questions', function ($questionQuery) use ($search) {
                         $questionQuery->where('question', 'like', "%{$search}%")
@@ -445,12 +443,11 @@ class JobController extends Controller
      */
     public function extendDeadline(Job $job)
     {
-        $job->deadline = $job->deadline
-            ? $job->deadline->copy()->addDays(14)
-            : now()->addDays(14);
+        // Always extend 14 days from today, not from the old deadline
+        $job->deadline = now()->addDays(14);
         $job->save();
 
-        return back()->with('success', 'Job deadline extended by 14 days.');
+        return back()->with('success', 'Job deadline extended by 14 days from today.');
     }
 
     /**

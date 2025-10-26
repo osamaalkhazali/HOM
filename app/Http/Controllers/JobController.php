@@ -2,20 +2,20 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\SendsApplicationStatusNotifications;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Job;
 use App\Models\Category;
 use App\Models\SubCategory;
 use App\Models\Application;
-use App\Models\Admin;
-use App\Notifications\ApplicationStatusNotification;
+use App\Models\ApplicationDocument;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 
 class JobController extends Controller
 {
+    use SendsApplicationStatusNotifications;
     /**
      * Display a listing of jobs
      */
@@ -191,11 +191,22 @@ class JobController extends Controller
             $rules['questions.' . $question->id] = $question->is_required ? 'required|string|max:5000' : 'nullable|string|max:5000';
         }
 
+        $documentRuleBase = 'file|mimes:pdf,doc,docx,jpg,jpeg,png|max:5120';
+
         foreach ($job->documents as $document) {
-            $rules['documents.' . $document->id] = $document->is_required ? 'required|file|mimes:pdf,doc,docx|max:5120' : 'nullable|file|mimes:pdf,doc,docx|max:5120';
+            $rules['documents.' . $document->id] = ($document->is_required ? 'required|' : 'nullable|') . $documentRuleBase;
         }
 
-        $validated = $request->validate($rules);
+        $messages = [
+            'resume.required' => __('site.jobs.apply.validation.resume_required'),
+            'resume.mimes' => __('site.jobs.apply.validation.resume_mimes'),
+            'resume.max' => __('site.jobs.apply.validation.resume_max'),
+            'documents.*.required' => __('site.jobs.apply.validation.documents_required'),
+            'documents.*.mimes' => __('site.jobs.apply.validation.documents_mimes'),
+            'documents.*.max' => __('site.jobs.apply.validation.documents_max'),
+        ];
+
+        $validated = $request->validate($rules, $messages);
 
         $cvPath = null;
         $uploadedResume = false;
@@ -255,18 +266,7 @@ class JobController extends Controller
             throw $e;
         }
 
-        try {
-            $application->load(['job', 'user']);
-
-            Notification::send($user, new ApplicationStatusNotification($application, 'pending', 'user'));
-
-            $admins = Admin::active()->get();
-            if ($admins->isNotEmpty()) {
-                Notification::send($admins, new ApplicationStatusNotification($application, 'pending', 'admin'));
-            }
-        } catch (\Throwable $e) {
-            report($e);
-        }
+        $this->sendStatusNotifications($application, 'pending');
 
         return redirect()->route('jobs.show', $job)
             ->with('success', __('site.flash.application_submitted'));
@@ -353,30 +353,52 @@ class JobController extends Controller
             return redirect()->back()->with('error', __('site.flash.documents_upload_unavailable'));
         }
 
-        $validated = $request->validate([
-            'documents' => 'required|array',
-            'documents.*' => 'required|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:5120',
-        ]);
+        $application->loadMissing('documentRequests');
 
+        $documentRequests = $application->documentRequests;
+        $documentRuleBase = 'file|mimes:pdf,doc,docx,jpg,jpeg,png|max:5120';
+        $hasPending = $documentRequests->contains(fn($doc) => !$doc->is_submitted);
+
+        $rules = [
+            'documents' => ($hasPending ? 'required' : 'nullable') . '|array',
+        ];
+
+        foreach ($documentRequests as $docRequest) {
+            $rules['documents.' . $docRequest->id] = ($docRequest->is_submitted ? 'nullable|' : 'required|') . $documentRuleBase;
+        }
+
+        $messages = [
+            'documents.required' => __('site.jobs.apply.validation.documents_required'),
+            'documents.*.required' => __('site.jobs.apply.validation.documents_required'),
+            'documents.*.mimes' => __('site.jobs.apply.validation.documents_mimes'),
+            'documents.*.max' => __('site.jobs.apply.validation.documents_max'),
+        ];
+
+        $validated = $request->validate($rules, $messages);
+
+        $uploadedDocuments = $documentRequests->filter(fn($doc) => $request->hasFile('documents.' . $doc->id));
+
+        if (!$hasPending && $uploadedDocuments->isEmpty()) {
+            return redirect()->back()->with('error', __('site.flash.documents_no_changes'));
+        }
         $storedFiles = [];
-        $allSubmitted = true;
+        $oldPaths = [];
+        $shouldNotifyDocumentsSubmitted = false;
 
         DB::beginTransaction();
 
         try {
-            foreach ($request->file('documents') as $requestId => $file) {
-                $documentRequest = $application->documentRequests()->find($requestId);
-
-                if (!$documentRequest) {
+            foreach ($documentRequests as $docRequest) {
+                if (!$request->hasFile('documents.' . $docRequest->id)) {
                     continue;
                 }
 
-                // Store the file
+                $file = $request->file('documents.' . $docRequest->id);
                 $path = $file->store('applications/requested-documents', 'public');
                 $storedFiles[] = $path;
+                $oldPaths[] = $docRequest->file_path;
 
-                // Update the document request
-                $documentRequest->update([
+                $docRequest->update([
                     'is_submitted' => true,
                     'submitted_at' => now(),
                     'file_path' => $path,
@@ -384,31 +406,13 @@ class JobController extends Controller
                 ]);
             }
 
-            // Check if all documents are submitted
             $allSubmitted = $application->documentRequests()
                 ->where('is_submitted', false)
                 ->doesntExist();
 
-            // Update application status if all documents are submitted
             if ($allSubmitted && $application->status === 'documents_requested') {
                 $application->update(['status' => 'documents_submitted']);
-
-                $application->load(['job', 'user']);
-
-                if ($application->user) {
-                    Notification::send(
-                        $application->user,
-                        new ApplicationStatusNotification($application, 'documents_submitted', 'user')
-                    );
-                }
-
-                $admins = Admin::active()->get();
-                if ($admins->isNotEmpty()) {
-                    Notification::send(
-                        $admins,
-                        new ApplicationStatusNotification($application, 'documents_submitted', 'admin')
-                    );
-                }
+                $shouldNotifyDocumentsSubmitted = true;
             }
 
             DB::commit();
@@ -420,7 +424,71 @@ class JobController extends Controller
             throw $e;
         }
 
+        if ($shouldNotifyDocumentsSubmitted) {
+            $this->sendStatusNotifications($application, 'documents_submitted');
+        }
+
+        foreach ($oldPaths as $oldPath) {
+            if ($oldPath) {
+                Storage::disk('public')->delete($oldPath);
+            }
+        }
+
         return redirect()->back()->with('success', __('site.flash.documents_uploaded'));
+    }
+
+    public function updateSupportingDocument(Request $request, Application $application, ApplicationDocument $document)
+    {
+        if ($application->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        if ($document->application_id !== $application->id) {
+            abort(404);
+        }
+
+        if ($application->status !== 'pending') {
+            return redirect()->back()->with('error', __('site.flash.document_update_unavailable'));
+        }
+
+        $messages = [
+            'document.required' => __('site.jobs.apply.validation.documents_required'),
+            'document.mimes' => __('site.jobs.apply.validation.documents_mimes'),
+            'document.max' => __('site.jobs.apply.validation.documents_max'),
+        ];
+
+        $request->validate([
+            'document' => 'required|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:5120',
+            'document_id' => 'sometimes|integer',
+        ], $messages);
+
+        $file = $request->file('document');
+        $oldPath = $document->file_path;
+
+        DB::beginTransaction();
+
+        try {
+            $newPath = $file->store('applications/documents', 'public');
+
+            $document->update([
+                'file_path' => $newPath,
+                'original_name' => $file->getClientOriginalName(),
+            ]);
+
+            DB::commit();
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            if (isset($newPath)) {
+                Storage::disk('public')->delete($newPath);
+            }
+            throw $e;
+        }
+
+        if (!empty($oldPath)) {
+            Storage::disk('public')->delete($oldPath);
+        }
+
+        return redirect()->back()->with('success', __('site.flash.document_updated'));
     }
 }
 

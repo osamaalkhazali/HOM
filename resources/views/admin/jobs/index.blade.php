@@ -113,7 +113,7 @@
                                 <option value="">All Categories</option>
                                 @foreach ($categories as $category)
                                     <option value="{{ $category->id }}" {{ request('category') == $category->id ? 'selected' : '' }}>
-                                        {{ $category->admin_label ?: $category->name }}
+                                        {{ $category->name }}
                                     </option>
                                 @endforeach
                             </select>
@@ -250,10 +250,10 @@
                             </td>
                             <td class="px-6 py-4">
                                 @if ($job->category)
-                                    <div class="text-sm text-gray-900">{{ $job->category->admin_label ?: $job->category->name }}</div>
+                                    <div class="text-sm text-gray-900">{{ $job->category->name }}</div>
                                 @endif
                                 @if ($job->subCategory)
-                                    <div class="text-xs text-gray-500">{{ $job->subCategory->admin_label ?: $job->subCategory->name }}</div>
+                                    <div class="text-xs text-gray-500">{{ $job->subCategory->name }}</div>
                                 @endif
                             </td>
                             <td class="px-6 py-4">

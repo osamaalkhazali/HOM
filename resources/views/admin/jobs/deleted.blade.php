@@ -108,7 +108,7 @@
                             @foreach ($categories as $category)
                                 <option value="{{ $category->id }}"
                                     {{ request('category') == $category->id ? 'selected' : '' }}>
-                                    {{ $category->admin_label ?: $category->name }}
+                                    {{ $category->name }}
                                 </option>
                             @endforeach
                         </select>
@@ -211,8 +211,8 @@
                                         </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm text-gray-900">{{ $job->category?->admin_label ?? $job->category?->name ?? 'No Category' }}</div>
-                                        <div class="text-sm text-gray-500">{{ $job->subCategory?->admin_label ?? $job->subCategory?->name ?? 'No Subcategory' }}</div>
+                                        <div class="text-sm text-gray-900">{{ $job->category?->name ?? 'No Category' }}</div>
+                                        <div class="text-sm text-gray-500">{{ $job->subCategory?->name ?? 'No Subcategory' }}</div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="flex items-center">

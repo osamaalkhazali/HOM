@@ -27,6 +27,13 @@
             <form method="POST" action="{{ route('admin.jobs.update', $job) }}" class="p-6 space-y-6">
                 @csrf
                 @php
+                    // Determine the actual category_id
+                    $actualCategoryId = $job->category_id;
+                    if (!$actualCategoryId && $job->sub_category_id && $job->subCategory) {
+                        // If only subcategory is set, get the parent category
+                        $actualCategoryId = $job->subCategory->category_id;
+                    }
+
                     $questionFormData = old('questions', $job->questions->map(fn($question) => [
                         'question' => $question->question,
                         'question_ar' => $question->question_ar,
@@ -124,8 +131,8 @@
                                 <option value="">Select Category</option>
                                 @foreach ($categories as $category)
                                     <option value="{{ $category->id }}"
-                                        {{ old('category_id', $job->category_id ?? ($job->subCategory ? $job->subCategory->category->id : '')) == $category->id ? 'selected' : '' }}>
-                                        {{ $category->admin_label ?? $category->name }}
+                                        {{ old('category_id', $actualCategoryId) == $category->id ? 'selected' : '' }}>
+                                        {{ $category->name }}
                                     </option>
                                 @endforeach
                             </select>
@@ -161,72 +168,121 @@
                             <select id="level" name="level" required
                                 class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 @error('level') border-red-500 @enderror">
                                 <option value="">Select Level</option>
-                                <option value="entry" {{ old('level', $job->level) === 'entry' ? 'selected' : '' }}>Entry
-                                    Level</option>
-                                <option value="mid" {{ old('level', $job->level) === 'mid' ? 'selected' : '' }}>Mid
-                                    Level</option>
-                                <option value="senior" {{ old('level', $job->level) === 'senior' ? 'selected' : '' }}>
-                                    Senior Level</option>
-                                <option value="executive"
-                                    {{ old('level', $job->level) === 'executive' ? 'selected' : '' }}>Executive</option>
+                                @foreach (['entry', 'mid', 'senior', 'executive'] as $levelKey)
+                                    <option value="{{ $levelKey }}" {{ old('level', $job->level) === $levelKey ? 'selected' : '' }}>
+                                        {{ trans('site.jobs.levels.' . $levelKey, [], 'en') }}
+                                        ({{ trans('site.jobs.levels.' . $levelKey, [], 'ar') }})
+                                    </option>
+                                @endforeach
                             </select>
                             @error('level')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
+                    </div>
+                </div>
 
-                        <!-- Salary -->
-                        <div>
-                            <label for="salary_type" class="block text-sm font-medium text-gray-700 mb-1">Salary Type
-                                *</label>
-                            <div class="space-y-3">
-                                <div>
-                                    <label class="flex items-center">
-                                        <input type="radio" name="salary_type" value="negotiable"
-                                            {{ (!old('salary_type') && (!$job->salary || $job->salary == 0)) || old('salary_type') == 'negotiable' ? 'checked' : '' }}
-                                            class="mr-2" onchange="toggleSalaryInput()">
-                                        <span class="text-sm">Negotiable</span>
-                                    </label>
+                <!-- Application Deadline Section -->
+                <div class="border-b border-gray-200 pb-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Application Deadline</h3>
+                    <div>
+                        @php
+                            $currentDeadline = old('deadline', $job->deadline->format('Y-m-d'));
+                            $now = now();
+                            $deadline = $job->deadline->endOfDay();
+                            $diff = $now->diff($deadline);
+                            $isExpired = $now->isAfter($deadline);
+
+                            // Format time remaining
+                            if ($isExpired) {
+                                $totalDays = abs($diff->days);
+                                if ($totalDays == 0) {
+                                    $timeRemainingText = 'Today';
+                                } elseif ($totalDays == 1) {
+                                    $timeRemainingText = '1 day ago';
+                                } else {
+                                    $timeRemainingText = $totalDays . ' days ago';
+                                }
+                            } else {
+                                $days = $diff->days;
+                                $hours = $diff->h;
+
+                                if ($days == 0) {
+                                    if ($hours == 0) {
+                                        $timeRemainingText = 'Less than 1 hour';
+                                    } elseif ($hours == 1) {
+                                        $timeRemainingText = '1 hour';
+                                    } else {
+                                        $timeRemainingText = $hours . ' hours';
+                                    }
+                                } elseif ($days == 1) {
+                                    if ($hours > 0) {
+                                        $timeRemainingText = '1 day ' . $hours . ' hour' . ($hours > 1 ? 's' : '');
+                                    } else {
+                                        $timeRemainingText = '1 day';
+                                    }
+                                } else {
+                                    if ($hours > 0) {
+                                        $timeRemainingText = $days . ' days ' . $hours . ' hour' . ($hours > 1 ? 's' : '');
+                                    } else {
+                                        $timeRemainingText = $days . ' days';
+                                    }
+                                }
+                            }
+
+                            $extend14Days = now()->addDays(14)->format('Y-m-d');
+
+                            $useCustomDeadlineValue = old('use_custom_deadline');
+                            if ($useCustomDeadlineValue === null) {
+                                $useCustomDeadlineValue = '0';
+                            }
+                            $useCustomDeadline = $useCustomDeadlineValue === '1';
+                        @endphp
+
+                        <input type="hidden" name="use_custom_deadline" id="use_custom_deadline" value="{{ $useCustomDeadline ? '1' : '0' }}">
+
+                        <div id="default-deadline-panel" class="{{ $useCustomDeadline ? 'hidden' : '' }} bg-blue-50 border border-blue-200 rounded-lg p-4">
+                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                                <div class="text-sm text-blue-900">
+                                    <p class="mb-1">
+                                        Current deadline: <span class="font-semibold">{{ $job->deadline->format('F d, Y') }}</span>
+                                        @if($isExpired)
+                                            <span class="text-red-600 font-semibold">(Expired {{ $timeRemainingText }})</span>
+                                        @else
+                                            <span class="text-gray-600">({{ $timeRemainingText }} remaining)</span>
+                                        @endif
+                                    </p>
+                                    <p class="text-xs text-blue-700">This job was set to close 14 days from creation date.</p>
                                 </div>
-                                <div>
-                                    <label class="flex items-center">
-                                        <input type="radio" name="salary_type" value="fixed"
-                                            {{ old('salary_type') == 'fixed' || (!old('salary_type') && $job->salary && $job->salary > 0) ? 'checked' : '' }}
-                                            class="mr-2" onchange="toggleSalaryInput()">
-                                        <span class="text-sm">Fixed Amount</span>
-                                    </label>
+                                <div class="flex flex-col sm:flex-row gap-2">
+                                    <button type="button" id="extend-14-days"
+                                        class="inline-flex items-center justify-center px-3 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg">
+                                        <i class="fas fa-plus-circle mr-2"></i>Extend +14 days
+                                    </button>
+                                    <button type="button" id="show-custom-deadline"
+                                        class="inline-flex items-center justify-center px-3 py-2 text-sm font-medium text-blue-700 hover:text-blue-900 bg-white border border-blue-300 rounded-lg">
+                                        <i class="fas fa-calendar-alt mr-2"></i>Custom date
+                                    </button>
                                 </div>
                             </div>
+                        </div>
 
-                            <div id="salary_input_div"
-                                class="mt-3 {{ (!old('salary_type') && (!$job->salary || $job->salary == 0)) || old('salary_type') == 'negotiable' ? 'hidden' : '' }}">
-                                <label for="salary" class="block text-sm font-medium text-gray-700 mb-1">Annual
-                                    Salary</label>
-                                <div class="relative">
-                                    <span class="absolute left-3 top-2 text-gray-500">$</span>
-                                    <input type="number" id="salary" name="salary"
-                                        value="{{ old('salary', $job->salary && $job->salary > 0 ? $job->salary : '') }}"
-                                        min="1" step="1000" placeholder="50000"
-                                        class="w-full border border-gray-300 rounded-lg pl-8 pr-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 @error('salary') border-red-500 @enderror">
-                                </div>
+                        <div id="custom-deadline-panel" class="{{ $useCustomDeadline ? '' : 'hidden' }} bg-gray-50 border border-gray-200 rounded-lg p-4">
+                            <div class="flex flex-col sm:flex-row sm:items-center sm:space-x-3 space-y-3 sm:space-y-0">
+                                <input type="date" id="deadline" name="deadline" value="{{ $currentDeadline }}"
+                                    required min="{{ date('Y-m-d', strtotime('+1 day')) }}"
+                                    class="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 @error('deadline') border-red-500 @enderror">
+                                <button type="button" id="cancel-custom-deadline"
+                                    class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 bg-white border border-gray-300 rounded-lg">
+                                    <i class="fas fa-times mr-2"></i>Cancel
+                                </button>
                             </div>
-                            @error('salary')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
+                            <p class="mt-2 text-xs text-gray-500">Select a custom deadline date.</p>
                         </div>
 
-                        <!-- Application Deadline -->
-                        <div class="md:col-span-2">
-                            <label for="deadline" class="block text-sm font-medium text-gray-700 mb-1">Application
-                                Deadline
-                                *</label>
-                            <input type="date" id="deadline" name="deadline"
-                                value="{{ old('deadline', $job->deadline->format('Y-m-d')) }}" required
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 @error('deadline') border-red-500 @enderror">
-                            @error('deadline')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
+                        @error('deadline')
+                            <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
                     </div>
                 </div>
 
@@ -411,10 +467,62 @@
 
     <script>
         const categoriesData = @json($categories);
+        const extend14DaysDate = '{{ $extend14Days }}';
+        const currentDeadlineDate = '{{ $job->deadline->format("Y-m-d") }}';
+        const useCustomDeadlineInput = document.getElementById('use_custom_deadline');
+        const defaultDeadlinePanel = document.getElementById('default-deadline-panel');
+        const customDeadlinePanel = document.getElementById('custom-deadline-panel');
+        const showCustomDeadlineButton = document.getElementById('show-custom-deadline');
+        const cancelCustomDeadlineButton = document.getElementById('cancel-custom-deadline');
+        const extend14DaysButton = document.getElementById('extend-14-days');
+        const deadlineInput = document.getElementById('deadline');
         const questionRowsContainer = document.getElementById('question-rows');
         const documentRowsContainer = document.getElementById('document-rows');
         let questionIndex = questionRowsContainer ? questionRowsContainer.querySelectorAll('.question-row').length : 0;
         let documentIndex = documentRowsContainer ? documentRowsContainer.querySelectorAll('.document-row').length : 0;
+
+        function activateDefaultDeadline({ resetValue = false } = {}) {
+            if (useCustomDeadlineInput) {
+                useCustomDeadlineInput.value = '0';
+            }
+
+            if (resetValue && deadlineInput) {
+                deadlineInput.value = currentDeadlineDate;
+            }
+
+            if (customDeadlinePanel) {
+                customDeadlinePanel.classList.add('hidden');
+            }
+
+            if (defaultDeadlinePanel) {
+                defaultDeadlinePanel.classList.remove('hidden');
+            }
+        }
+
+        function activateCustomDeadline({ focus = true } = {}) {
+            if (useCustomDeadlineInput) {
+                useCustomDeadlineInput.value = '1';
+            }
+
+            if (defaultDeadlinePanel) {
+                defaultDeadlinePanel.classList.add('hidden');
+            }
+
+            if (customDeadlinePanel) {
+                customDeadlinePanel.classList.remove('hidden');
+            }
+
+            if (focus && deadlineInput) {
+                deadlineInput.focus();
+            }
+        }
+
+        function extendDeadlineBy14Days() {
+            if (deadlineInput) {
+                deadlineInput.value = extend14DaysDate;
+            }
+            activateCustomDeadline({ focus: false });
+        }
 
         function createEl(tag, attrs = {}, children = []) {
             const el = document.createElement(tag);
@@ -576,7 +684,7 @@
 
             const selectedCategoryId = categorySelect.value;
             const preselected = subcategorySelect.dataset.selected || '';
-            subcategorySelect.innerHTML = '<option value="">Select Subcategory</option>';
+            subcategorySelect.innerHTML = '<option value="">No Subcategory</option>';
 
             if (selectedCategoryId) {
                 const category = categoriesData.find(cat => String(cat.id) === String(selectedCategoryId));
@@ -584,7 +692,7 @@
                     category.sub_categories.forEach(subcat => {
                         const option = document.createElement('option');
                         option.value = subcat.id;
-                        option.textContent = subcat.admin_label ?? subcat.name;
+                        option.textContent = subcat.name;
                         if (preselected && String(preselected) === String(subcat.id)) {
                             option.selected = true;
                         }
@@ -614,30 +722,31 @@
         };
         window.updateSubcategories = updateSubcategories;
 
-        function toggleSalaryInput() {
-            const salaryDiv = document.getElementById('salary_input_div');
-            const salaryInput = document.getElementById('salary');
-            const fixedRadio = document.querySelector('input[name="salary_type"][value="fixed"]');
-            if (!salaryDiv || !salaryInput || !fixedRadio) return;
-
-            if (fixedRadio.checked) {
-                salaryDiv.classList.remove('hidden');
-                salaryInput.required = true;
-            } else {
-                salaryDiv.classList.add('hidden');
-                salaryInput.required = false;
-                salaryInput.value = '';
-            }
-        }
-
         function setDeadlineMin() {
-            const deadlineInput = document.getElementById('deadline');
             if (deadlineInput) {
                 deadlineInput.min = new Date(Date.now() + 86400000).toISOString().split('T')[0];
             }
         }
 
         document.addEventListener('DOMContentLoaded', function () {
+            if (useCustomDeadlineInput && useCustomDeadlineInput.value === '1') {
+                activateCustomDeadline({ focus: false });
+            } else {
+                activateDefaultDeadline({ resetValue: false });
+            }
+
+            if (showCustomDeadlineButton) {
+                showCustomDeadlineButton.addEventListener('click', () => activateCustomDeadline());
+            }
+
+            if (cancelCustomDeadlineButton) {
+                cancelCustomDeadlineButton.addEventListener('click', () => activateDefaultDeadline({ resetValue: true }));
+            }
+
+            if (extend14DaysButton) {
+                extend14DaysButton.addEventListener('click', extendDeadlineBy14Days);
+            }
+
             setDeadlineMin();
             updateSubcategories();
 
@@ -648,11 +757,6 @@
             if (documentRowsContainer && documentRowsContainer.querySelectorAll('.document-row').length === 0) {
                 addDocumentRow({ is_required: false });
             }
-
-            document.querySelectorAll('input[name="salary_type"]').forEach(radio => {
-                radio.addEventListener('change', toggleSalaryInput);
-            });
-            toggleSalaryInput();
         });
     </script>
 @endsection

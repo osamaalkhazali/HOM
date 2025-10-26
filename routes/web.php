@@ -158,6 +158,7 @@ Route::middleware('auth')->group(function () {
     // User applications routes
     Route::get('/applications', [JobController::class, 'myApplications'])->name('applications.index');
     Route::post('/applications/{application}/upload-documents', [JobController::class, 'uploadRequestedDocuments'])->name('applications.upload-documents');
+    Route::post('/applications/{application}/documents/{document}', [JobController::class, 'updateSupportingDocument'])->name('applications.documents.update');
 
     // User notifications
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');

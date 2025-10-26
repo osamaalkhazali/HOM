@@ -90,6 +90,11 @@ class User extends Authenticatable implements MustVerifyEmail
                 'resolver' => fn(self $user) => $user->name,
             ],
             [
+                'key' => 'phone',
+                'label_key' => 'site.profile_completion.fields.phone',
+                'resolver' => fn(self $user) => $user->phone,
+            ],
+            [
                 'key' => 'headline',
                 'label_key' => 'site.profile_completion.fields.headline',
                 'resolver' => fn(self $user) => optional($user->profile)->headline,
@@ -115,19 +120,9 @@ class User extends Authenticatable implements MustVerifyEmail
                 'resolver' => fn(self $user) => optional($user->profile)->skills,
             ],
             [
-                'key' => 'about',
-                'label_key' => 'site.profile_completion.fields.about',
-                'resolver' => fn(self $user) => optional($user->profile)->about,
-            ],
-            [
                 'key' => 'education',
                 'label_key' => 'site.profile_completion.fields.education',
                 'resolver' => fn(self $user) => optional($user->profile)->education,
-            ],
-            [
-                'key' => 'linkedin_url',
-                'label_key' => 'site.profile_completion.fields.linkedin_url',
-                'resolver' => fn(self $user) => optional($user->profile)->linkedin_url,
             ],
             [
                 'key' => 'cv_path',

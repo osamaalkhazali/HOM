@@ -18,7 +18,6 @@
         $exportFormats = [
             'excel' => ['label' => 'Excel', 'icon' => 'fas fa-file-excel text-green-600'],
             'csv' => ['label' => 'CSV', 'icon' => 'fas fa-file-code text-amber-600'],
-            'pdf' => ['label' => 'PDF', 'icon' => 'fas fa-file-pdf text-red-600'],
         ];
 
         $filteredParams = $exportQuery ?? [];
@@ -184,7 +183,7 @@
                             <option value="">All Categories</option>
                             @foreach ($categories as $category)
                                 <option value="{{ $category->id }}" {{ request('category_id') == $category->id ? 'selected' : '' }}>
-                                    {{ $category->admin_label ?: $category->name }}
+                                    {{ $category->name }}
                                 </option>
                             @endforeach
                         </select>

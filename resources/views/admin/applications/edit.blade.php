@@ -4,6 +4,7 @@
 
 @section('content')
     @php
+        // Only show manual statuses - documents_requested and documents_submitted are automatic
         $statusOptions = [
             'pending' => [
                 'label' => 'Pending Review',
@@ -22,18 +23,8 @@
             ],
             'shortlisted' => [
                 'label' => 'Shortlisted',
-                'hint' => 'Candidate selected for shortlist',
+                'hint' => 'Candidate selected for shortlist - you can add document requests',
                 'badge' => ['classes' => 'bg-purple-100 text-purple-700 border border-purple-200', 'icon' => 'fas fa-star text-purple-600', 'text' => 'Shortlisted'],
-            ],
-            'documents_requested' => [
-                'label' => 'Documents Requested',
-                'hint' => 'Awaiting additional documents from candidate',
-                'badge' => ['classes' => 'bg-amber-100 text-amber-700 border border-amber-200', 'icon' => 'fas fa-file-signature text-amber-600', 'text' => 'Documents Requested'],
-            ],
-            'documents_submitted' => [
-                'label' => 'Documents Submitted',
-                'hint' => 'Candidate provided requested documents',
-                'badge' => ['classes' => 'bg-teal-100 text-teal-700 border border-teal-200', 'icon' => 'fas fa-file-upload text-teal-600', 'text' => 'Documents Submitted'],
             ],
             'rejected' => [
                 'label' => 'Rejected',
@@ -47,6 +38,27 @@
             ],
         ];
 
+        // Add current status if it's one of the automatic ones (for display only)
+        $currentStatus = old('status', $application->status);
+        if (in_array($currentStatus, ['documents_requested', 'documents_submitted'])) {
+            $autoStatusLabels = [
+                'documents_requested' => [
+                    'label' => 'Documents Requested (Current - Auto)',
+                    'hint' => 'This status was set automatically when documents were requested',
+                    'badge' => ['classes' => 'bg-amber-100 text-amber-700 border border-amber-200', 'icon' => 'fas fa-file-signature text-amber-600', 'text' => 'Documents Requested'],
+                ],
+                'documents_submitted' => [
+                    'label' => 'Documents Submitted (Current - Auto)',
+                    'hint' => 'This status was set automatically when candidate submitted documents',
+                    'badge' => ['classes' => 'bg-teal-100 text-teal-700 border border-teal-200', 'icon' => 'fas fa-file-upload text-teal-600', 'text' => 'Documents Submitted'],
+                ],
+            ];
+            if (isset($autoStatusLabels[$currentStatus])) {
+                // Add the current automatic status at the beginning for display
+                $statusOptions = [$currentStatus => $autoStatusLabels[$currentStatus]] + $statusOptions;
+            }
+        }
+
         $documentRequestFormData = old('document_requests', $application->documentRequests->map(fn ($request) => [
             'id' => $request->id,
             'name' => $request->name,
@@ -55,7 +67,7 @@
             'is_submitted' => $request->is_submitted,
         ])->values()->toArray());
 
-        $documentStatusAllowed = in_array(old('status', $application->status), ['shortlisted', 'documents_requested', 'documents_submitted']);
+        $documentStatusAllowed = in_array($currentStatus, ['shortlisted', 'documents_requested', 'documents_submitted']);
     @endphp
     <div class="space-y-6">
         <!-- Header -->

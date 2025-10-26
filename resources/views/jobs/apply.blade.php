@@ -133,7 +133,7 @@
                                     @endif
 
                                     <input type="file" class="form-control @error('resume') is-invalid @enderror" id="resume" name="resume" accept=".pdf,.doc,.docx" {{ !$hasCv ? 'required' : '' }} style="border-radius: 10px;">
-                                    <small class="form-text text-muted">{{ __('site.jobs.apply.form.accepted_formats') }}</small>
+                                    <small class="form-text text-muted">{{ __('site.jobs.apply.form.resume_formats') }}</small>
                                     @error('resume')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -146,13 +146,10 @@
                                         <div class="space-y-3">
                                             @foreach ($job->questions as $question)
                                                 <div>
-                                                    <label class="form-label fw-semibold d-flex align-items-center justify-content-between">
-                                                        <span>{{ $question->prompt }}</span>
-                                                        @if ($question->question_ar && app()->getLocale() !== 'ar')
-                                                            <span class="text-xs text-gray-500" dir="rtl">{{ $question->question_ar }}</span>
-                                                        @endif
+                                                    <label class="form-label fw-semibold">
+                                                        {{ $question->prompt }}
                                                         @if ($question->is_required)
-                                                            <span class="text-red-500 text-xs ms-2">*</span>
+                                                            <span class="text-danger ms-1">*</span>
                                                         @endif
                                                     </label>
                                                     <textarea name="questions[{{ $question->id }}]" rows="3" class="form-control @error('questions.' . $question->id) is-invalid @enderror" style="border-radius: 10px;" {{ $question->is_required ? 'required' : '' }}>{{ old('questions.' . $question->id) }}</textarea>
@@ -172,19 +169,14 @@
                                         <div class="space-y-3">
                                             @foreach ($job->documents as $document)
                                                 <div>
-                                                    <label class="form-label fw-semibold d-flex align-items-center justify-content-between">
-                                                        <span>{{ $document->label }}</span>
-                                                        @if ($document->name_ar && app()->getLocale() !== 'ar')
-                                                            <span class="text-xs text-gray-500" dir="rtl">{{ $document->name_ar }}</span>
-                                                        @endif
+                                                    <label class="form-label fw-semibold">
+                                                        {{ $document->label }}
                                                         @if ($document->is_required)
-                                                            <span class="text-red-500 text-xs ms-2">*</span>
-                                                        @else
-                                                            <span class="text-xs text-gray-500 ms-2">({{ __('site.jobs.apply.sections.optional') }})</span>
+                                                            <span class="text-danger ms-1">*</span>
                                                         @endif
                                                     </label>
-                                                    <input type="file" name="documents[{{ $document->id }}]" accept=".pdf,.doc,.docx" class="form-control @error('documents.' . $document->id) is-invalid @enderror" style="border-radius: 10px;" {{ $document->is_required ? 'required' : '' }}>
-                                                    <small class="form-text text-muted">{{ __('site.jobs.apply.form.accepted_formats') }}</small>
+                                                    <input type="file" name="documents[{{ $document->id }}]" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" class="form-control @error('documents.' . $document->id) is-invalid @enderror" style="border-radius: 10px;" {{ $document->is_required ? 'required' : '' }}>
+                                                    <small class="form-text text-muted">{{ __('site.jobs.apply.form.documents_formats') }}</small>
                                                     @error('documents.' . $document->id)
                                                         <div class="invalid-feedback d-block">{{ $message }}</div>
                                                     @enderror

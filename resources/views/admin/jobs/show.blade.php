@@ -87,14 +87,14 @@
                             <div class="flex items-center space-x-4">
                                 @if ($job->category)
                                     <span
-                                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                        <i class="fas fa-tag mr-1"></i>{{ $job->category->admin_label ?: $job->category->name }}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                        <i class="fas fa-tag mr-1"></i>{{ $job->category->name }}
                                     </span>
                                 @endif
                                 @if ($job->subCategory)
                                     <span
-                                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                                        <i class="fas fa-tags mr-1"></i>{{ $job->subCategory->admin_label ?: $job->subCategory->name }}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                        <i class="fas fa-tags mr-1"></i>{{ $job->subCategory->name }}
                                     </span>
                                 @endif
                             </div>

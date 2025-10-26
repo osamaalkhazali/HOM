@@ -169,11 +169,9 @@
                             <div>
                                 <h4 class="text-sm font-medium text-gray-900">{{ $job->title }}</h4>
                                 @php
-                                    $categoryLabel = optional(optional($job->subCategory)->category)->admin_label
-                                        ?? optional(optional($job->subCategory)->category)->name
+                                    $categoryLabel = optional(optional($job->subCategory)->category)->name
                                         ?? 'Uncategorized';
-                                    $subLabel = optional($job->subCategory)->admin_label
-                                        ?? optional($job->subCategory)->name;
+                                    $subLabel = optional($job->subCategory)->name;
                                 @endphp
                                 <p class="text-sm text-gray-500">
                                     {{ $categoryLabel }}

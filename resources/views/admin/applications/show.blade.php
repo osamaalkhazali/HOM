@@ -31,11 +31,23 @@
                     @csrf
                     @method('PATCH')
                     @php
-                        $statusOptions = ['pending', 'under_reviewing', 'reviewed', 'shortlisted', 'documents_requested', 'documents_submitted', 'rejected', 'hired'];
+                        // Only manual statuses - documents_requested and documents_submitted are automatic
+                        $manualStatuses = ['pending', 'under_reviewing', 'reviewed', 'shortlisted', 'rejected', 'hired'];
+                        $currentStatus = $application->status;
+                        $isAutoStatus = in_array($currentStatus, ['documents_requested', 'documents_submitted']);
                     @endphp
                     <select name="status" onchange="this.form.submit()"
                         class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        @foreach ($statusOptions as $statusOption)
+                        @if ($isAutoStatus)
+                            @php
+                                $labelEn = __('site.application_statuses.' . $currentStatus, [], 'en');
+                                $labelAr = __('site.application_statuses.' . $currentStatus, [], 'ar');
+                            @endphp
+                            <option value="{{ $currentStatus }}" selected>
+                                {{ $labelEn }} ({{ $labelAr }}) - Auto
+                            </option>
+                        @endif
+                        @foreach ($manualStatuses as $statusOption)
                             @php
                                 $labelEn = __('site.application_statuses.' . $statusOption, [], 'en');
                                 $labelAr = __('site.application_statuses.' . $statusOption, [], 'ar');
@@ -295,6 +307,91 @@
                     </div>
                 @endif
 
+                <!-- Application Questions & Answers -->
+                @if ($application->questionAnswers && $application->questionAnswers->count() > 0)
+                    <div class="bg-white rounded-lg shadow">
+                        <div class="px-6 py-4 border-b border-gray-200">
+                            <h3 class="text-lg font-medium text-gray-900">Application Questions & Answers</h3>
+                            <p class="text-sm text-gray-500 mt-1">Applicant's responses to job-specific questions</p>
+                        </div>
+                        <div class="divide-y divide-gray-200">
+                            @foreach ($application->questionAnswers as $index => $answer)
+                                <div class="px-6 py-4">
+                                    <div class="flex items-start gap-3">
+                                        <div class="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                            <span class="text-sm font-semibold text-blue-600">{{ $index + 1 }}</span>
+                                        </div>
+                                        <div class="flex-1">
+                                            <h4 class="text-sm font-medium text-gray-900 mb-2">
+                                                @if ($answer->question)
+                                                    {{ $answer->question->question ?? 'Question' }}
+                                                    @if ($answer->question->question_ar)
+                                                        <span class="text-gray-600" dir="rtl">({{ $answer->question->question_ar }})</span>
+                                                    @endif
+                                                    @if ($answer->question->is_required)
+                                                        <span class="ml-1 text-red-500">*</span>
+                                                    @endif
+                                                @else
+                                                    Question
+                                                @endif
+                                            </h4>
+                                            <div class="mt-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                                                <p class="text-sm text-gray-900">{{ $answer->answer ?? 'No answer provided' }}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
+
+                <!-- Uploaded Documents (Required by Job) -->
+                @if ($application->documents && $application->documents->count() > 0)
+                    <div class="bg-white rounded-lg shadow">
+                        <div class="px-6 py-4 border-b border-gray-200">
+                            <h3 class="text-lg font-medium text-gray-900">Uploaded Documents</h3>
+                            <p class="text-sm text-gray-500 mt-1">Additional documents submitted with the application</p>
+                        </div>
+                        <div class="divide-y divide-gray-200">
+                            @foreach ($application->documents as $document)
+                                <div class="px-6 py-4 flex items-center justify-between">
+                                    <div class="flex-1">
+                                        <h4 class="text-sm font-medium text-gray-900">
+                                            @if ($document->jobDocument)
+                                                {{ $document->jobDocument->name ?? 'Document' }}
+                                                @if ($document->jobDocument->name_ar)
+                                                    <span class="text-gray-600" dir="rtl">({{ $document->jobDocument->name_ar }})</span>
+                                                @endif
+                                                @if ($document->jobDocument->is_required)
+                                                    <span class="ml-1 text-red-500">*</span>
+                                                @endif
+                                            @else
+                                                Document
+                                            @endif
+                                        </h4>
+                                        <p class="text-xs text-gray-400 mt-1">
+                                            Uploaded: {{ $document->created_at->format('M d, Y g:i A') }}
+                                        </p>
+                                    </div>
+                                    <div class="flex-shrink-0 ml-4">
+                                        @if ($document->file_path && \Storage::disk('public')->exists($document->file_path))
+                                            <a href="{{ asset('storage/' . $document->file_path) }}" target="_blank"
+                                               class="inline-flex items-center px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition-colors">
+                                                <i class="fas fa-download mr-2"></i>Download
+                                            </a>
+                                        @else
+                                            <span class="inline-flex items-center px-3 py-2 bg-gray-100 text-gray-500 text-sm rounded-lg">
+                                                <i class="fas fa-exclamation-triangle mr-2"></i>File Missing
+                                            </span>
+                                        @endif
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
+
                 <!-- Application Notes -->
                 @if ($application->notes)
                     <div class="bg-white rounded-lg shadow">
@@ -351,10 +448,9 @@
                                     </div>
                                     @endif
                                     @php
-                                        $categoryLabel = optional(optional($application->job?->subCategory)->category)->admin_label
-                                            ?? optional(optional($application->job?->subCategory)->category)->name;
-                                        $subLabel = optional($application->job?->subCategory)->admin_label
-                                            ?? optional($application->job?->subCategory)->name;
+                                        $categoryLabel = optional(optional($application->job?->subCategory)->category)->name
+                                            ?? 'Uncategorized';
+                                        $subLabel = optional($application->job?->subCategory)->name;
                                     @endphp
                                     @if($categoryLabel || $subLabel)
                                         <div class="flex items-center text-sm text-gray-600">
@@ -515,44 +611,6 @@
                                 <i class="fas fa-star mr-2"></i>Shortlist Candidate
                             </button>
                         </form>
-                        @endif
-
-                        <!-- Documents Requested Status -->
-                        @if ($application->status !== 'documents_requested')
-                        @php
-                            $canRequestDocuments = $application->status === 'shortlisted' && $documentRequests->count() > 0;
-                        @endphp
-                        <form method="POST" action="{{ route('admin.applications.update-status', $application) }}">
-                            @csrf
-                            @method('PATCH')
-                            <input type="hidden" name="status" value="documents_requested">
-                            <button type="submit" {{ $canRequestDocuments ? '' : 'disabled' }}
-                                class="w-full bg-amber-500 text-white px-4 py-2 rounded-lg transition-colors text-sm {{ $canRequestDocuments ? 'hover:bg-amber-600' : 'opacity-60 cursor-not-allowed' }}">
-                                <i class="fas fa-file-signature mr-2"></i>Request Documents
-                            </button>
-                        </form>
-                        @if (! $canRequestDocuments && $application->status !== 'documents_requested')
-                            <p class="text-xs text-amber-600">Shortlist first and add document requests to enable this.</p>
-                        @endif
-                        @endif
-
-                        <!-- Documents Submitted Status -->
-                        @if ($application->status !== 'documents_submitted')
-                        @php
-                            $canMarkDocumentsSubmitted = $documentRequests->count() > 0;
-                        @endphp
-                        <form method="POST" action="{{ route('admin.applications.update-status', $application) }}">
-                            @csrf
-                            @method('PATCH')
-                            <input type="hidden" name="status" value="documents_submitted">
-                            <button type="submit" {{ $canMarkDocumentsSubmitted ? '' : 'disabled' }}
-                                class="w-full bg-teal-600 text-white px-4 py-2 rounded-lg transition-colors text-sm {{ $canMarkDocumentsSubmitted ? 'hover:bg-teal-700' : 'opacity-60 cursor-not-allowed' }}">
-                                <i class="fas fa-file-upload mr-2"></i>Mark Docs Submitted
-                            </button>
-                        </form>
-                        @if (! $canMarkDocumentsSubmitted && $application->status !== 'documents_submitted')
-                            <p class="text-xs text-teal-600">Add document requests to enable this action.</p>
-                        @endif
                         @endif
 
                         <hr class="my-2">

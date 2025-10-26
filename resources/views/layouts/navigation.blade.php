@@ -285,6 +285,11 @@
                                 </a>
                             </li>
                             <li>
+                                <a class="dropdown-item" href="{{ route('applications.index') }}">
+                                    {{ __('site.nav.my_applications') }}
+                                </a>
+                            </li>
+                            <li>
                                 <a class="dropdown-item" href="{{ route('profile.edit') }}">
                                     {{ __('site.nav.profile') }}
                                 </a>

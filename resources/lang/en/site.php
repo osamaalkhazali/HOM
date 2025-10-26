@@ -10,6 +10,7 @@ return [
         'login' => 'Login',
         'register' => 'Get Started',
         'dashboard' => 'Dashboard',
+        'my_applications' => 'My Applications',
         'profile' => 'Profile',
         'logout' => 'Logout',
         'notifications' => 'Notifications',
@@ -429,7 +430,8 @@ return [
                 'cover_letter_placeholder' => 'Tell us why you\'re the perfect fit for this role...',
                 'use_profile_cv' => 'Use CV from my profile',
                 'upload_new_cv' => 'Upload a specific CV for this job',
-                'accepted_formats' => 'Accepted formats: PDF, DOC, DOCX (Max: 5MB)',
+                'resume_formats' => 'Accepted formats: PDF, DOC, DOCX (Max: 5MB)',
+                'documents_formats' => 'Accepted formats: PDF, DOC, DOCX, JPG, JPEG, PNG (Max: 5MB)',
                 'cover_letter_optional' => ':label (Optional)',
             ],
             'tips' => [
@@ -441,24 +443,32 @@ return [
                     'You\'ll receive a confirmation email after submission',
                 ],
             ],
-        'help' => [
-            'title' => 'Need Help?',
-            'items' => [
-                'Make sure uploaded files are under 5MB and in PDF, DOC, or DOCX format.',
-                'If you run into issues, contact support or try a different browser.',
+            'help' => [
+                'title' => 'Need Help?',
+                'items' => [
+                    'Make sure uploaded files are under 5MB and in PDF, DOC, DOCX, JPG, JPEG, or PNG format.',
+                    'If you run into issues, contact support or try a different browser.',
+                ],
+            ],
+            'sections' => [
+                'questions_title' => 'Additional Questions',
+                'questions_help' => 'Please answer the following questions to help us better understand your experience.',
+                'documents_title' => 'Supporting Documents',
+                'documents_help' => 'Upload any additional documents requested for this position.',
+                'optional' => 'Optional',
+            ],
+            'buttons' => [
+                'back_to_job' => 'Back to Job',
+            ],
+            'validation' => [
+                'resume_required' => 'Please upload your resume as a PDF or Word document (max 5MB).',
+                'resume_mimes' => 'The resume must be a PDF, DOC, or DOCX file.',
+                'resume_max' => 'The resume may not be greater than 5MB.',
+                'documents_required' => 'Please upload the requested supporting document.',
+                'documents_mimes' => 'Each supporting document must be a PDF, DOC, DOCX, JPG, JPEG, or PNG file.',
+                'documents_max' => 'Each supporting document must be smaller than 5MB.',
             ],
         ],
-        'sections' => [
-            'questions_title' => 'Additional Questions',
-            'questions_help' => 'Please answer the following questions to help us better understand your experience.',
-            'documents_title' => 'Supporting Documents',
-            'documents_help' => 'Upload any additional documents requested for this position.',
-            'optional' => 'Optional',
-        ],
-        'buttons' => [
-            'back_to_job' => 'Back to Job',
-        ],
-    ],
     ],
 
     'profile' => [
@@ -682,6 +692,7 @@ return [
         'complete_more' => ' and :count more',
         'fields' => [
             'name' => 'Name',
+            'phone' => 'Phone number',
             'headline' => 'Professional headline',
             'location' => 'Location',
             'current_position' => 'Current position',
@@ -784,6 +795,8 @@ return [
                 'title' => 'Supporting Documents',
                 'empty' => 'No supporting documents were uploaded.',
                 'download' => 'Download',
+                'replace_button' => 'Replace File',
+                'replace_hint' => 'Upload a new file to replace the existing document (PDF, DOC, DOCX, JPG, JPEG, PNG. Max 5MB).',
             ],
         ],
         'documents_requested' => [
@@ -793,7 +806,9 @@ return [
             'pending' => 'Pending',
             'submitted' => 'Submitted',
             'file_hint' => 'Accepted formats: PDF, DOC, DOCX, JPG, JPEG, PNG (Max 5MB)',
+            'replace_hint' => 'Upload a new file if you need to update a previously submitted document.',
             'submit_button' => 'Upload Documents',
+            'update_button' => 'Save Updates',
             'download' => 'Download',
         ],
         'empty' => [
@@ -812,6 +827,10 @@ return [
             'fields' => [
                 'name' => 'Name',
                 'email' => 'Email',
+                'phone' => [
+                    'label' => 'Phone Number',
+                    'placeholder' => '+1234567890',
+                ],
                 'headline' => [
                     'label' => 'Professional Headline',
                     'placeholder' => 'e.g., Senior Software Developer',
@@ -840,7 +859,7 @@ return [
                     'placeholder' => 'https://your-website.com',
                 ],
                 'linkedin' => [
-                    'label' => 'LinkedIn Profile',
+                    'label' => 'LinkedIn Profile (Optional)',
                     'placeholder' => 'https://linkedin.com/in/your-profile',
                 ],
                 'education' => [
@@ -855,7 +874,7 @@ return [
                     'preview_empty' => 'No skills to preview',
                 ],
                 'about' => [
-                    'label' => 'About / Bio',
+                    'label' => 'About / Bio (Optional)',
                     'placeholder' => 'Tell us about yourself, your experience, and career goals',
                 ],
                 'cv' => [
@@ -910,6 +929,9 @@ return [
         'application_submitted' => 'Your application has been submitted successfully!',
         'application_error' => 'There was an error submitting your application. Please try again.',
         'documents_uploaded' => 'Documents uploaded successfully!',
+        'document_updated' => 'Supporting document updated successfully!',
+        'document_update_unavailable' => 'You can only update supporting documents while your application is pending.',
+        'documents_no_changes' => 'Please select at least one file before submitting.',
         'documents_upload_unavailable' => 'Document upload is not available for this application status.',
         'login_success' => 'You have been logged in successfully.',
         'logout_success' => 'You have been logged out successfully.',
@@ -923,6 +945,7 @@ return [
         'updated_successfully' => 'Updated successfully!',
         'restored_successfully' => 'Restored successfully!',
         'account_deactivated' => 'This account has been deactivated. Please contact support for assistance.',
+        'registration_success_mail_failed' => 'Your account was created successfully! However, we could not send you a verification email. Please check your email settings or contact support.',
 
         // Job-related messages
         'job_created' => 'Job created successfully.',
@@ -1152,5 +1175,3 @@ return [
         ],
     ],
 ];
-
-

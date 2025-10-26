@@ -338,20 +338,21 @@
                                             </h6>
                                             <form action="{{ route('applications.upload-documents', $application) }}" method="POST" enctype="multipart/form-data">
                                                 @csrf
+                                                @php($hasPendingDocRequests = $application->documentRequests->whereNull('submitted_at')->count() > 0)
                                                 <div class="row g-3">
                                                     @foreach ($application->documentRequests as $docRequest)
                                                         <div class="col-12">
                                                             <div class="border rounded p-3 @if($docRequest->is_submitted) bg-light @endif">
-                                                                <div class="d-flex align-items-start justify-content-between gap-3">
+                                                                <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
                                                                     <div class="flex-grow-1">
-                                                                        <label class="form-label fw-semibold mb-1">
-                                                                            {{ $docRequest->name_localized }}
+                                                                        <label class="form-label fw-semibold mb-1 d-flex align-items-center gap-2 flex-wrap">
+                                                                            <span>{{ $docRequest->name_localized }}</span>
                                                                             @if($docRequest->is_submitted)
-                                                                                <span class="badge bg-success-subtle text-success ms-2">
+                                                                                <span class="badge bg-success-subtle text-success">
                                                                                     <i class="fas fa-check me-1"></i>{{ __('site.applications_index.documents_requested.submitted') }}
                                                                                 </span>
                                                                             @else
-                                                                                <span class="badge bg-warning-subtle text-warning ms-2">
+                                                                                <span class="badge bg-warning-subtle text-warning">
                                                                                     <i class="fas fa-clock me-1"></i>{{ __('site.applications_index.documents_requested.pending') }}
                                                                                 </span>
                                                                             @endif
@@ -364,22 +365,30 @@
                                                                                 <i class="fas fa-paperclip"></i>
                                                                                 <span>{{ $docRequest->original_name }}</span>
                                                                                 <span>&bull;</span>
-                                                                                <span>{{ $docRequest->submitted_at->diffForHumans() }}</span>
+                                                                                <span>{{ $docRequest->submitted_at?->diffForHumans() }}</span>
                                                                             </div>
-                                                                        @else
+                                                                        @endif
+                                                                        <div class="mt-3">
                                                                             <input
                                                                                 type="file"
                                                                                 name="documents[{{ $docRequest->id }}]"
-                                                                                class="form-control"
+                                                                                class="form-control @error('documents.' . $docRequest->id) is-invalid @enderror"
                                                                                 accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                                                                                required
+                                                                                {{ $docRequest->is_submitted ? '' : 'required' }}
                                                                             >
-                                                                            <div class="form-text">{{ __('site.applications_index.documents_requested.file_hint') }}</div>
-                                                                        @endif
+                                                                            <div class="form-text">
+                                                                                {{ $docRequest->is_submitted
+                                                                                    ? __('site.applications_index.documents_requested.replace_hint')
+                                                                                    : __('site.applications_index.documents_requested.file_hint') }}
+                                                                            </div>
+                                                                            @error('documents.' . $docRequest->id)
+                                                                                <div class="text-danger small mt-1">{{ $message }}</div>
+                                                                            @enderror
+                                                                        </div>
                                                                     </div>
-                                                                    @if($docRequest->is_submitted && $docRequest->file_path)
+                                                                    @if($docRequest->file_path)
                                                                         <a href="{{ Storage::url($docRequest->file_path) }}"
-                                                                           class="btn btn-sm btn-outline-primary"
+                                                                           class="btn btn-sm btn-outline-primary align-self-start"
                                                                            target="_blank">
                                                                             <i class="fas fa-download me-1"></i>{{ __('site.applications_index.documents_requested.download') }}
                                                                         </a>
@@ -389,13 +398,11 @@
                                                         </div>
                                                     @endforeach
                                                 </div>
-                                                @if($application->documentRequests->whereNull('submitted_at')->count() > 0)
-                                                    <div class="mt-3">
-                                                        <button type="submit" class="btn btn-warning">
-                                                            <i class="fas fa-upload me-1"></i>{{ __('site.applications_index.documents_requested.submit_button') }}
-                                                        </button>
-                                                    </div>
-                                                @endif
+                                                <div class="mt-3">
+                                                    <button type="submit" class="btn {{ $hasPendingDocRequests ? 'btn-warning' : 'btn-primary' }}">
+                                                        <i class="fas fa-upload me-1"></i>{{ $hasPendingDocRequests ? __('site.applications_index.documents_requested.submit_button') : __('site.applications_index.documents_requested.update_button') }}
+                                                    </button>
+                                                </div>
                                             </form>
                                         </div>
                                         <hr>
@@ -434,14 +441,54 @@
                                             @if ($documents->isNotEmpty())
                                                 <ul class="list-unstyled mb-0 application-details-list">
                                                     @foreach ($documents as $document)
-                                                        <li class="mb-3 d-flex align-items-center justify-content-between gap-3">
-                                                            <div>
-                                                                <div class="fw-semibold">{{ $document->jobDocument->label }}</div>
-                                                                <div class="text-muted small">{{ $document->original_name }}</div>
+                                                        @php($shouldShowReplace = old('document_id') == $document->id && $errors->has('document'))
+                                                        <li class="mb-3">
+                                                            <div class="d-flex flex-column flex-lg-row gap-3 justify-content-between align-items-stretch">
+                                                                <div class="flex-grow-1">
+                                                                    <div class="fw-semibold">{{ $document->jobDocument->label }}</div>
+                                                                    <div class="text-muted small">{{ $document->original_name }}</div>
+                                                                    @if ($application->status === 'pending')
+                                                                        <form action="{{ route('applications.documents.update', [$application, $document]) }}" method="POST" enctype="multipart/form-data" class="mt-3">
+                                                                            @csrf
+                                                                            <input type="hidden" name="document_id" value="{{ $document->id }}">
+                                                                            <button
+                                                                                type="button"
+                                                                                class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1 js-replace-trigger"
+                                                                                data-target="replace-input-{{ $document->id }}"
+                                                                                style="{{ $shouldShowReplace ? 'display:none;' : '' }}"
+                                                                            >
+                                                                                <i class="fas fa-sync"></i>
+                                                                                {{ __('site.applications_index.details.documents.replace_button') }}
+                                                                            </button>
+                                                                            <div id="replace-input-{{ $document->id }}" class="mt-3 {{ $shouldShowReplace ? '' : 'd-none' }}">
+                                                                                <div class="d-flex flex-column flex-md-row gap-2 align-items-stretch align-items-md-center">
+                                                                                    <input
+                                                                                        type="file"
+                                                                                        name="document"
+                                                                                        class="form-control form-control-sm @if($shouldShowReplace && $errors->has('document')) is-invalid @endif"
+                                                                                        accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                                                                                        {{ $shouldShowReplace ? 'autofocus' : '' }}
+                                                                                        required
+                                                                                    >
+                                                                                    <button type="submit" class="btn btn-sm btn-primary d-inline-flex align-items-center gap-1">
+                                                                                        <i class="fas fa-save"></i>
+                                                                                        {{ __('site.applications_index.documents_requested.update_button') }}
+                                                                                    </button>
+                                                                                </div>
+                                                                                <div class="form-text mt-1">{{ __('site.applications_index.details.documents.replace_hint') }}</div>
+                                                                                @if ($shouldShowReplace && $errors->has('document'))
+                                                                                    <div class="text-danger small mt-1">{{ $errors->first('document') }}</div>
+                                                                                @endif
+                                                                            </div>
+                                                                        </form>
+                                                                    @endif
+                                                                </div>
+                                                                <div class="d-flex align-items-start gap-2">
+                                                                    <a href="{{ $document->download_url }}" class="btn btn-sm btn-outline-primary" target="_blank">
+                                                                        <i class="fas fa-download me-1"></i>{{ __('site.applications_index.details.documents.download') }}
+                                                                    </a>
+                                                                </div>
                                                             </div>
-                                                            <a href="{{ $document->download_url }}" class="btn btn-sm btn-outline-primary" target="_blank">
-                                                                <i class="fas fa-download me-1"></i>{{ __('site.applications_index.details.documents.download') }}
-                                                            </a>
                                                         </li>
                                                     @endforeach
                                                 </ul>
@@ -490,6 +537,28 @@
             @endif
         </div>
     </section>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.js-replace-trigger').forEach(function (button) {
+                button.addEventListener('click', function () {
+                    var targetId = button.getAttribute('data-target');
+                    var container = document.getElementById(targetId);
+
+                    if (!container) {
+                        return;
+                    }
+
+                    container.classList.remove('d-none');
+                    button.style.display = 'none';
+
+                    var input = container.querySelector('input[type="file"]');
+                    if (input) {
+                        input.focus();
+                    }
+                });
+            });
+        });
+    </script>
 </x-app-layout>
 
 @push('styles')

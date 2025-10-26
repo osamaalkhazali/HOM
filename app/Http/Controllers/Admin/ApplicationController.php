@@ -2,24 +2,24 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Concerns\SendsApplicationStatusNotifications;
 use App\Http\Controllers\Controller;
 use App\Models\Application;
 use App\Models\Job;
 use App\Models\ApplicationDocumentRequest;
 use App\Models\Admin;
-use App\Notifications\ApplicationStatusNotification;
 use App\Services\Admin\AdminExportService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class ApplicationController extends Controller
 {
+    use SendsApplicationStatusNotifications;
     protected AdminExportService $exportService;
 
     public function __construct(AdminExportService $exportService)
@@ -200,24 +200,18 @@ class ApplicationController extends Controller
     protected function buildApplicationExportRows(Collection $applications, Request $request, string $scope): array
     {
         $headings = [
-            'Application ID',
+            '#',
             'Status',
             'Applied At',
-            'Updated At',
             'Applicant Name',
             'Applicant Email',
             'Applicant Phone',
-            'Preferred Language',
-            'User Active',
-            'Email Verified',
-            'User Soft Deleted',
             'Profile Headline',
             'Profile Position',
             'Profile Experience (Years)',
             'Profile Skills',
             'Profile Location',
             'Profile About',
-            'CV Path',
             'CV URL',
             'Job Title (EN)',
             'Job Title (AR)',
@@ -230,15 +224,16 @@ class ApplicationController extends Controller
             'Job Subcategory',
             'Job Level',
             'Job Deadline',
-            'Salary',
             'Cover Letter',
             'Question Answers',
             'Requested Documents',
             'Uploaded Documents',
         ];
 
-        $rows = $applications->map(function (Application $application) {
-            return $this->mapApplicationRow($application);
+        $rowNumber = 0;
+        $rows = $applications->map(function (Application $application) use (&$rowNumber) {
+            $rowNumber++;
+            return $this->mapApplicationRow($application, $rowNumber);
         })->all();
 
         $meta = [
@@ -254,58 +249,73 @@ class ApplicationController extends Controller
     /**
      * @return array<int, string|int|float|null>
      */
-    protected function mapApplicationRow(Application $application): array
+    protected function mapApplicationRow(Application $application, int $rowNumber): array
     {
         $user = $application->user;
         $profile = $user?->profile;
         $job = $application->job;
 
-        $questionAnswers = $application->questionAnswers->map(function ($answer) {
+        $baseUrl = config('app.url', 'http://www.hom-intl.com');
+
+        // Format question answers with numbering
+        $questionAnswers = $application->questionAnswers->map(function ($answer, $index) {
             $question = $answer->question;
             $label = $question?->question ?? $question?->question_ar ?? ('Question #' . $answer->id);
-            return trim($label . ': ' . $answer->answer);
-        })->filter()->join(PHP_EOL);
+            return ($index + 1) . '- ' . trim($label . ': ' . $answer->answer);
+        })->filter()->join(' | ');
 
-        $requestedDocuments = $application->documentRequests->map(function ($request) {
+        // Format requested documents with numbering and URLs
+        $requestedDocuments = $application->documentRequests->map(function ($request, $index) use ($baseUrl) {
             $status = $request->is_submitted ? 'Submitted' : 'Pending';
-            $fileStatus = $request->file_path ? 'File: ' . $request->original_name : 'No file';
-            $submittedAt = $request->submitted_at ? 'Submitted at ' . $request->submitted_at->format('Y-m-d H:i') : null;
-            $parts = array_filter([$status, $fileStatus, $submittedAt]);
-            return trim(($request->name ?: 'Document') . ' [' . implode(' | ', $parts) . ']');
-        })->filter()->join(PHP_EOL);
+            $docName = $request->name ?: 'Document';
 
-        $uploadedDocuments = $application->documents->map(function ($doc) {
+            if ($request->file_path) {
+                $url = $baseUrl . Storage::url($request->file_path);
+                $fileInfo = $request->original_name . ' [' . $url . ']';
+            } else {
+                $fileInfo = 'No file';
+            }
+
+            return ($index + 1) . '- ' . $docName . ': ' . $status . ' - ' . $fileInfo;
+        })->filter()->join(' | ');
+
+        // Format uploaded documents with numbering and URLs
+        $uploadedDocuments = $application->documents->map(function ($doc, $index) use ($baseUrl) {
             $jobDocument = $doc->jobDocument;
             $name = $jobDocument?->name ?? $doc->original_name ?? 'Document';
-            return $name . ': ' . ($doc->original_name ?? 'Unknown file');
-        })->filter()->join(PHP_EOL);
+            $url = $baseUrl . Storage::url($doc->file_path);
+            return ($index + 1) . '- ' . $name . ': ' . $doc->original_name . ' [' . $url . ']';
+        })->filter()->join(' | ');
 
         $cvPath = $application->cv_path ?: ($profile->cv_path ?? null);
-        $cvUrl = $cvPath ? Storage::url($cvPath) : null;
+        $cvUrl = $cvPath ? $baseUrl . Storage::url($cvPath) : '—';
 
         $deadline = $job && $job->deadline ? $job->deadline->format('Y-m-d') : '—';
-        $salary = $job && $job->salary !== null ? number_format((float)$job->salary, 2) : '—';
+
+        // Get job category - try to get from category relationship or from subcategory's category
+        $jobCategory = null;
+        if ($job) {
+            if ($job->category) {
+                $jobCategory = $job->category->name;
+            } elseif ($job->subCategory && $job->subCategory->category) {
+                $jobCategory = $job->subCategory->category->name;
+            }
+        }
 
         return [
-            $application->id,
+            $rowNumber,
             Str::headline($application->status),
             optional($application->created_at)->format('Y-m-d H:i'),
-            optional($application->updated_at)->format('Y-m-d H:i'),
             $user->name ?? '—',
             $user->email ?? '—',
             $user->phone ?? '—',
-            $user->preferred_language ?? '—',
-            $user ? ($user->is_active ? 'Active' : 'Inactive') : '—',
-            $user ? ($user->email_verified_at ? 'Verified' : 'Not verified') : '—',
-            $user && $user->trashed() ? 'Yes' : 'No',
             $profile->headline ?? '—',
             $profile->current_position ?? '—',
             $profile->experience_years ?? '—',
             $profile->skills ?? '—',
             $profile->location ?? '—',
             $profile->about ?? '—',
-            $cvPath ?? '—',
-            $cvUrl ?? '—',
+            $cvUrl,
             $job->title ?? '—',
             $job->title_ar ?? '—',
             $job ? Str::headline($job->status) : '—',
@@ -313,11 +323,10 @@ class ApplicationController extends Controller
             $job->company_ar ?? '—',
             $job->location ?? '—',
             $job->location_ar ?? '—',
-            optional($job->category)->name ?? '—',
+            $jobCategory ?? '—',
             optional($job->subCategory)->name ?? '—',
             $job ? Str::headline($job->level) : '—',
             $deadline,
-            $salary,
             $application->cover_letter ?? '—',
             $questionAnswers ?: '—',
             $requestedDocuments ?: '—',
@@ -473,7 +482,9 @@ class ApplicationController extends Controller
       $validated['status'] = 'documents_requested';
     }
 
-    DB::transaction(function () use ($application, $validated, $requestsPayload) {
+        $previousStatus = $application->status;
+
+        DB::transaction(function () use ($application, $validated, $requestsPayload) {
       $application->update([
         'status' => $validated['status'],
         'notes' => $validated['notes'] ?? null,
@@ -530,7 +541,13 @@ class ApplicationController extends Controller
       });
     });
 
-    return redirect()->route('admin.applications.show', $application)
+        $application->refresh();
+
+        if ($previousStatus !== $application->status) {
+            $this->sendStatusNotifications($application, $application->status);
+        }
+
+        return redirect()->route('admin.applications.show', $application)
       ->with('success', 'Application updated successfully');
   }
 
@@ -569,26 +586,7 @@ class ApplicationController extends Controller
     $application->update(['status' => $newStatus]);
 
     if ($oldStatus !== $newStatus) {
-      try {
-        $application->load(['job', 'user']);
-
-        if ($application->user) {
-          Notification::send(
-            $application->user,
-            new ApplicationStatusNotification($application, $newStatus, 'user')
-          );
-        }
-
-        $admins = Admin::active()->get();
-        if ($admins->isNotEmpty()) {
-          Notification::send(
-            $admins,
-            new ApplicationStatusNotification($application, $newStatus, 'admin')
-          );
-        }
-      } catch (\Throwable $e) {
-        report($e);
-      }
+            $this->sendStatusNotifications($application, $newStatus);
     }
 
     return redirect()->back()->with('success', 'Application status updated successfully');
@@ -625,19 +623,7 @@ class ApplicationController extends Controller
         continue;
       }
 
-      if ($app->user) {
-        Notification::send(
-          $app->user,
-          new ApplicationStatusNotification($app, $newStatus, 'user')
-        );
-      }
-
-      if ($admins->isNotEmpty()) {
-        Notification::send(
-          $admins,
-          new ApplicationStatusNotification($app, $newStatus, 'admin')
-        );
-      }
+            $this->sendStatusNotifications($app, $newStatus, $admins);
     }
 
     $count = count($validated['application_ids']);
