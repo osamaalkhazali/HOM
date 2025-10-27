@@ -307,25 +307,23 @@
                 <div class="border-b border-gray-200 pb-6">
                     <h3 class="text-lg font-medium text-gray-900 mb-4">Job Description</h3>
                     <div class="space-y-4">
-                        <div>
-                            <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Description (English)
-                                *</label>
-                            <textarea id="description" name="description" rows="8" required
-                                placeholder="Provide a detailed job description including responsibilities, requirements, benefits, etc."
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 @error('description') border-red-500 @enderror">{{ old('description') }}</textarea>
-                            @error('description')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
-                        <div>
-                            <label for="description_ar" class="block text-sm font-medium text-gray-700 mb-1">Description (Arabic)</label>
-                            <textarea id="description_ar" name="description_ar" rows="8" dir="rtl"
-                                placeholder="اكتب وصفاً تفصيلياً للوظيفة يتضمن المسؤوليات والمتطلبات والمزايا وغير ذلك."
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 @error('description_ar') border-red-500 @enderror">{{ old('description_ar') }}</textarea>
-                            @error('description_ar')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
+                        @include('admin.jobs.partials.rich-text-editor', [
+                            'name' => 'description',
+                            'label' => 'Description (English) *',
+                            'value' => old('description'),
+                            'placeholder' => 'Provide a detailed job description including responsibilities, requirements, benefits, etc.',
+                            'required' => true,
+                            'helper' => null,
+                        ])
+
+                        @include('admin.jobs.partials.rich-text-editor', [
+                            'name' => 'description_ar',
+                            'label' => 'Description (Arabic)',
+                            'value' => old('description_ar'),
+                            'placeholder' => 'اكتب وصفاً تفصيلياً للوظيفة يتضمن المسؤوليات والمتطلبات والمزايا وغير ذلك.',
+                            'dir' => 'rtl',
+                            'helper' => null,
+                        ])
                     </div>
                 </div>
 

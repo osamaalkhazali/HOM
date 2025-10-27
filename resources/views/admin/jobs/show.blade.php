@@ -52,15 +52,30 @@
                     </div>
                     <div class="p-6">
                         <div class="space-y-4">
-                            <div>
-                                <h2 class="text-2xl font-bold text-gray-900">{{ $job->title }}</h2>
-                                <p class="text-lg text-gray-600 mt-1">{{ $job->company }}</p>
+                            <div class="space-y-2">
+                                <div>
+                                    <h2 class="text-2xl font-bold text-gray-900">{{ $job->title }}</h2>
+                                    @if ($job->title_ar)
+                                        <p class="text-lg text-gray-600" dir="rtl">{{ $job->title_ar }}</p>
+                                    @endif
+                                </div>
+                                <div>
+                                    <p class="text-lg text-gray-600">{{ $job->company }}</p>
+                                    @if ($job->company_ar)
+                                        <p class="text-lg text-gray-600" dir="rtl">{{ $job->company_ar }}</p>
+                                    @endif
+                                </div>
                             </div>
 
                             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                <div class="flex items-center text-sm text-gray-600">
-                                    <i class="fas fa-map-marker-alt mr-2 text-gray-400"></i>
-                                    {{ $job->location }}
+                                <div class="flex text-sm text-gray-600">
+                                    <i class="fas fa-map-marker-alt mr-2 text-gray-400 mt-0.5"></i>
+                                    <div>
+                                        <span>{{ $job->location }}</span>
+                                        @if ($job->location_ar)
+                                            <span class="block" dir="rtl">{{ $job->location_ar }}</span>
+                                        @endif
+                                    </div>
                                 </div>
                                 <div class="flex items-center text-sm text-gray-600">
                                     <i class="fas fa-layer-group mr-2 text-gray-400"></i>
@@ -107,9 +122,35 @@
                     <div class="px-6 py-4 border-b border-gray-200">
                         <h3 class="text-lg font-medium text-gray-900">Job Description</h3>
                     </div>
-                    <div class="p-6">
-                        <div class="prose max-w-none">
-                            {!! nl2br(e($job->description)) !!}
+                    @php
+                        $descriptionEn = \App\Support\RichText::sanitize($job->description);
+                        $descriptionAr = \App\Support\RichText::sanitize($job->description_ar);
+                        $defaultLanguage = $descriptionEn ? 'en' : ($descriptionAr ? 'ar' : 'en');
+                    @endphp
+                    <div class="p-6 space-y-4" data-language-wrapper>
+                        <div class="flex items-center justify-between" data-language-toggle data-default-language="{{ $defaultLanguage }}">
+                            <div class="inline-flex rounded-md shadow-sm lang-toggle-group" role="group">
+                                <button type="button" class="px-3 py-1.5 text-sm font-medium border border-gray-300 bg-white text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 first:rounded-l-md last:rounded-r-none{{ $defaultLanguage === 'en' ? ' is-active' : '' }}" data-language-button="en">
+                                    English
+                                </button>
+                                <button type="button" class="px-3 py-1.5 text-sm font-medium border border-gray-300 bg-white text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 last:rounded-r-md first:rounded-l-none{{ $defaultLanguage === 'ar' ? ' is-active' : '' }}" data-language-button="ar">
+                                    العربية
+                                </button>
+                            </div>
+                        </div>
+                        <div class="language-panel {{ $defaultLanguage === 'en' ? '' : 'hidden' }}" data-language-panel="en" data-has-content="{{ $descriptionEn ? 'true' : 'false' }}">
+                            @if ($descriptionEn)
+                                <div class="prose max-w-none">{!! $descriptionEn !!}</div>
+                            @else
+                                <p class="text-sm text-gray-500 italic">No English description provided.</p>
+                            @endif
+                        </div>
+                        <div class="language-panel {{ $defaultLanguage === 'ar' ? '' : 'hidden' }}" data-language-panel="ar" data-has-content="{{ $descriptionAr ? 'true' : 'false' }}" dir="rtl">
+                            @if ($descriptionAr)
+                                <div class="prose max-w-none" dir="rtl">{!! $descriptionAr !!}</div>
+                            @else
+                                <p class="text-sm text-gray-500 italic" dir="ltr">لا يوجد وصف باللغة العربية.</p>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -376,3 +417,96 @@
         </div>
     </div>
 @endsection
+
+@push('styles')
+    <style>
+        .lang-toggle-group button {
+            transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .lang-toggle-group button + button {
+            margin-left: -1px;
+        }
+
+        .lang-toggle-group button.is-active {
+            background-color: #2563eb;
+            color: #ffffff;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.3);
+        }
+
+        .language-panel.hidden {
+            display: none;
+        }
+
+        .prose ul,
+        .prose ol {
+            list-style-position: outside;
+            margin: 0.75rem 0 0.75rem 1.5rem;
+            padding: 0;
+        }
+
+        .prose ul {
+            list-style-type: disc;
+        }
+
+        .prose ol {
+            list-style-type: decimal;
+        }
+
+        .prose[dir="rtl"] ul,
+        .prose[dir="rtl"] ol {
+            margin: 0.75rem 1.5rem 0.75rem 0;
+        }
+
+        .prose li {
+            margin-bottom: 0.4rem;
+        }
+
+        .prose ul li::marker {
+            color: #2563eb;
+        }
+
+        .prose ol li::marker {
+            color: #2563eb;
+        }
+    </style>
+@endpush
+
+@push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('[data-language-toggle]').forEach(function (toggle) {
+                const wrapper = toggle.closest('[data-language-wrapper]');
+                if (!wrapper) {
+                    return;
+                }
+
+                const buttons = toggle.querySelectorAll('[data-language-button]');
+                const panels = wrapper.querySelectorAll('[data-language-panel]');
+                const defaultLanguage = toggle.dataset.defaultLanguage || 'en';
+
+                const activate = (language) => {
+                    panels.forEach(function (panel) {
+                        const isActivePanel = panel.dataset.languagePanel === language;
+                        panel.classList.toggle('hidden', !isActivePanel);
+                    });
+
+                    buttons.forEach(function (button) {
+                        const isActiveButton = button.dataset.languageButton === language;
+                        button.classList.toggle('is-active', isActiveButton);
+                        button.setAttribute('aria-pressed', isActiveButton ? 'true' : 'false');
+                    });
+                };
+
+                activate(defaultLanguage);
+
+                buttons.forEach(function (button) {
+                    button.addEventListener('click', function () {
+                        activate(button.dataset.languageButton);
+                    });
+                });
+            });
+        });
+    </script>
+@endpush

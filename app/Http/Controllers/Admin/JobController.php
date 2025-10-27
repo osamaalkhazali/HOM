@@ -7,12 +7,14 @@ use App\Models\Job;
 use App\Models\Category;
 use App\Models\SubCategory;
 use App\Services\Admin\AdminExportService;
+use App\Support\RichText;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class JobController extends Controller
 {
@@ -353,6 +355,15 @@ class JobController extends Controller
     $documentsInput = $validated['documents'] ?? [];
     unset($validated['questions'], $validated['documents']);
 
+    $validated['description'] = RichText::sanitize($validated['description']);
+    if (!$validated['description']) {
+      throw ValidationException::withMessages([
+        'description' => 'The description field must not be empty.',
+      ]);
+    }
+
+    $validated['description_ar'] = RichText::sanitize($validated['description_ar'] ?? null);
+
     $validated['posted_by'] = auth('admin')->id();
         $validated['is_active'] = $validated['status'] === 'active';
 
@@ -418,7 +429,16 @@ class JobController extends Controller
     $documentsInput = $validated['documents'] ?? [];
     unset($validated['questions'], $validated['documents']);
 
-        $validated['is_active'] = $validated['status'] === 'active';
+    $validated['description'] = RichText::sanitize($validated['description']);
+    if (!$validated['description']) {
+      throw ValidationException::withMessages([
+        'description' => 'The description field must not be empty.',
+      ]);
+    }
+
+    $validated['description_ar'] = RichText::sanitize($validated['description_ar'] ?? null);
+
+    $validated['is_active'] = $validated['status'] === 'active';
 
         DB::transaction(function () use ($job, $validated, $questionsInput, $documentsInput) {
       $job->update($validated);

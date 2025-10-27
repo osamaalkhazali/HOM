@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Job;
 use App\Models\Admin;
 use App\Models\SubCategory;
+use App\Support\RichText;
 use Illuminate\Database\Seeder;
 
 class JobSeeder extends Seeder
@@ -172,8 +173,8 @@ class JobSeeder extends Seeder
                 Job::create([
                     'title' => $title['en'],
                     'title_ar' => $title['ar'],
-                    'description' => $description['en'],
-                    'description_ar' => $description['ar'],
+                    'description' => RichText::sanitize($description['en']),
+                    'description_ar' => RichText::sanitize($description['ar']),
                     'category_id' => $subCategory->category_id,
                     'sub_category_id' => $subCategory->id,
                     'company' => $company['en'],

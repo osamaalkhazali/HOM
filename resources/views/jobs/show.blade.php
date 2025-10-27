@@ -99,7 +99,7 @@
                         </div>
                         <div class="panel-body">
                             <div class="job-description" style="line-height: 1.7; font-size: 15px;">
-                                {!! $job->description_localized !!}
+                                {!! \App\Support\RichText::sanitize($job->description_localized) !!}
                             </div>
                         </div>
                     </div>
