@@ -242,12 +242,12 @@
 
                                 <!-- CV -->
                                 <div>
-                                    @if ($user->profile->cv_path)
+                                    @if ($user->profile->cv_path && \App\Support\SecureStorage::exists($user->profile->cv_path))
                                         <div>
                                             <label class="block text-xs font-medium text-gray-500 mb-2">CV/Resume</label>
-                                            <a href="{{ Storage::url($user->profile->cv_path) }}" target="_blank"
+                                            <a href="{{ route('admin.users.cv.view', $user) }}" target="_blank"
                                                 class="inline-flex items-center px-4 py-2 bg-green-100 text-green-800 rounded-lg hover:bg-green-200 transition-colors">
-                                                <i class="fas fa-file-pdf mr-2"></i>
+                                                <i class="fas fa-eye mr-2"></i>
                                                 <span class="text-sm font-medium">View CV/Resume</span>
                                             </a>
                                         </div>

@@ -4,11 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
 use App\Models\Profile;
+use App\Support\SecureStorage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class ProfileController extends Controller
@@ -61,11 +61,11 @@ class ProfileController extends Controller
 
             // Delete old CV if exists
             if ($user->profile && $user->profile->cv_path) {
-                Storage::delete($user->profile->cv_path);
+                SecureStorage::delete($user->profile->cv_path);
             }
 
-            // Store new CV
-            $cvPath = $cvFile->store('cvs', 'public');
+            // Store new CV on private disk
+            $cvPath = SecureStorage::storeUploadedFile($cvFile, 'cvs');
             $profileData['cv_path'] = $cvPath;
         }
 

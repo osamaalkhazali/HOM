@@ -287,8 +287,8 @@
                                                     <i class="fas fa-ban me-1"></i>{{ __('site.applications_index.list.job_unavailable') }}
                                                 </span>
                                             @endif
-                                            @if ($application->cv_path)
-                                                <a href="{{ Storage::url($application->cv_path) }}" target="_blank" class="btn btn-sm btn-outline-secondary">
+                                            @if ($application->cv_path && \App\Support\SecureStorage::exists($application->cv_path))
+                                                <a href="{{ route('applications.cv.download', $application) }}" target="_blank" class="btn btn-sm btn-outline-secondary">
                                                     <i class="fas fa-download me-1"></i>{{ __('site.applications_index.list.download_cv') }}
                                                 </a>
                                             @endif
@@ -386,8 +386,8 @@
                                                                             @enderror
                                                                         </div>
                                                                     </div>
-                                                                    @if($docRequest->file_path)
-                                                                        <a href="{{ Storage::url($docRequest->file_path) }}"
+                                                                    @if($docRequest->file_path && \App\Support\SecureStorage::exists($docRequest->file_path))
+                                                                        <a href="{{ route('applications.requested-documents.download', [$application, $docRequest]) }}"
                                                                            class="btn btn-sm btn-outline-primary align-self-start"
                                                                            target="_blank">
                                                                             <i class="fas fa-download me-1"></i>{{ __('site.applications_index.documents_requested.download') }}

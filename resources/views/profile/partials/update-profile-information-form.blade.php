@@ -237,12 +237,12 @@
 
         <div class="mb-4">
             <label for="cv" class="form-label fw-medium">{{ __('site.profile_form.profile_information.fields.cv.label') }}</label>
-            @if ($user->profile && $user->profile->cv_path)
+                @if ($user->profile && $user->profile->cv_path && \App\Support\SecureStorage::exists($user->profile->cv_path))
                 <div class="mb-2">
                     <div class="alert alert-info" role="alert">
                         <i class="fas fa-file-pdf me-2"></i>
                         {{ __('site.profile_form.profile_information.fields.cv.current') }} <strong>{{ basename($user->profile->cv_path) }}</strong>
-                        <a href="{{ asset('storage/' . $user->profile->cv_path) }}" target="_blank"
+                            <a href="{{ route('profile.cv.view') }}" target="_blank"
                             class="btn btn-sm btn-outline-primary ms-2">
                             <i class="fas fa-eye me-1"></i>{{ __('site.profile_form.profile_information.fields.cv.view') }}
                         </a>

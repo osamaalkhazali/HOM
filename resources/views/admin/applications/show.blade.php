@@ -154,13 +154,13 @@
                                     @if ($request->submitted_at)
                                         <p class="text-[11px] text-gray-400 mt-1">Received {{ $request->submitted_at->diffForHumans() }}</p>
                                     @endif
-                                    @if ($request->file_path)
+                                    @if ($request->file_path && \App\Support\SecureStorage::exists($request->file_path))
                                         <div class="mt-2 flex gap-2 justify-end">
-                                            <a href="{{ route('admin.applications.documents.view', $request) }}" target="_blank"
+                                            <a href="{{ route('admin.applications.requested-documents.view', $request) }}" target="_blank"
                                                class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium bg-blue-600 text-white hover:bg-blue-700 transition-colors">
                                                 <i class="fas fa-eye mr-1.5"></i>View
                                             </a>
-                                            <a href="{{ route('admin.applications.documents.view', $request) }}" download="{{ $request->original_name }}"
+                                            <a href="{{ route('admin.applications.requested-documents.download', [$application, $request]) }}"
                                                class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium bg-green-600 text-white hover:bg-green-700 transition-colors">
                                                 <i class="fas fa-download mr-1.5"></i>Download
                                             </a>
@@ -375,8 +375,8 @@
                                         </p>
                                     </div>
                                     <div class="flex-shrink-0 ml-4">
-                                        @if ($document->file_path && \Storage::disk('public')->exists($document->file_path))
-                                            <a href="{{ asset('storage/' . $document->file_path) }}" target="_blank"
+                                        @if ($document->file_path && \App\Support\SecureStorage::exists($document->file_path))
+                                            <a href="{{ route('admin.applications.documents.download', [$application, $document]) }}" target="_blank"
                                                class="inline-flex items-center px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition-colors">
                                                 <i class="fas fa-download mr-2"></i>Download
                                             </a>
@@ -498,7 +498,7 @@
                 @php
                     $cvPath = $application->cv_path ?? ($application->user ? optional($application->user->profile)->cv_path : null);
                 @endphp
-                @if ($cvPath)
+                @if ($cvPath && \App\Support\SecureStorage::exists($cvPath))
                     <div class="bg-white rounded-lg shadow">
                         <div class="px-6 py-4 border-b border-gray-200">
                             <h3 class="text-lg font-medium text-gray-900">Resume/CV</h3>
@@ -507,9 +507,9 @@
                             <div class="text-center">
                                 <i class="fas fa-file-pdf text-red-500 text-4xl mb-4"></i>
                                 <p class="text-sm text-gray-600 mb-4">Resume attached</p>
-                                <a href="{{ Storage::url($cvPath) }}" target="_blank"
+                                <a href="{{ route('admin.applications.cv.view', $application) }}" target="_blank"
                                     class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm transition-colors">
-                                    <i class="fas fa-download mr-2"></i>Download Resume
+                                    <i class="fas fa-eye mr-2"></i>View Resume
                                 </a>
                             </div>
                         </div>

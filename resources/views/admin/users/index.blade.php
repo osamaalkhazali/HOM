@@ -324,11 +324,11 @@
                                         title="View Details">
                                         <i class="fas fa-eye"></i>
                                     </a>
-                                    @if ($user->profile && $user->profile->cv_path)
-                                        <a href="{{ Storage::url($user->profile->cv_path) }}" target="_blank"
+                                    @if ($user->profile && $user->profile->cv_path && \App\Support\SecureStorage::exists($user->profile->cv_path))
+                                        <a href="{{ route('admin.users.cv.view', $user) }}" target="_blank"
                                             class="text-purple-600 hover:text-purple-800 hover:bg-purple-50 p-2 rounded transition-colors"
                                             title="View CV">
-                                            <i class="fas fa-file-pdf"></i>
+                                            <i class="fas fa-eye"></i>
                                         </a>
                                     @endif
                                     <form method="POST" action="{{ route('admin.users.toggle-status', $user) }}" class="inline">

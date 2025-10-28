@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Admin\AdminNotificationController;
+use App\Http\Controllers\SecureDocumentController;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
@@ -77,6 +78,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/users/{id}/restore', [UserController::class, 'restore'])->name('users.restore');
         Route::delete('/users/{id}/force-delete', [UserController::class, 'forceDelete'])->name('users.force-delete');
         Route::get('/users/{user}', [UserController::class, 'show'])->name('users.show');
+        Route::get('/users/{user}/cv', [SecureDocumentController::class, 'downloadUserCv'])->name('users.cv.download');
+        Route::get('/users/{user}/cv/view', [SecureDocumentController::class, 'viewUserCv'])->name('users.cv.view');
         Route::patch('/users/{user}/toggle-status', [UserController::class, 'toggleStatus'])->name('users.toggle-status');
         Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
 
@@ -107,6 +110,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::delete('/applications/{application}', [ApplicationController::class, 'destroy'])->name('applications.destroy');
         Route::patch('/applications/bulk-update-status', [ApplicationController::class, 'bulkUpdateStatus'])->name('applications.bulk-update-status');
         Route::delete('/applications/bulk-delete', [ApplicationController::class, 'bulkDelete'])->name('applications.bulk-delete');
+        Route::get('/applications/{application}/cv', [SecureDocumentController::class, 'downloadApplicationCv'])->name('applications.cv.download');
+        Route::get('/applications/{application}/cv/view', [SecureDocumentController::class, 'viewApplicationCv'])->name('applications.cv.view');
+        Route::get('/applications/{application}/documents/{document}/download', [SecureDocumentController::class, 'downloadApplicationDocument'])->name('applications.documents.download');
+        Route::get('/applications/{application}/requested-documents/{documentRequest}/download', [SecureDocumentController::class, 'downloadRequestedDocument'])->name('applications.requested-documents.download');
 
         // Category management routes
         Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
@@ -144,9 +151,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/notifications', [AdminNotificationController::class, 'index'])->name('notifications.index');
         Route::post('/notifications/read-all', [AdminNotificationController::class, 'readAll'])->name('notifications.readAll');
         Route::get('/notifications/open/{id}', [AdminNotificationController::class, 'open'])->name('notifications.open');
-
-        // Document download/view route
-        Route::get('/applications/documents/{document}/view', [ApplicationController::class, 'viewDocument'])->name('applications.documents.view');
+        Route::get('/applications/requested-documents/{documentRequest}/view', [SecureDocumentController::class, 'viewRequestedDocument'])->name('applications.requested-documents.view');
     });
 });
 
@@ -154,11 +159,17 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::get('/profile/cv/download', [SecureDocumentController::class, 'downloadOwnCv'])->name('profile.cv.download');
+    Route::get('/profile/cv/view', [SecureDocumentController::class, 'viewOwnCv'])->name('profile.cv.view');
 
     // User applications routes
     Route::get('/applications', [JobController::class, 'myApplications'])->name('applications.index');
     Route::post('/applications/{application}/upload-documents', [JobController::class, 'uploadRequestedDocuments'])->name('applications.upload-documents');
     Route::post('/applications/{application}/documents/{document}', [JobController::class, 'updateSupportingDocument'])->name('applications.documents.update');
+    Route::get('/applications/{application}/cv', [SecureDocumentController::class, 'downloadApplicationCv'])->name('applications.cv.download');
+    Route::get('/applications/{application}/cv/view', [SecureDocumentController::class, 'viewApplicationCv'])->name('applications.cv.view');
+    Route::get('/applications/{application}/documents/{document}/download', [SecureDocumentController::class, 'downloadApplicationDocument'])->name('applications.documents.download');
+    Route::get('/applications/{application}/requested-documents/{documentRequest}/download', [SecureDocumentController::class, 'downloadRequestedDocument'])->name('applications.requested-documents.download');
 
     // User notifications
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');

@@ -10,8 +10,8 @@ use App\Models\Category;
 use App\Models\SubCategory;
 use App\Models\Application;
 use App\Models\ApplicationDocument;
+use App\Support\SecureStorage;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 
 class JobController extends Controller
 {
@@ -213,7 +213,7 @@ class JobController extends Controller
         if ($hasCv && $request->cv_option === 'profile') {
             $cvPath = $profile->cv_path;
         } elseif ($request->hasFile('resume')) {
-            $cvPath = $request->file('resume')->store('resumes', 'public');
+            $cvPath = SecureStorage::storeUploadedFile($request->file('resume'), 'resumes');
             $uploadedResume = true;
         }
 
@@ -243,7 +243,7 @@ class JobController extends Controller
             foreach ($job->documents as $document) {
                 if ($request->hasFile('documents.' . $document->id)) {
                     $file = $request->file('documents.' . $document->id);
-                    $path = $file->store('applications/documents', 'public');
+                    $path = SecureStorage::storeUploadedFile($file, 'applications/documents');
                     $storedFiles[] = $path;
 
                     $application->documents()->create([
@@ -258,10 +258,10 @@ class JobController extends Controller
         } catch (\Throwable $e) {
             DB::rollBack();
             foreach ($storedFiles as $path) {
-                Storage::disk('public')->delete($path);
+                SecureStorage::delete($path);
             }
             if ($uploadedResume && $cvPath) {
-                Storage::disk('public')->delete($cvPath);
+                SecureStorage::delete($cvPath);
             }
             throw $e;
         }
@@ -394,7 +394,7 @@ class JobController extends Controller
                 }
 
                 $file = $request->file('documents.' . $docRequest->id);
-                $path = $file->store('applications/requested-documents', 'public');
+                $path = SecureStorage::storeUploadedFile($file, 'applications/requested-documents');
                 $storedFiles[] = $path;
                 $oldPaths[] = $docRequest->file_path;
 
@@ -419,7 +419,7 @@ class JobController extends Controller
         } catch (\Throwable $e) {
             DB::rollBack();
             foreach ($storedFiles as $path) {
-                Storage::disk('public')->delete($path);
+                SecureStorage::delete($path);
             }
             throw $e;
         }
@@ -430,7 +430,7 @@ class JobController extends Controller
 
         foreach ($oldPaths as $oldPath) {
             if ($oldPath) {
-                Storage::disk('public')->delete($oldPath);
+                SecureStorage::delete($oldPath);
             }
         }
 
@@ -468,7 +468,7 @@ class JobController extends Controller
         DB::beginTransaction();
 
         try {
-            $newPath = $file->store('applications/documents', 'public');
+            $newPath = SecureStorage::storeUploadedFile($file, 'applications/documents');
 
             $document->update([
                 'file_path' => $newPath,
@@ -479,13 +479,13 @@ class JobController extends Controller
         } catch (\Throwable $e) {
             DB::rollBack();
             if (isset($newPath)) {
-                Storage::disk('public')->delete($newPath);
+                SecureStorage::delete($newPath);
             }
             throw $e;
         }
 
         if (!empty($oldPath)) {
-            Storage::disk('public')->delete($oldPath);
+            SecureStorage::delete($oldPath);
         }
 
         return redirect()->back()->with('success', __('site.flash.document_updated'));

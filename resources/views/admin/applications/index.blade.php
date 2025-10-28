@@ -454,10 +454,10 @@
                                     @php
                                         $cvPath = $application->cv_path ?? ($application->user ? optional($application->user->profile)->cv_path : null);
                                     @endphp
-                                    @if($cvPath)
-                                        <a href="{{ Storage::url($cvPath) }}" target="_blank"
+                                        @if ($cvPath && \App\Support\SecureStorage::exists($cvPath))
+                                            <a href="{{ route('admin.applications.cv.view', $application) }}" target="_blank"
                                            class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors">
-                                            <i class="fas fa-file-pdf mr-1"></i>View CV
+                                            <i class="fas fa-eye mr-1"></i>View CV
                                         </a>
                                     @else
                                         <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-600">

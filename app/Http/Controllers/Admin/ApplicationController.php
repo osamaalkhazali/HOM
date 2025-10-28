@@ -11,9 +11,9 @@ use App\Models\Admin;
 use App\Services\Admin\AdminExportService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use App\Support\SecureStorage;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
@@ -255,40 +255,48 @@ class ApplicationController extends Controller
         $profile = $user?->profile;
         $job = $application->job;
 
-        $baseUrl = config('app.url', 'http://www.hom-intl.com');
-
-        // Format question answers with numbering
-        $questionAnswers = $application->questionAnswers->map(function ($answer, $index) {
+    // Format question answers with numbering
+    $questionAnswers = $application->questionAnswers->map(function ($answer, $index) {
             $question = $answer->question;
             $label = $question?->question ?? $question?->question_ar ?? ('Question #' . $answer->id);
             return ($index + 1) . '- ' . trim($label . ': ' . $answer->answer);
         })->filter()->join(' | ');
 
-        // Format requested documents with numbering and URLs
-        $requestedDocuments = $application->documentRequests->map(function ($request, $index) use ($baseUrl) {
+    // Format requested documents with numbering and URLs
+    $requestedDocuments = $application->documentRequests->map(function ($request, $index) use ($application) {
             $status = $request->is_submitted ? 'Submitted' : 'Pending';
             $docName = $request->name ?: 'Document';
 
             if ($request->file_path) {
-                $url = $baseUrl . Storage::url($request->file_path);
-                $fileInfo = $request->original_name . ' [' . $url . ']';
-            } else {
+        if (SecureStorage::exists($request->file_path)) {
+          $url = route('admin.applications.requested-documents.download', [$application, $request]);
+          $fileInfo = $request->original_name . ' [' . $url . ']';
+        } else {
+          $fileInfo = 'File missing';
+        }
+      } else {
                 $fileInfo = 'No file';
             }
 
             return ($index + 1) . '- ' . $docName . ': ' . $status . ' - ' . $fileInfo;
         })->filter()->join(' | ');
 
-        // Format uploaded documents with numbering and URLs
-        $uploadedDocuments = $application->documents->map(function ($doc, $index) use ($baseUrl) {
+    // Format uploaded documents with numbering and URLs
+    $uploadedDocuments = $application->documents->map(function ($doc, $index) use ($application) {
             $jobDocument = $doc->jobDocument;
             $name = $jobDocument?->name ?? $doc->original_name ?? 'Document';
-            $url = $baseUrl . Storage::url($doc->file_path);
-            return ($index + 1) . '- ' . $name . ': ' . $doc->original_name . ' [' . $url . ']';
+      if ($doc->file_path && SecureStorage::exists($doc->file_path)) {
+        $url = route('admin.applications.documents.download', [$application, $doc]);
+        return ($index + 1) . '- ' . $name . ': ' . $doc->original_name . ' [' . $url . ']';
+      }
+
+      return ($index + 1) . '- ' . $name . ': File missing';
         })->filter()->join(' | ');
 
         $cvPath = $application->cv_path ?: ($profile->cv_path ?? null);
-        $cvUrl = $cvPath ? $baseUrl . Storage::url($cvPath) : '—';
+    $cvUrl = ($cvPath && SecureStorage::exists($cvPath))
+      ? route('admin.applications.cv.view', $application)
+      : '—';
 
         $deadline = $job && $job->deadline ? $job->deadline->format('Y-m-d') : '—';
 
@@ -653,31 +661,5 @@ class ApplicationController extends Controller
   {
     $application->delete();
     return redirect()->route('admin.applications.index')->with('success', 'Application deleted successfully');
-  }
-
-  /**
-   * View or download a submitted document
-   */
-  public function viewDocument(ApplicationDocumentRequest $document)
-  {
-    // Ensure the document has been submitted
-    if (!$document->is_submitted || !$document->file_path) {
-      abort(404, 'Document not found');
-    }
-
-    // Check if file exists
-    if (!\Storage::disk('public')->exists($document->file_path)) {
-      abort(404, 'File not found');
-    }
-
-    // Get file path and determine type
-    $path = storage_path('app/public/' . $document->file_path);
-    $mimeType = \Storage::disk('public')->mimeType($document->file_path);
-
-    // Return file response
-    return response()->file($path, [
-      'Content-Type' => $mimeType,
-      'Content-Disposition' => 'inline; filename="' . $document->original_name . '"'
-    ]);
   }
 }

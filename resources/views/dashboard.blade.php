@@ -154,7 +154,6 @@
                                         </div>
                                     </div>
                                 </div>
-
                                 <!-- Current Position -->
                                 <div class="col-md-6">
                                     <div class="border rounded p-3">
@@ -195,9 +194,9 @@
                                             <div class="flex-grow-1">
                                                 <div class="small text-muted">{{ __('site.dashboard_user.profile.resume') }}</div>
                                                 <div class="fw-semibold">
-                                                    @if($profile && !empty($profile->cv_path))
-                                                        <a href="{{ Storage::url($profile->cv_path) }}" target="_blank" class="text-success text-decoration-none">
-                                                            <i class="fas fa-download me-1"></i>{{ __('site.dashboard_user.profile.resume_view') }}
+                                                       @if($profile && !empty($profile->cv_path) && \App\Support\SecureStorage::exists($profile->cv_path))
+                                                <a href="{{ route('profile.cv.view') }}" target="_blank" class="text-success text-decoration-none">
+                                                    <i class="fas fa-eye me-1"></i>{{ __('site.dashboard_user.profile.resume_view') }}
                                                         </a>
                                                     @else
                                                         <span class="text-muted">{{ __('site.dashboard_user.profile.resume_missing') }}</span>
@@ -368,11 +367,11 @@
                                                                      <i class="fas fa-ban me-2"></i>{{ __('site.dashboard_user.applications.job_unavailable') }}
                                                                  </span></li>
                                                         @endif
-                                                        @if ($application->cv_path)
-                                                             <li><a class="dropdown-item"
-                                                                     href="{{ Storage::url($application->cv_path) }}"
-                                                                     target="_blank">
-                                                                     <i class="fas fa-download me-2"></i>{{ __('site.dashboard_user.applications.download_cv') }}
+                            @if ($application->cv_path && \App\Support\SecureStorage::exists($application->cv_path))
+                                 <li><a class="dropdown-item"
+                                     href="{{ route('applications.cv.view', $application) }}"
+                                     target="_blank">
+                                                                     <i class="fas fa-eye me-2"></i>{{ __('site.dashboard_user.applications.download_cv') }}
                                                                  </a></li>
                                                         @endif
                                                         @if ($application->status === 'documents_requested' && $application->documentRequests->count() > 0)

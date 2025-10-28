@@ -9,8 +9,9 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
+use App\Support\SecureStorage;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class UserController extends Controller
@@ -234,7 +235,9 @@ class UserController extends Controller
   {
     $profile = $user->profile;
     $cvPath = $profile?->cv_path;
-    $cvUrl = $cvPath ? Storage::url($cvPath) : null;
+    $cvUrl = ($cvPath && SecureStorage::exists($cvPath))
+      ? route('admin.users.cv.view', $user)
+      : null;
 
     $applicationsBreakdown = $user->applications->groupBy('status')->map(function ($group, $status) {
       return Str::headline($status) . ': ' . $group->count();
@@ -343,7 +346,7 @@ class UserController extends Controller
   public function deleted(Request $request)
   {
     // Debug: Let's see if this method is being called
-    \Log::info('UserController@deleted method called');
+    Log::info('UserController@deleted method called');
 
     $query = User::onlyTrashed()->with(['profile', 'applications']);
 
