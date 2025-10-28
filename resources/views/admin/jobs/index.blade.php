@@ -13,7 +13,7 @@
         $filteredParams = $exportQuery ?? [];
         unset($filteredParams['scope'], $filteredParams['format']);
 
-        $advancedFilterKeys = ['category', 'status', 'level', 'deadline_status', 'has_applications', 'has_questions', 'has_documents', 'sort', 'direction'];
+    $advancedFilterKeys = ['category', 'client_id', 'status', 'level', 'deadline_status', 'has_applications', 'has_questions', 'has_documents', 'sort', 'direction'];
         $advancedActive = collect($advancedFilterKeys)->contains(fn ($key) => filled(request($key)));
     @endphp
 
@@ -114,6 +114,19 @@
                                 @foreach ($categories as $category)
                                     <option value="{{ $category->id }}" {{ request('category') == $category->id ? 'selected' : '' }}>
                                         {{ $category->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="client_id" class="block text-sm font-medium text-gray-700 mb-1">Client</label>
+                            <select name="client_id" id="client_id"
+                                    class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="">All Clients</option>
+                                @foreach ($clients as $client)
+                                    <option value="{{ $client->id }}" {{ request('client_id') == $client->id ? 'selected' : '' }}>
+                                        {{ $client->name }}
                                     </option>
                                 @endforeach
                             </select>
@@ -247,6 +260,11 @@
                                 <div class="text-sm text-gray-500">
                                     <i class="fas fa-map-marker-alt mr-1"></i>{{ $job->location }}
                                 </div>
+                                @if ($job->client)
+                                    <div class="text-xs text-gray-400">
+                                        <i class="fas fa-handshake mr-1"></i>{{ $job->client->name }}
+                                    </div>
+                                @endif
                             </td>
                             <td class="px-6 py-4">
                                 @if ($job->category)

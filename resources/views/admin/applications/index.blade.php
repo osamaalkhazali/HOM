@@ -23,7 +23,7 @@
         $filteredParams = $exportQuery ?? [];
         unset($filteredParams['scope'], $filteredParams['format']);
 
-        $advancedFilterKeys = ['status', 'job_id', 'category_id', 'has_answers', 'has_documents', 'has_cover_letter', 'date_from', 'date_to'];
+    $advancedFilterKeys = ['status', 'job_id', 'client_id', 'category_id', 'has_answers', 'has_documents', 'has_cover_letter', 'date_from', 'date_to'];
         $advancedActive = collect($advancedFilterKeys)->contains(fn ($key) => filled(request($key)));
     @endphp
 
@@ -171,6 +171,19 @@
                             @foreach ($jobs as $job)
                                 <option value="{{ $job->id }}" {{ request('job_id') == $job->id ? 'selected' : '' }}>
                                     {{ $job->title }} - {{ $job->company }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="client_id" class="block text-sm font-medium text-gray-700 mb-1">Client</label>
+                        <select name="client_id" id="client_id"
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">All Clients</option>
+                            @foreach ($clients as $client)
+                                <option value="{{ $client->id }}" {{ request('client_id') == $client->id ? 'selected' : '' }}>
+                                    {{ $client->name }}
                                 </option>
                             @endforeach
                         </select>
@@ -385,6 +398,11 @@
                                             @endif
                                         @endif
                                     </div>
+                                    @if($application->job && $application->job->client)
+                                        <div class="text-xs text-gray-400 mt-1">
+                                            <i class="fas fa-handshake mr-1"></i>{{ $application->job->client->name }}
+                                        </div>
+                                    @endif
                                 </td>
                                 <td class="px-6 py-4">
                                     @php

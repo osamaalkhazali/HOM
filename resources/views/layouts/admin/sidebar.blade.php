@@ -126,6 +126,17 @@
                     </div>
                 </div>
 
+                <!-- Clients -->
+                <a href="{{ route('admin.clients.index') }}"
+                    class="group flex items-center px-2 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.clients.*') ? '' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
+                    style="{{ request()->routeIs('admin.clients.*') ? 'background: rgba(13,110,253,0.08); color: var(--primary-color);' : '' }}">
+                    <i class="fas fa-handshake mr-3"></i>
+                    Clients
+                    <span class="ml-auto bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+                        {{ \App\Models\Client::count() }}
+                    </span>
+                </a>
+
                 <!-- Categories -->
                 <a href="{{ route('admin.categories.index') }}"
                     class="group flex items-center px-2 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.categories*') ? '' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"

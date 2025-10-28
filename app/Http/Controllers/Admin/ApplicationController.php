@@ -4,10 +4,11 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Concerns\SendsApplicationStatusNotifications;
 use App\Http\Controllers\Controller;
-use App\Models\Application;
-use App\Models\Job;
-use App\Models\ApplicationDocumentRequest;
 use App\Models\Admin;
+use App\Models\Application;
+use App\Models\ApplicationDocumentRequest;
+use App\Models\Client;
+use App\Models\Job;
 use App\Services\Admin\AdminExportService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -37,12 +38,13 @@ class ApplicationController extends Controller
         $this->applyFilters($request, $query);
         $this->applySorting($request, $query);
 
-        $applications = $query->paginate(15)->withQueryString();
-        $jobs = Job::select('id', 'title', 'company')->get();
+    $applications = $query->paginate(15)->withQueryString();
+    $jobs = Job::select('id', 'title', 'company')->get();
+    $clients = Client::orderBy('name')->get(['id', 'name']);
         $categories = \App\Models\Category::all();
         $exportQuery = $request->except(['page']);
 
-        return view('admin.applications.index', compact('applications', 'jobs', 'categories', 'exportQuery'));
+    return view('admin.applications.index', compact('applications', 'jobs', 'clients', 'categories', 'exportQuery'));
     }
 
     protected function baseQuery(): Builder
@@ -55,7 +57,8 @@ class ApplicationController extends Controller
       'job' => function ($q) {
         $q->withTrashed();
       },
-            'job.category',
+      'job.category',
+      'job.client',
       'job.subCategory.category',
             'questionAnswers.question',
             'documents.jobDocument',
@@ -103,7 +106,13 @@ class ApplicationController extends Controller
       $query->where('job_id', $request->job_id);
     }
 
-        if ($request->filled('category_id')) {
+    if ($request->filled('client_id')) {
+      $query->whereHas('job', function ($q) use ($request) {
+        $q->where('client_id', $request->client_id);
+      });
+    }
+
+    if ($request->filled('category_id')) {
       $query->whereHas('job.subCategory', function ($q) use ($request) {
         $q->where('category_id', $request->category_id);
       });
@@ -218,6 +227,7 @@ class ApplicationController extends Controller
             'Job Status',
             'Job Company (EN)',
             'Job Company (AR)',
+      'Client',
             'Job Location (EN)',
             'Job Location (AR)',
             'Job Category',
@@ -329,6 +339,7 @@ class ApplicationController extends Controller
             $job ? Str::headline($job->status) : '—',
             $job->company ?? '—',
             $job->company_ar ?? '—',
+      optional($job->client)->name ?? '—',
             $job->location ?? '—',
             $job->location_ar ?? '—',
             $jobCategory ?? '—',

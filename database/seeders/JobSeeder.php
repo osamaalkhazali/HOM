@@ -2,8 +2,9 @@
 
 namespace Database\Seeders;
 
-use App\Models\Job;
 use App\Models\Admin;
+use App\Models\Client;
+use App\Models\Job;
 use App\Models\SubCategory;
 use App\Support\RichText;
 use Illuminate\Database\Seeder;
@@ -116,6 +117,8 @@ class JobSeeder extends Seeder
         // Get all subcategories and admin users
         $subCategories = SubCategory::all();
         $adminUsers = Admin::all();
+        $clientId = Client::query()->where('slug', 'bromine-jo')->value('id')
+            ?? Client::query()->value('id');
 
         // Prefer hr@hom-intl.com if exists
         $hrAdmin = Admin::where('email', 'hr@hom-intl.com')->first();
@@ -127,6 +130,11 @@ class JobSeeder extends Seeder
 
         if ($subCategories->isEmpty() || $adminUsers->isEmpty()) {
             $this->command->error('Please run Category, SubCategory, and Admin seeders first!');
+            return;
+        }
+
+        if (!$clientId) {
+            $this->command->error('Please seed at least one client before running the Job seeder.');
             return;
         }
 
@@ -179,6 +187,7 @@ class JobSeeder extends Seeder
                     'sub_category_id' => $subCategory->id,
                     'company' => $company['en'],
                     'company_ar' => $company['ar'],
+                    'client_id' => $clientId,
                     'salary' => null, // No salary
                     'location' => $location['en'],
                     'location_ar' => $location['ar'],

@@ -20,6 +20,14 @@
         <div class="bg-white rounded-lg shadow">
             <form method="POST" action="{{ route('admin.jobs.store') }}" class="p-6 space-y-6">
                 @csrf
+                @if ($clients->isEmpty())
+                    <div class="rounded-md border border-amber-200 bg-amber-50 p-4 text-amber-800">
+                        <div class="flex items-start">
+                            <i class="fas fa-info-circle mt-1 mr-3"></i>
+                            <p class="text-sm">Add at least one client before creating a job. <a href="{{ route('admin.clients.create') }}" class="underline">Create client</a>.</p>
+                        </div>
+                    </div>
+                @endif
                 @php
                     $questionFormData = old('questions', []);
                     $documentFormData = old('documents', []);
@@ -78,6 +86,22 @@
                                 placeholder="مثال: شركة الحلول التقنية"
                                 class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 @error('company_ar') border-red-500 @enderror">
                             @error('company_ar')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label for="client_id" class="block text-sm font-medium text-gray-700 mb-1">Client *</label>
+                            <select id="client_id" name="client_id" {{ $clients->isEmpty() ? 'disabled' : '' }} required
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 @error('client_id') border-red-500 @enderror">
+                                <option value="">Select Client</option>
+                                @foreach ($clients as $client)
+                                    <option value="{{ $client->id }}" {{ old('client_id') == $client->id ? 'selected' : '' }}>
+                                        {{ $client->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('client_id')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
                         </div>

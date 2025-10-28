@@ -24,6 +24,7 @@ class Job extends Model
     'category_id',
     'sub_category_id',
     'company',
+    'client_id',
     'company_ar',
     'salary',
     'location',
@@ -68,6 +69,11 @@ class Job extends Model
   public function postedBy()
   {
     return $this->belongsTo(User::class, 'posted_by');
+  }
+
+  public function client()
+  {
+    return $this->belongsTo(Client::class);
   }
 
   public function questions()

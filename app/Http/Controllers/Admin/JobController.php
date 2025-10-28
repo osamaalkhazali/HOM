@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Client;
 use App\Models\Job;
 use App\Models\Category;
 use App\Models\SubCategory;
@@ -37,14 +38,16 @@ class JobController extends Controller
 
         $jobs = $query->withCount('applications')->paginate(15)->withQueryString();
         $categories = Category::all();
-        $exportQuery = $request->except(['page']);
+    $clients = Client::orderBy('name')->get(['id', 'name']);
+    $exportQuery = $request->except(['page']);
 
-        return view('admin.jobs.index', compact('jobs', 'categories', 'exportQuery'));
+    return view('admin.jobs.index', compact('jobs', 'categories', 'clients', 'exportQuery'));
     }
 
     protected function baseIndexQuery(): Builder
     {
-        return Job::with([
+    return Job::with([
+      'client',
             'category',
             'subCategory.category',
             'postedBy',
@@ -146,6 +149,10 @@ class JobController extends Controller
         if ($request->filled('date_to')) {
       $query->whereDate('created_at', '<=', $request->date_to);
     }
+
+    if ($request->filled('client_id')) {
+      $query->where('client_id', $request->client_id);
+    }
     }
 
     protected function applyIndexSorting(Request $request, Builder $query): void
@@ -200,6 +207,7 @@ class JobController extends Controller
             'Deadline',
             'Company (EN)',
             'Company (AR)',
+      'Client',
             'Location (EN)',
             'Location (AR)',
             'Category',
@@ -266,6 +274,7 @@ class JobController extends Controller
             $deadline,
             $job->company ?? '—',
             $job->company_ar ?? '—',
+      optional($job->client)->name ?? '—',
             $job->location ?? '—',
             $job->location_ar ?? '—',
             optional($job->category)->name ?? '—',
@@ -307,10 +316,11 @@ class JobController extends Controller
   public function create()
   {
     $categories = Category::with('subCategories')->get();
+    $clients = Client::orderBy('name')->get(['id', 'name']);
         $defaultDeadline = now()->addDays(14);
         $defaultDeadlineDays = 14;
 
-        return view('admin.jobs.create', compact('categories', 'defaultDeadline', 'defaultDeadlineDays'));
+    return view('admin.jobs.create', compact('categories', 'clients', 'defaultDeadline', 'defaultDeadlineDays'));
   }
 
   /**
@@ -336,6 +346,7 @@ class JobController extends Controller
       'sub_category_id' => 'nullable|exists:sub_categories,id',
       'company' => 'required|string|max:255',
       'company_ar' => 'nullable|string|max:255',
+      'client_id' => 'required|exists:clients,id',
       'location' => 'required|string|max:255',
       'location_ar' => 'nullable|string|max:255',
       'level' => 'required|in:entry,mid,senior,executive',
@@ -381,7 +392,7 @@ class JobController extends Controller
    */
   public function show(Job $job)
   {
-    $job->load(['category', 'subCategory', 'postedBy', 'applications.user', 'questions', 'documents']);
+    $job->load(['category', 'subCategory', 'postedBy', 'applications.user', 'questions', 'documents', 'client']);
     return view('admin.jobs.show', compact('job'));
   }
 
@@ -392,7 +403,8 @@ class JobController extends Controller
   {
     $job->load(['questions', 'documents']);
     $categories = Category::with('subCategories')->get();
-    return view('admin.jobs.edit', compact('job', 'categories'));
+    $clients = Client::orderBy('name')->get(['id', 'name']);
+    return view('admin.jobs.edit', compact('job', 'categories', 'clients'));
   }
 
   /**
@@ -410,6 +422,7 @@ class JobController extends Controller
       'sub_category_id' => 'nullable|exists:sub_categories,id',
       'company' => 'required|string|max:255',
       'company_ar' => 'nullable|string|max:255',
+      'client_id' => 'required|exists:clients,id',
       'location' => 'required|string|max:255',
       'location_ar' => 'nullable|string|max:255',
       'level' => 'required|in:entry,mid,senior,executive',
@@ -475,7 +488,7 @@ class JobController extends Controller
      */
   public function deleted(Request $request)
   {
-    $query = Job::onlyTrashed()->with(['category', 'subCategory', 'postedBy', 'applications']);
+    $query = Job::onlyTrashed()->with(['category', 'subCategory', 'postedBy', 'applications', 'client']);
 
     // Search functionality for deleted jobs
     if ($request->filled('search')) {

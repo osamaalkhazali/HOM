@@ -64,6 +64,11 @@
                                     @if ($job->company_ar)
                                         <p class="text-lg text-gray-600" dir="rtl">{{ $job->company_ar }}</p>
                                     @endif
+                                    @if ($job->client)
+                                        <p class="mt-2 text-sm text-gray-500">
+                                            <i class="fas fa-handshake text-gray-400 mr-2"></i>Client: {{ $job->client->name }}
+                                        </p>
+                                    @endif
                                 </div>
                             </div>
 
@@ -220,7 +225,7 @@
                         <div class="flex items-center justify-between">
                             <h3 class="text-lg font-medium text-gray-900">Applications ({{ $job->applications->count() }})
                             </h3>
-                            <a href="{{ route('admin.applications.index', ['job' => $job->id]) }}"
+                            <a href="{{ route('admin.applications.index', ['job_id' => $job->id]) }}"
                                 class="text-blue-600 hover:text-blue-800 text-sm">
                                 View All Applications
                             </a>
@@ -330,6 +335,12 @@
                             <dt class="text-sm font-medium text-gray-500">Posted By</dt>
                             <dd class="mt-1 text-sm text-gray-900">{{ $job->postedBy->name }}</dd>
                         </div>
+                        @if ($job->client)
+                            <div>
+                                <dt class="text-sm font-medium text-gray-500">Client</dt>
+                                <dd class="mt-1 text-sm text-gray-900">{{ $job->client->name }}</dd>
+                            </div>
+                        @endif
                         <div>
                             <dt class="text-sm font-medium text-gray-500">Created Date</dt>
                             <dd class="mt-1 text-sm text-gray-900">{{ $job->created_at->format('F d, Y \a\t H:i') }}</dd>
@@ -393,7 +404,7 @@
                             </button>
                         </form>
 
-                        <a href="{{ route('admin.applications.index', ['job' => $job->id]) }}"
+                            <a href="{{ route('admin.applications.index', ['job_id' => $job->id]) }}"
                             class="w-full flex items-center justify-center px-4 py-2 border border-purple-300 rounded-md shadow-sm text-sm font-medium text-purple-700 bg-purple-50 hover:bg-purple-100 transition-colors">
                             <i class="fas fa-file-alt mr-2"></i>View Applications
                         </a>

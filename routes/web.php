@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\ApplicationController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\SettingController;
+use App\Http\Controllers\Admin\ClientController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Admin\AdminNotificationController;
 use App\Http\Controllers\SecureDocumentController;
@@ -129,6 +130,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/categories/deleted', [CategoryController::class, 'deleted'])->name('categories.deleted');
         Route::post('/categories/{id}/restore', [CategoryController::class, 'restore'])->name('categories.restore');
         Route::delete('/categories/{id}/force-delete', [CategoryController::class, 'forceDelete'])->name('categories.force-delete');
+
+        // Client management routes
+        Route::resource('clients', ClientController::class);
 
 
 
