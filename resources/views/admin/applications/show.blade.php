@@ -114,6 +114,7 @@
 
         @php
             $documentRequests = $application->documentRequests;
+            $hasPendingDocuments = $documentRequests->contains(fn($doc) => !$doc->is_submitted);
         @endphp
 
         @if ($documentRequests->count() > 0)
@@ -128,6 +129,59 @@
                         <i class="fas fa-edit mr-1"></i>Manage
                     </a>
                 </div>
+
+                @if (in_array($application->status, ['documents_requested', 'documents_submitted']) && $hasPendingDocuments)
+                    <div class="px-6 py-4 bg-amber-50 border-b border-gray-200">
+                        <div class="flex items-start gap-3">
+                            <i class="fas fa-info-circle text-amber-600 mt-0.5"></i>
+                            <div class="flex-1">
+                                <p class="text-sm font-medium text-amber-900">Upload Documents on Behalf of Applicant</p>
+                                <p class="text-xs text-amber-700 mt-1">You can upload the requested documents directly as the admin. The status will automatically update to "Documents Submitted" once all documents are uploaded.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <form action="{{ route('admin.applications.upload-documents', $application) }}" method="POST" enctype="multipart/form-data">
+                            @csrf
+                            <div class="space-y-4">
+                                @foreach ($documentRequests as $docRequest)
+                                    @if (!$docRequest->is_submitted)
+                                        <div class="bg-white border border-gray-200 rounded-lg p-4">
+                                            <label class="block text-sm font-semibold text-gray-900 mb-1">
+                                                {{ $docRequest->name }}
+                                                @if ($docRequest->name_ar)
+                                                    <span class="text-gray-500 font-normal">({{ $docRequest->name_ar }})</span>
+                                                @endif
+                                                <span class="text-red-500">*</span>
+                                            </label>
+                                            @if ($docRequest->notes)
+                                                <p class="text-xs text-gray-600 mb-3">{{ $docRequest->notes }}</p>
+                                            @endif
+                                            <input
+                                                type="file"
+                                                name="documents[{{ $docRequest->id }}]"
+                                                class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('documents.' . $docRequest->id) border-red-500 @enderror"
+                                                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                                                required
+                                            >
+                                            <p class="text-xs text-gray-500 mt-1">Allowed: PDF, DOC, DOCX, JPG, JPEG, PNG (Max: 5MB)</p>
+                                            @error('documents.' . $docRequest->id)
+                                                <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
+                                            @enderror
+                                        </div>
+                                    @endif
+                                @endforeach
+                            </div>
+                            <div class="mt-4">
+                                <button type="submit" class="inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors">
+                                    <i class="fas fa-upload mr-2"></i>Upload Documents
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                @endif
+
                 <div class="divide-y divide-gray-200">
                     @foreach ($documentRequests as $request)
                         <div class="px-6 py-4 flex items-start justify-between gap-4">

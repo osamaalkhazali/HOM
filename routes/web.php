@@ -108,6 +108,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/applications/{application}/edit', [ApplicationController::class, 'edit'])->name('applications.edit');
         Route::put('/applications/{application}', [ApplicationController::class, 'update'])->name('applications.update');
         Route::patch('/applications/{application}/status', [ApplicationController::class, 'updateStatus'])->name('applications.update-status');
+        Route::post('/applications/{application}/upload-documents', [ApplicationController::class, 'uploadRequestedDocuments'])->name('applications.upload-documents');
         Route::delete('/applications/{application}', [ApplicationController::class, 'destroy'])->name('applications.destroy');
         Route::patch('/applications/bulk-update-status', [ApplicationController::class, 'bulkUpdateStatus'])->name('applications.bulk-update-status');
         Route::delete('/applications/bulk-delete', [ApplicationController::class, 'bulkDelete'])->name('applications.bulk-delete');

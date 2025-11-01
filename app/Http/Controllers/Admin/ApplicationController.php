@@ -666,6 +666,104 @@ class ApplicationController extends Controller
   }
 
   /**
+   * Admin uploads documents on behalf of the applicant
+   */
+  public function uploadRequestedDocuments(Request $request, Application $application)
+  {
+    // Validate that the application status allows document uploads
+    if (!in_array($application->status, ['documents_requested', 'documents_submitted'])) {
+      return redirect()->back()->with('error', 'Document uploads are only available when documents have been requested.');
+    }
+
+    $application->loadMissing('documentRequests');
+
+    $documentRequests = $application->documentRequests;
+    $documentRuleBase = 'file|mimes:pdf,doc,docx,jpg,jpeg,png|max:5120';
+    $hasPending = $documentRequests->contains(fn($doc) => !$doc->is_submitted);
+
+    $rules = [
+      'documents' => ($hasPending ? 'required' : 'nullable') . '|array',
+    ];
+
+    foreach ($documentRequests as $docRequest) {
+      $rules['documents.' . $docRequest->id] = ($docRequest->is_submitted ? 'nullable|' : 'required|') . $documentRuleBase;
+    }
+
+    $messages = [
+      'documents.required' => 'Please upload at least one pending document.',
+      'documents.*.required' => 'This document is required.',
+      'documents.*.mimes' => 'Only PDF, DOC, DOCX, JPG, JPEG, and PNG files are allowed.',
+      'documents.*.max' => 'File size must not exceed 5MB.',
+    ];
+
+    $validated = $request->validate($rules, $messages);
+
+    $uploadedDocuments = $documentRequests->filter(fn($doc) => $request->hasFile('documents.' . $doc->id));
+
+    if (!$hasPending && $uploadedDocuments->isEmpty()) {
+      return redirect()->back()->with('error', 'No changes were made. All documents are already submitted.');
+    }
+
+    $storedFiles = [];
+    $oldPaths = [];
+    $shouldNotifyDocumentsSubmitted = false;
+
+    DB::beginTransaction();
+
+    try {
+      foreach ($documentRequests as $docRequest) {
+        if (!$request->hasFile('documents.' . $docRequest->id)) {
+          continue;
+        }
+
+        $file = $request->file('documents.' . $docRequest->id);
+        $path = SecureStorage::storeUploadedFile($file, 'applications/requested-documents');
+        $storedFiles[] = $path;
+        $oldPaths[] = $docRequest->file_path;
+
+        $docRequest->update([
+          'is_submitted' => true,
+          'submitted_at' => now(),
+          'file_path' => $path,
+          'original_name' => $file->getClientOriginalName(),
+        ]);
+      }
+
+      // Check if all documents are now submitted
+      $allSubmitted = $application->documentRequests()
+        ->where('is_submitted', false)
+        ->doesntExist();
+
+      if ($allSubmitted && $application->status === 'documents_requested') {
+        $application->update(['status' => 'documents_submitted']);
+        $shouldNotifyDocumentsSubmitted = true;
+      }
+
+      DB::commit();
+    } catch (\Throwable $e) {
+      DB::rollBack();
+      foreach ($storedFiles as $path) {
+        SecureStorage::delete($path);
+      }
+      throw $e;
+    }
+
+    // Send notification if status changed to documents_submitted
+    if ($shouldNotifyDocumentsSubmitted) {
+      $this->sendStatusNotifications($application, 'documents_submitted');
+    }
+
+    // Delete old files after successful transaction
+    foreach ($oldPaths as $oldPath) {
+      if ($oldPath) {
+        SecureStorage::delete($oldPath);
+      }
+    }
+
+    return redirect()->back()->with('success', 'Documents uploaded successfully');
+  }
+
+  /**
    * Remove the specified application
    */
   public function destroy(Application $application)
