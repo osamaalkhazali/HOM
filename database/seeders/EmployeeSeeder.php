@@ -17,81 +17,116 @@ class EmployeeSeeder extends Seeder
      */
     public function run(): void
     {
-        // Get some hired applications
-        $hiredApplications = Application::where('status', 'hired')->get();
+        $users = User::limit(8)->get();
+        $jobs = Job::limit(6)->get();
 
-        if ($hiredApplications->isEmpty()) {
-            // If no hired applications exist, create some sample employees directly
-            $users = User::limit(10)->get();
-            $jobs = Job::limit(5)->get();
-
-            if ($users->isEmpty() || $jobs->isEmpty()) {
-                $this->command->warn('No users or jobs found. Please seed users and jobs first.');
-                return;
-            }
-
-            $statuses = ['active', 'on_leave', 'resigned', 'terminated'];
-
-            foreach ($users as $index => $user) {
-                $job = $jobs->random();
-                $status = $statuses[array_rand($statuses)];
-
-                // Random hire date within the last 2 years
-                $hireDate = Carbon::now()->subDays(rand(1, 730));
-
-                // Set end date for resigned/terminated employees
-                $endDate = null;
-                if (in_array($status, ['resigned', 'terminated'])) {
-                    $endDate = $hireDate->copy()->addDays(rand(30, 365));
-                }
-
-                Employee::create([
-                    'user_id' => $user->id,
-                    'job_id' => $job->id,
-                    'application_id' => null,
-                    'position_title' => $job->title,
-                    'status' => $status,
-                    'hire_date' => $hireDate,
-                    'end_date' => $endDate,
-                    'notes' => $this->getRandomNotes($status),
-                ]);
-
-                $this->command->info("Created employee record for {$user->name}");
-            }
-        } else {
-            // Create employee records for hired applications
-            foreach ($hiredApplications as $application) {
-                // Check if employee already exists
-                if (Employee::where('application_id', $application->id)->exists()) {
-                    continue;
-                }
-
-                $status = 'active';
-                $hireDate = Carbon::parse($application->updated_at);
-                $endDate = null;
-
-                // Randomly assign some as resigned or terminated for testing
-                if (rand(1, 10) > 7) { // 30% chance
-                    $status = rand(0, 1) ? 'resigned' : 'terminated';
-                    $endDate = $hireDate->copy()->addDays(rand(30, 365));
-                }
-
-                Employee::create([
-                    'user_id' => $application->user_id,
-                    'job_id' => $application->job_id,
-                    'application_id' => $application->id,
-                    'position_title' => $application->job->title,
-                    'status' => $status,
-                    'hire_date' => $hireDate,
-                    'end_date' => $endDate,
-                    'notes' => $this->getRandomNotes($status),
-                ]);
-
-                $this->command->info("Created employee record for application #{$application->id}");
-            }
+        if ($users->isEmpty() || $jobs->isEmpty()) {
+            $this->command->warn('No users or jobs found. Please seed users and jobs first.');
+            return;
         }
 
-        $this->command->info('Employee seeding completed successfully!');
+        // Scenario 1: Create 3 users with single active employment
+        for ($i = 0; $i < 3 && $i < $users->count(); $i++) {
+            $user = $users[$i];
+            $job = $jobs->random();
+            $hireDate = Carbon::now()->subMonths(rand(3, 18));
+
+            Employee::create([
+                'user_id' => $user->id,
+                'job_id' => $job->id,
+                'application_id' => Application::where('user_id', $user->id)->where('job_id', $job->id)->first()?->id,
+                'position_title' => $job->title,
+                'status' => 'active',
+                'hire_date' => $hireDate,
+                'end_date' => null,
+                'notes' => $this->getRandomNotes('active'),
+            ]);
+
+            $this->command->info("✓ Created active employee: {$user->name} - {$job->title}");
+        }
+
+        // Scenario 2: Create 2 users hired twice (first resigned/terminated, second active)
+        for ($i = 3; $i < 5 && $i < $users->count(); $i++) {
+            $user = $users[$i];
+
+            // First employment (resigned or terminated)
+            $firstJob = $jobs->random();
+            $firstHireDate = Carbon::now()->subMonths(rand(24, 36));
+            $firstStatus = rand(0, 1) ? 'resigned' : 'terminated';
+            $firstEndDate = $firstHireDate->copy()->addMonths(rand(6, 18));
+
+            Employee::create([
+                'user_id' => $user->id,
+                'job_id' => $firstJob->id,
+                'application_id' => null,
+                'position_title' => $firstJob->title,
+                'status' => $firstStatus,
+                'hire_date' => $firstHireDate,
+                'end_date' => $firstEndDate,
+                'notes' => $this->getRandomNotes($firstStatus),
+            ]);
+
+            // Second employment (active)
+            $secondJob = $jobs->where('id', '!=', $firstJob->id)->random();
+            $secondHireDate = $firstEndDate->copy()->addMonths(rand(1, 3));
+
+            Employee::create([
+                'user_id' => $user->id,
+                'job_id' => $secondJob->id,
+                'application_id' => Application::where('user_id', $user->id)->where('job_id', $secondJob->id)->first()?->id,
+                'position_title' => $secondJob->title,
+                'status' => 'active',
+                'hire_date' => $secondHireDate,
+                'end_date' => null,
+                'notes' => 'Re-hired after previous employment. Excellent performance.',
+            ]);
+
+            $this->command->info("✓ Created dual employment: {$user->name} - {$firstStatus} → active");
+        }
+
+        // Scenario 3: Create 2 users with resigned status
+        for ($i = 5; $i < 7 && $i < $users->count(); $i++) {
+            $user = $users[$i];
+            $job = $jobs->random();
+            $hireDate = Carbon::now()->subMonths(rand(12, 30));
+            $endDate = $hireDate->copy()->addMonths(rand(6, 20));
+
+            Employee::create([
+                'user_id' => $user->id,
+                'job_id' => $job->id,
+                'application_id' => null,
+                'position_title' => $job->title,
+                'status' => 'resigned',
+                'hire_date' => $hireDate,
+                'end_date' => $endDate,
+                'notes' => $this->getRandomNotes('resigned'),
+            ]);
+
+            $this->command->info("✓ Created resigned employee: {$user->name} - {$job->title}");
+        }
+
+        // Scenario 4: Create 1 user with transferred status
+        if ($users->count() > 7) {
+            $user = $users[7];
+            $job = $jobs->random();
+            $hireDate = Carbon::now()->subMonths(rand(6, 15));
+
+            Employee::create([
+                'user_id' => $user->id,
+                'job_id' => $job->id,
+                'application_id' => null,
+                'position_title' => $job->title,
+                'status' => 'transferred',
+                'hire_date' => $hireDate,
+                'end_date' => null,
+                'notes' => 'Transferred to another department/location.',
+            ]);
+
+            $this->command->info("✓ Created transferred employee: {$user->name} - {$job->title}");
+        }
+
+        $totalEmployees = Employee::count();
+        $this->command->info("🎉 Employee seeding completed! Total records: {$totalEmployees}");
     }
 
     /**
@@ -101,29 +136,29 @@ class EmployeeSeeder extends Seeder
     {
         $notes = [
             'active' => [
-                'Excellent performer, consistently meets targets.',
-                'Great team player, always willing to help.',
-                'Shows strong leadership potential.',
-                'Highly skilled and motivated employee.',
-                null, // Some employees may not have notes
-            ],
-            'on_leave' => [
-                'On maternity leave until further notice.',
-                'Medical leave - expected return in 3 months.',
-                'Sabbatical leave approved for 6 months.',
-                'Family emergency leave.',
+                'Excellent performer, consistently exceeds targets.',
+                'Great team player with strong communication skills.',
+                'Shows leadership potential and initiative.',
+                'Highly skilled and self-motivated.',
+                null, // Some without notes
             ],
             'resigned' => [
                 'Resigned for career advancement opportunity.',
-                'Left for higher education pursuits.',
-                'Relocating to another city.',
-                'Accepted position at another company.',
+                'Left to pursue higher education.',
+                'Relocated to another city for family reasons.',
+                'Accepted better opportunity at competitor.',
+                'Left on good terms, eligible for rehire.',
             ],
             'terminated' => [
-                'Performance issues - multiple warnings issued.',
-                'Violation of company policies.',
+                'Performance did not meet expectations after warnings.',
+                'Violation of company policy.',
                 'Position eliminated due to restructuring.',
-                'Contract not renewed.',
+                'Contract not renewed at end of term.',
+            ],
+            'transferred' => [
+                'Transferred to head office.',
+                'Moved to new branch location.',
+                'Transferred to sister company.',
             ],
         ];
 
