@@ -33,6 +33,16 @@ class AuthController extends Controller
         if (Auth::guard('admin')->attempt($credentials, $request->filled('remember'))) {
             $admin = Auth::guard('admin')->user();
 
+            // Check if account is active
+            if (!$admin->is_active) {
+                Auth::guard('admin')->logout();
+                return back()
+                    ->withInput($request->only('email', 'remember'))
+                    ->withErrors([
+                        'email' => 'Your account has been deactivated. Please contact the administrator.',
+                    ]);
+            }
+
             // Check if email is verified
             if (!$admin->hasVerifiedEmail()) {
                 Auth::guard('admin')->logout();
@@ -63,9 +73,7 @@ class AuthController extends Controller
 
             // Redirect to intended URL if set, otherwise to dashboard
             return redirect()->intended(route('admin.dashboard'));
-        }
-
-        return back()->withInput($request->only('email', 'remember'))->withErrors([
+        }        return back()->withInput($request->only('email', 'remember'))->withErrors([
             'email' => 'The provided credentials do not match our records.',
         ]);
     }

@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('password');
             $table->enum('role', ['super', 'admin', 'client_hr'])->default('admin');
             $table->foreignId('client_id')->nullable()->constrained()->onDelete('cascade');
+            $table->boolean('is_active')->default(true);
             $table->timestamp('last_login_at')->nullable();
             $table->rememberToken();
             $table->timestamps();

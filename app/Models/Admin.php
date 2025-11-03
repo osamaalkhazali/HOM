@@ -14,11 +14,12 @@ class Admin extends Authenticatable implements CanResetPassword, MustVerifyEmail
     use Notifiable, SoftDeletes, CanResetPasswordTrait;
 
     protected $table = 'admins';
-    protected $fillable = ['name', 'email', 'phone', 'password', 'role', 'client_id', 'email_verified_at', 'last_login_at'];
+    protected $fillable = ['name', 'email', 'phone', 'password', 'role', 'client_id', 'email_verified_at', 'is_active', 'last_login_at'];
     protected $hidden = ['password', 'remember_token'];
     protected $casts = [
         'email_verified_at' => 'datetime',
         'last_login_at' => 'datetime',
+        'is_active' => 'boolean',
     ];
 
     public function client()
@@ -43,7 +44,7 @@ class Admin extends Authenticatable implements CanResetPassword, MustVerifyEmail
 
     public function getStatusAttribute()
     {
-        return $this->email_verified_at ? 'active' : 'inactive';
+        return ($this->email_verified_at && $this->is_active) ? 'active' : 'inactive';
     }
 
     public function getRoleNameAttribute()
@@ -58,12 +59,14 @@ class Admin extends Authenticatable implements CanResetPassword, MustVerifyEmail
 
     public function scopeActive($query)
     {
-        return $query->whereNotNull('email_verified_at');
+        return $query->whereNotNull('email_verified_at')->where('is_active', true);
     }
 
     public function scopeInactive($query)
     {
-        return $query->whereNull('email_verified_at');
+        return $query->where(function($q) {
+            $q->whereNull('email_verified_at')->orWhere('is_active', false);
+        });
     }
 
     public function scopeSuperAdmin($query)

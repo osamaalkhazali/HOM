@@ -224,6 +224,7 @@ class AdminController extends Controller
       'password' => Hash::make($request->password),
       'role' => $request->role,
       'client_id' => $request->role === 'client_hr' ? $request->client_id : null,
+      'is_active' => $request->status === 'active',
       'email_verified_at' => $request->status === 'active' ? now() : null,
     ]);
 
@@ -304,7 +305,8 @@ class AdminController extends Controller
       'email' => $request->email,
       'role' => $request->role,
       'client_id' => $request->role === 'client_hr' ? $request->client_id : null,
-      'email_verified_at' => $request->status === 'active' ? now() : null,
+      'is_active' => $request->status === 'active',
+      'email_verified_at' => $request->status === 'active' ? ($admin->email_verified_at ?? now()) : $admin->email_verified_at,
     ];
 
     if ($request->filled('password')) {
@@ -329,10 +331,10 @@ class AdminController extends Controller
     }
 
     $admin->update([
-      'email_verified_at' => $admin->email_verified_at ? null : now()
+      'is_active' => !$admin->is_active
     ]);
 
-    $status = $admin->email_verified_at ? 'activated' : 'deactivated';
+    $status = $admin->is_active ? 'activated' : 'deactivated';
     return redirect()->back()
       ->with('success', "Admin {$status} successfully.");
   }
