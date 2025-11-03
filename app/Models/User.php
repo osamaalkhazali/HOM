@@ -79,6 +79,14 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Get all employment records for the user.
+     */
+    public function employees()
+    {
+        return $this->hasMany(Employee::class);
+    }
+
+    /**
      * Calculate the user's profile completion status with localized labels.
      */
     public function profileCompletionStatus(): array

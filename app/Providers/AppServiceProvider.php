@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use App\Models\Setting;
+use App\Models\Application;
+use App\Observers\ApplicationObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -33,6 +35,9 @@ class AppServiceProvider extends ServiceProvider
 
         // Ensure verification emails are dispatched on registration
         Event::listen(Registered::class, SendEmailVerificationNotification::class);
+
+        // Register Application Observer for auto-creating employees
+        Application::observe(ApplicationObserver::class);
 
         // Share settings with all views
         try {

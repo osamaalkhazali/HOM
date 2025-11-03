@@ -12,6 +12,8 @@ use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\ClientController;
+use App\Http\Controllers\Admin\EmployeeController;
+use App\Http\Controllers\Admin\EmployeeDocumentController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Admin\AdminNotificationController;
 use App\Http\Controllers\SecureDocumentController;
@@ -106,6 +108,25 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         // Client logo - accessible to all admin roles (for dashboard)
         Route::get('/clients/{client}/logo', [ClientController::class, 'serveLogo'])->name('clients.logo');
+
+        // Employees Management - accessible to all admin roles (view) and Client HR (manage)
+        Route::get('/employees', [EmployeeController::class, 'index'])->name('employees.index');
+        Route::get('/employees/{employee}', [EmployeeController::class, 'show'])->name('employees.show');
+
+        // Employee document viewing/downloading - accessible to all admin roles
+        Route::get('/employees/{employee}/documents/{document}/view', [EmployeeDocumentController::class, 'view'])->name('employees.documents.view');
+        Route::get('/employees/{employee}/documents/{document}/download', [EmployeeDocumentController::class, 'download'])->name('employees.documents.download');
+
+        // Employee management actions - Client HR only (authorization handled in controller)
+        Route::get('/employees/create', [EmployeeController::class, 'create'])->name('employees.create');
+        Route::post('/employees', [EmployeeController::class, 'store'])->name('employees.store');
+        Route::get('/employees/{employee}/edit', [EmployeeController::class, 'edit'])->name('employees.edit');
+        Route::patch('/employees/{employee}', [EmployeeController::class, 'update'])->name('employees.update');
+        Route::delete('/employees/{employee}', [EmployeeController::class, 'destroy'])->name('employees.destroy');
+
+        // Employee document management - Client HR only (authorization handled in controller)
+        Route::post('/employees/{employee}/documents', [EmployeeDocumentController::class, 'store'])->name('employees.documents.store');
+        Route::delete('/employees/{employee}/documents/{document}', [EmployeeDocumentController::class, 'destroy'])->name('employees.documents.destroy');
 
         // User show page - accessible to all admin roles (scoped by controller logic for Client HR)
         Route::get('/users/{user}', [UserController::class, 'show'])->name('users.show');

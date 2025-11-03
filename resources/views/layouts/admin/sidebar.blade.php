@@ -132,6 +132,59 @@
                     </div>
                 </div>
 
+                <!-- Employees -->
+                <div class="space-y-1">
+                    <button onclick="toggleSubmenu('employees')"
+                        class="group flex items-center w-full px-2 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.employees*') ? '' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
+                        style="{{ request()->routeIs('admin.employees*') ? 'background: rgba(13,110,253,0.06); color: var(--primary-color);' : '' }}">
+                        <i class="fas fa-user-tie mr-3"></i>
+                        Employees
+                        <i class="fas fa-chevron-down ml-auto transform transition-transform" id="employees-chevron"></i>
+                    </button>
+                    <div class="ml-6 space-y-1 hidden" id="employees-submenu">
+                        <a href="{{ route('admin.employees.index') }}"
+                            class="group flex items-center px-2 py-2 text-sm rounded-md {{ request()->routeIs('admin.employees.index') && !request()->has('status') ? '' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
+                            style="{{ request()->routeIs('admin.employees.index') && !request()->has('status') ? 'background: rgba(13,110,253,0.08); color: var(--primary-color);' : '' }}">
+                            <i class="fas fa-list mr-3"></i>All Employees
+                            <span class="ml-auto bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+                                {{ \App\Models\Employee::count() }}
+                            </span>
+                        </a>
+                        <a href="{{ route('admin.employees.index', ['status' => 'active']) }}"
+                            class="group flex items-center px-2 py-2 text-sm rounded-md {{ request()->get('status') === 'active' ? '' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
+                            style="{{ request()->get('status') === 'active' ? 'background: rgba(13,110,253,0.06); color: var(--primary-color);' : '' }}">
+                            <i class="fas fa-check-circle mr-3"></i>Active Employees
+                            <span class="ml-auto bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
+                                {{ \App\Models\Employee::where('status', 'active')->count() }}
+                            </span>
+                        </a>
+                        <a href="{{ route('admin.employees.index', ['status' => 'on_leave']) }}"
+                            class="group flex items-center px-2 py-2 text-sm rounded-md {{ request()->get('status') === 'on_leave' ? '' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
+                            style="{{ request()->get('status') === 'on_leave' ? 'background: rgba(13,110,253,0.06); color: var(--primary-color);' : '' }}">
+                            <i class="fas fa-plane mr-3"></i>On Leave
+                            <span class="ml-auto bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full">
+                                {{ \App\Models\Employee::where('status', 'on_leave')->count() }}
+                            </span>
+                        </a>
+                        <a href="{{ route('admin.employees.index', ['status' => 'resigned']) }}"
+                            class="group flex items-center px-2 py-2 text-sm rounded-md {{ request()->get('status') === 'resigned' ? '' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
+                            style="{{ request()->get('status') === 'resigned' ? 'background: rgba(13,110,253,0.06); color: var(--primary-color);' : '' }}">
+                            <i class="fas fa-user-minus mr-3"></i>Resigned
+                            <span class="ml-auto bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-full">
+                                {{ \App\Models\Employee::where('status', 'resigned')->count() }}
+                            </span>
+                        </a>
+                        <a href="{{ route('admin.employees.index', ['status' => 'terminated']) }}"
+                            class="group flex items-center px-2 py-2 text-sm rounded-md {{ request()->get('status') === 'terminated' ? '' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
+                            style="{{ request()->get('status') === 'terminated' ? 'background: rgba(13,110,253,0.06); color: var(--primary-color);' : '' }}">
+                            <i class="fas fa-ban mr-3"></i>Terminated
+                            <span class="ml-auto bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full">
+                                {{ \App\Models\Employee::where('status', 'terminated')->count() }}
+                            </span>
+                        </a>
+                    </div>
+                </div>
+
                 <!-- Clients -->
                 @if(auth('admin')->user()->isSuperAdmin() || auth('admin')->user()->isAdmin())
                 <a href="{{ route('admin.clients.index') }}"
@@ -250,6 +303,17 @@
                 applicationsSubmenu.classList.remove('hidden');
                 applicationsChevron.classList.remove('fa-chevron-down');
                 applicationsChevron.classList.add('fa-chevron-up');
+            }
+        @endif
+
+        // Employees - expand if we're on any employees page
+        @if (request()->routeIs('admin.employees.*'))
+            const employeesSubmenu = document.getElementById('employees-submenu');
+            const employeesChevron = document.getElementById('employees-chevron');
+            if (employeesSubmenu && employeesSubmenu.classList.contains('hidden')) {
+                employeesSubmenu.classList.remove('hidden');
+                employeesChevron.classList.remove('fa-chevron-down');
+                employeesChevron.classList.add('fa-chevron-up');
             }
         @endif
 
