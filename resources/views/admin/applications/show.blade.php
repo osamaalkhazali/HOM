@@ -30,7 +30,7 @@
                 <h2 class="text-lg font-medium text-gray-900">Application Status</h2>
                 @if(auth('admin')->user()->isSuperAdmin() || auth('admin')->user()->isAdmin())
                 <form method="POST" action="{{ route('admin.applications.update-status', $application) }}"
-                    class="flex items-center space-x-2">
+                    class="flex items-center space-x-2" id="statusChangeFormTop">
                     @csrf
                     @method('PATCH')
                     @php
@@ -39,7 +39,7 @@
                         $currentStatus = $application->status;
                         $isAutoStatus = in_array($currentStatus, ['documents_requested', 'documents_submitted']);
                     @endphp
-                    <select name="status" onchange="this.form.submit()"
+                    <select name="status" id="statusSelectTop" onchange="handleTopStatusChange(this.value, '{{ $application->user->name }}')"
                         class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                         @if ($isAutoStatus)
                             @php
@@ -452,20 +452,11 @@
                     </div>
                 @endif
 
-                <!-- Application Notes -->
-                @if ($application->notes)
-                    <div class="bg-white rounded-lg shadow">
-                        <div class="px-6 py-4 border-b border-gray-200">
-                            <h3 class="text-lg font-medium text-gray-900">Internal Notes</h3>
-                        </div>
-                        <div class="p-6">
-                            <div class="prose max-w-none">
-                                {!! nl2br(e($application->notes)) !!}
-                            </div>
-                        </div>
-                    </div>
-                @endif
-            </div>
+                </div>
+                    @endforeach
+                </div>
+            @endif
+        </div>
 
             <!-- Sidebar -->
             <div class="space-y-6">
@@ -685,13 +676,12 @@
                         <!-- Hired Status -->
                         @if ($application->status !== 'hired')
                         <form method="POST" action="{{ route('admin.applications.update-status', $application) }}"
-                              data-confirm="Are you sure you want to hire this candidate?"
-                              data-confirm-variant="success"
-                              data-confirm-confirm="Hire">
+                              id="hireForm">
                             @csrf
                             @method('PATCH')
                             <input type="hidden" name="status" value="hired">
-                            <button type="submit"
+                            <button type="button"
+                                onclick="confirmStatusChange('hired')"
                                 class="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors text-sm">
                                 <i class="fas fa-check mr-2"></i>Hire Candidate
                             </button>
@@ -701,38 +691,135 @@
                         <!-- Rejected Status -->
                         @if ($application->status !== 'rejected')
                         <form method="POST" action="{{ route('admin.applications.update-status', $application) }}"
-                              data-confirm="Are you sure you want to reject this application?"
-                              data-confirm-variant="warning"
-                              data-confirm-confirm="Reject">
+                              id="rejectForm">
                             @csrf
                             @method('PATCH')
                             <input type="hidden" name="status" value="rejected">
-                            <button type="submit"
+                            <button type="button"
+                                onclick="confirmStatusChange('rejected')"
                                 class="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors text-sm">
                                 <i class="fas fa-times mr-2"></i>Reject Application
                             </button>
                         </form>
                         @endif
-
-                        <hr class="my-2">
-
-                        <!-- Delete Application -->
-                        <form method="POST" action="{{ route('admin.applications.destroy', $application) }}"
-                              data-confirm="Are you sure you want to delete this application? This action cannot be undone."
-                              data-confirm-variant="danger"
-                              data-confirm-confirm="Delete">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit"
-                                class="w-full bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-colors text-sm">
-                                <i class="fas fa-trash mr-2"></i>Delete Application
-                            </button>
-                        </form>
                         @endif
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Status Confirmation Modal -->
+    <div id="statusConfirmModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50">
+        <div class="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-[10px] bg-white">
+            <div class="mt-3">
+                <div id="modalIcon" class="flex items-center justify-center w-12 h-12 mx-auto bg-blue-100 rounded-[10px]">
+                    <i class="fas fa-user-check text-blue-600 text-2xl"></i>
+                </div>
+                <div class="mt-4 text-center">
+                    <h3 id="statusConfirmTitle" class="text-lg font-medium text-gray-900 mb-3">Confirm Status Change</h3>
+                    <div id="statusConfirmMessage" class="text-left"></div>
+                </div>
+                <div class="flex gap-3 mt-6">
+                    <button onclick="closeStatusConfirmModal()"
+                            class="flex-1 px-4 py-2 rounded-[10px] bg-gray-200 hover:bg-gray-300 text-gray-700 transition-colors font-medium">
+                        Cancel
+                    </button>
+                    <button id="statusConfirmBtn" onclick="submitStatusForm()"
+                            class="flex-1 px-4 py-2 rounded-[10px] bg-blue-600 hover:bg-blue-700 text-white transition-colors font-medium">
+                        Confirm
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let activeFormId = null;
+
+        function confirmStatusChange(status) {
+            const modal = document.getElementById('statusConfirmModal');
+            const title = document.getElementById('statusConfirmTitle');
+            const message = document.getElementById('statusConfirmMessage');
+            const confirmBtn = document.getElementById('statusConfirmBtn');
+            const iconDiv = document.getElementById('modalIcon');
+
+            if (status === 'hired') {
+                activeFormId = 'hireForm';
+                title.textContent = 'Hire Candidate';
+                message.innerHTML = `
+                    <p class="text-sm text-gray-700 mb-3">Are you sure you want to mark this application as <strong>Hired</strong>?</p>
+                    <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-[10px]">
+                        <div class="flex items-start">
+                            <i class="fas fa-info-circle text-blue-600 mt-0.5 mr-2"></i>
+                            <div class="text-sm text-blue-800">
+                                <p class="font-semibold mb-1">Important:</p>
+                                <p>This candidate will be added to the Employees section. Once added, the employee record can only be removed by the Client HR.</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                confirmBtn.textContent = 'Hire Candidate';
+                confirmBtn.className = 'flex-1 px-4 py-2 rounded-[10px] bg-green-600 hover:bg-green-700 text-white transition-colors font-medium';
+                iconDiv.className = 'flex items-center justify-center w-12 h-12 mx-auto bg-green-100 rounded-[10px]';
+                iconDiv.innerHTML = '<i class="fas fa-user-check text-green-600 text-2xl"></i>';
+            } else if (status === 'rejected') {
+                activeFormId = 'rejectForm';
+                title.textContent = 'Reject Application';
+                message.innerHTML = `
+                    <p class="text-sm text-gray-700 mb-3">Are you sure you want to mark this application as <strong>Rejected</strong>?</p>
+                    <div class="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-[10px]">
+                        <div class="flex items-start">
+                            <i class="fas fa-exclamation-triangle text-amber-600 mt-0.5 mr-2"></i>
+                            <div class="text-sm text-amber-800">
+                                <p>The candidate will be notified that their application was not successful.</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                confirmBtn.textContent = 'Reject Application';
+                confirmBtn.className = 'flex-1 px-4 py-2 rounded-[10px] bg-red-600 hover:bg-red-700 text-white transition-colors font-medium';
+                iconDiv.className = 'flex items-center justify-center w-12 h-12 mx-auto bg-red-100 rounded-[10px]';
+                iconDiv.innerHTML = '<i class="fas fa-times-circle text-red-600 text-2xl"></i>';
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        function closeStatusConfirmModal() {
+            document.getElementById('statusConfirmModal').classList.add('hidden');
+            activeFormId = null;
+            // Reset top dropdown if it was used
+            const topSelect = document.getElementById('statusSelectTop');
+            if (topSelect) {
+                topSelect.value = '{{ $application->status }}';
+            }
+        }
+
+        function submitStatusForm() {
+            if (activeFormId) {
+                document.getElementById(activeFormId).submit();
+            }
+        }
+
+        // Handle status change from top dropdown
+        function handleTopStatusChange(status, candidateName) {
+            if (!status || status === '{{ $application->status }}') return;
+
+            if (status === 'hired' || status === 'rejected') {
+                activeFormId = 'statusChangeFormTop';
+                confirmStatusChange(status);
+            } else {
+                document.getElementById('statusChangeFormTop').submit();
+            }
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('statusConfirmModal')?.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeStatusConfirmModal();
+            }
+        });
+    </script>
 @endsection
 

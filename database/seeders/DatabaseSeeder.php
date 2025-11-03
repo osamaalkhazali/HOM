@@ -23,6 +23,8 @@ class DatabaseSeeder extends Seeder
             ProfileSeeder::class,        // Depends on User
             JobSeeder::class,            // Depends on SubCategory and User
             ApplicationSeeder::class,    // Depends on Job and User
+            SettingSeeder::class,        // Independent - no dependencies
+            EmployeeSeeder::class,       // Depends on User and Job
         ]);
 
         $this->command->info('🎉 Database seeding completed successfully!');

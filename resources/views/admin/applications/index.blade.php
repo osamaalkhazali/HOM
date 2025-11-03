@@ -256,13 +256,13 @@
                     <span id="selected-count">0</span> applications selected
                 </span>
                 <div class="flex space-x-2">
-                    <form method="POST" action="{{ route('admin.applications.bulk-update-status') }}" class="inline">
+                    <form method="POST" action="{{ route('admin.applications.bulk-update-status') }}" class="inline" id="bulkStatusForm">
                         @csrf
-                        <input type="hidden" name="application_ids" id="bulk-ids">
-                        <select name="status"
+                        @method('PATCH')
+                        <div id="bulk-ids-container"></div>
+                        <select name="status" id="bulkStatusSelect"
                                 class="border border-gray-300 rounded px-3 py-1 text-sm"
-                                data-confirm-change="Update status for selected applications?"
-                                data-confirm-variant="warning">
+                                onchange="handleBulkStatusChange(this.value)">
                             <option value="">Change Status</option>
                             <option value="pending">Mark as Pending</option>
                             <option value="reviewed">Mark as Reviewed</option>
@@ -270,19 +270,6 @@
                             <option value="rejected">Mark as Rejected</option>
                             <option value="hired">Mark as Hired</option>
                         </select>
-                    </form>
-                    <form method="POST" action="{{ route('admin.applications.bulk-delete') }}" class="inline"
-                          data-confirm="Are you sure you want to delete selected applications?"
-                          data-confirm-variant="danger"
-                          data-confirm-confirm="Delete"
-                          data-confirm-cancel="Cancel">
-                        @csrf
-                        @method('DELETE')
-                        <input type="hidden" name="application_ids" id="bulk-delete-ids">
-                        <button type="submit"
-                                class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm transition-colors">
-                            <i class="fas fa-trash mr-1"></i>Delete Selected
-                        </button>
                     </form>
                 </div>
             </div>
@@ -516,29 +503,15 @@
                                                 <i class="fas fa-edit"></i>
                                             </a>
 
-                                            <!-- Delete Application -->
-                                            <form method="POST" action="{{ route('admin.applications.destroy', $application) }}" class="inline"
-                                                  data-confirm="Are you sure you want to delete this application?"
-                                                  data-confirm-variant="danger"
-                                                  data-confirm-confirm="Delete"
-                                                  data-confirm-cancel="Cancel">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit"
-                                                        class="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 p-2 rounded"
-                                                        title="Delete Application">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </form>
                                             @endif
                                         </div>
 
                                         @if(auth('admin')->user()->isSuperAdmin() || auth('admin')->user()->isAdmin())
                                         <!-- Quick Status Update Dropdown (below buttons) -->
-                                        <form method="POST" action="{{ route('admin.applications.update-status', $application) }}" class="w-full">
+                                        <form method="POST" action="{{ route('admin.applications.update-status', $application) }}" class="w-full" id="statusForm-{{ $application->id }}">
                                             @csrf
                                             @method('PATCH')
-                                            <select name="status" onchange="this.form.submit()"
+                                            <select name="status" onchange="handleStatusChange(this, {{ $application->id }}, '{{ $application->user->name }}')"
                                                     class="w-full text-xs border border-gray-300 rounded-md px-3 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-gray-400 transition-colors">
                                                 <option value="">Change Status...</option>
                                                 @php
@@ -606,8 +579,17 @@
         const selectedCount = document.getElementById('selected-count');
 
         selectedCount.textContent = selectedIds.length;
-        document.getElementById('bulk-ids').value = selectedIds.join(',');
-        document.getElementById('bulk-delete-ids').value = selectedIds.join(',');
+
+        // Update bulk status form with array inputs
+        const bulkIdsContainer = document.getElementById('bulk-ids-container');
+        bulkIdsContainer.innerHTML = '';
+        selectedIds.forEach(id => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'application_ids[]';
+            input.value = id;
+            bulkIdsContainer.appendChild(input);
+        });
 
         if (selectedIds.length > 0) {
             bulkActions.style.display = 'block';
@@ -697,5 +679,230 @@
             });
         });
     })();
+
+    // Bulk status change confirmation
+    function handleBulkStatusChange(status) {
+        if (!status) return;
+
+        // Update selection to ensure IDs are populated
+        updateSelection();
+
+        const selectedCount = document.querySelectorAll('.application-checkbox:checked').length;
+        if (selectedCount === 0) {
+            alert('Please select at least one application');
+            document.getElementById('bulkStatusSelect').value = '';
+            return;
+        }
+
+        if (status === 'hired' || status === 'rejected') {
+            showBulkStatusModal(status, selectedCount);
+        } else {
+            // For other statuses, submit directly
+            document.getElementById('bulkStatusForm').submit();
+        }
+    }
+
+    function showBulkStatusModal(status, count) {
+        const modal = document.getElementById('bulkStatusModal');
+        const title = document.getElementById('bulkStatusTitle');
+        const message = document.getElementById('bulkStatusMessage');
+        const confirmBtn = document.getElementById('bulkStatusConfirmBtn');
+        const iconDiv = document.getElementById('bulkModalIcon');
+
+        if (status === 'hired') {
+            title.textContent = 'Hire Candidates';
+            message.innerHTML = `
+                <p class="text-sm text-gray-700 mb-3">Are you sure you want to mark <strong>${count} application(s)</strong> as <strong>Hired</strong>?</p>
+                <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-[10px]">
+                    <div class="flex items-start">
+                        <i class="fas fa-info-circle text-blue-600 mt-0.5 mr-2"></i>
+                        <div class="text-sm text-blue-800">
+                            <p class="font-semibold mb-1">Important:</p>
+                            <p>These candidates will be added to the Employees section. Once added, employee records can only be removed by the Client HR.</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            confirmBtn.textContent = 'Hire Candidates';
+            confirmBtn.className = 'flex-1 px-4 py-2 rounded-[10px] bg-green-600 hover:bg-green-700 text-white transition-colors font-medium';
+            iconDiv.className = 'flex items-center justify-center w-12 h-12 mx-auto bg-green-100 rounded-[10px]';
+            iconDiv.innerHTML = '<i class="fas fa-users-check text-green-600 text-2xl"></i>';
+        } else if (status === 'rejected') {
+            title.textContent = 'Reject Applications';
+            message.innerHTML = `
+                <p class="text-sm text-gray-700 mb-3">Are you sure you want to mark <strong>${count} application(s)</strong> as <strong>Rejected</strong>?</p>
+                <div class="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-[10px]">
+                    <div class="flex items-start">
+                        <i class="fas fa-exclamation-triangle text-amber-600 mt-0.5 mr-2"></i>
+                        <div class="text-sm text-amber-800">
+                            <p>The candidates will be notified that their applications were not successful.</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            confirmBtn.textContent = 'Reject Applications';
+            confirmBtn.className = 'flex-1 px-4 py-2 rounded-[10px] bg-red-600 hover:bg-red-700 text-white transition-colors font-medium';
+            iconDiv.className = 'flex items-center justify-center w-12 h-12 mx-auto bg-red-100 rounded-[10px]';
+            iconDiv.innerHTML = '<i class="fas fa-user-times text-red-600 text-2xl"></i>';
+        }
+
+        modal.classList.remove('hidden');
+    }
+
+    function closeBulkStatusModal() {
+        document.getElementById('bulkStatusModal').classList.add('hidden');
+        document.getElementById('bulkStatusSelect').value = '';
+    }
+
+    function submitBulkStatusForm() {
+        // Update selection one more time before submitting
+        updateSelection();
+        document.getElementById('bulkStatusForm').submit();
+    }
+
+    // Close modal when clicking outside
+    document.getElementById('bulkStatusModal')?.addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeBulkStatusModal();
+        }
+    });
+
+    // Individual status change from dropdown
+    let currentFormId = null;
+    let currentSelectElement = null;
+
+    function handleStatusChange(selectElement, applicationId, candidateName) {
+        const status = selectElement.value;
+        if (!status) return;
+
+        currentFormId = 'statusForm-' + applicationId;
+        currentSelectElement = selectElement;
+
+        if (status === 'hired' || status === 'rejected') {
+            showSingleStatusModal(status, candidateName);
+        } else {
+            document.getElementById(currentFormId).submit();
+        }
+    }
+
+    function showSingleStatusModal(status, candidateName) {
+        const modal = document.getElementById('singleStatusModal');
+        const title = document.getElementById('singleStatusTitle');
+        const message = document.getElementById('singleStatusMessage');
+        const confirmBtn = document.getElementById('singleStatusConfirmBtn');
+        const iconDiv = document.getElementById('singleModalIcon');
+
+        if (status === 'hired') {
+            title.textContent = 'Hire Candidate';
+            message.innerHTML = `
+                <p class="text-sm text-gray-700 mb-2">Are you sure you want to hire <strong>${candidateName}</strong>?</p>
+                <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-[10px] mt-3">
+                    <div class="flex items-start">
+                        <i class="fas fa-info-circle text-blue-600 mt-0.5 mr-2"></i>
+                        <div class="text-sm text-blue-800">
+                            <p class="font-semibold mb-1">Important:</p>
+                            <p>This candidate will be added to the Employees section. Once added, the employee record can only be removed by the Client HR.</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            confirmBtn.textContent = 'Hire Candidate';
+            confirmBtn.className = 'flex-1 px-4 py-2 rounded-[10px] bg-green-600 hover:bg-green-700 text-white transition-colors font-medium';
+            iconDiv.className = 'flex items-center justify-center w-12 h-12 mx-auto bg-green-100 rounded-[10px]';
+            iconDiv.innerHTML = '<i class="fas fa-user-check text-green-600 text-2xl"></i>';
+        } else if (status === 'rejected') {
+            title.textContent = 'Reject Application';
+            message.innerHTML = `
+                <p class="text-sm text-gray-700 mb-2">Are you sure you want to reject <strong>${candidateName}'s</strong> application?</p>
+                <div class="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-[10px] mt-3">
+                    <div class="flex items-start">
+                        <i class="fas fa-exclamation-triangle text-amber-600 mt-0.5 mr-2"></i>
+                        <div class="text-sm text-amber-800">
+                            <p>The candidate will be notified that their application was not successful.</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            confirmBtn.textContent = 'Reject Application';
+            confirmBtn.className = 'flex-1 px-4 py-2 rounded-[10px] bg-red-600 hover:bg-red-700 text-white transition-colors font-medium';
+            iconDiv.className = 'flex items-center justify-center w-12 h-12 mx-auto bg-red-100 rounded-[10px]';
+            iconDiv.innerHTML = '<i class="fas fa-user-times text-red-600 text-2xl"></i>';
+        }
+
+        modal.classList.remove('hidden');
+    }
+
+    function closeSingleStatusModal() {
+        document.getElementById('singleStatusModal').classList.add('hidden');
+        // Reset the dropdown to original value
+        if (currentSelectElement) {
+            currentSelectElement.value = '';
+        }
+        currentFormId = null;
+        currentSelectElement = null;
+    }
+
+    function submitSingleStatusForm() {
+        if (currentFormId) {
+            document.getElementById(currentFormId).submit();
+        }
+    }
+
+    // Close modal when clicking outside
+    document.getElementById('singleStatusModal')?.addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeSingleStatusModal();
+        }
+    });
 </script>
+
+<!-- Single Status Change Confirmation Modal -->
+<div id="singleStatusModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50">
+    <div class="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-[10px] bg-white">
+        <div class="mt-3">
+            <div id="singleModalIcon" class="flex items-center justify-center w-12 h-12 mx-auto bg-blue-100 rounded-[10px]">
+                <i class="fas fa-user-check text-blue-600 text-2xl"></i>
+            </div>
+            <div class="mt-4 text-center">
+                <h3 id="singleStatusTitle" class="text-lg font-medium text-gray-900 mb-3">Confirm Status Change</h3>
+                <div id="singleStatusMessage" class="text-left"></div>
+            </div>
+            <div class="flex gap-3 mt-6">
+                <button onclick="closeSingleStatusModal()"
+                        class="flex-1 px-4 py-2 rounded-[10px] bg-gray-200 hover:bg-gray-300 text-gray-700 transition-colors font-medium">
+                    Cancel
+                </button>
+                <button id="singleStatusConfirmBtn" onclick="submitSingleStatusForm()"
+                        class="flex-1 px-4 py-2 rounded-[10px] bg-blue-600 hover:bg-blue-700 text-white transition-colors font-medium">
+                    Confirm
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bulk Status Confirmation Modal -->
+<div id="bulkStatusModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50">
+    <div class="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-[10px] bg-white">
+        <div class="mt-3">
+            <div id="bulkModalIcon" class="flex items-center justify-center w-12 h-12 mx-auto bg-blue-100 rounded-[10px]">
+                <i class="fas fa-users text-blue-600 text-2xl"></i>
+            </div>
+            <div class="mt-4 text-center">
+                <h3 id="bulkStatusTitle" class="text-lg font-medium text-gray-900 mb-3">Confirm Bulk Status Change</h3>
+                <div id="bulkStatusMessage" class="text-left"></div>
+            </div>
+            <div class="flex gap-3 mt-6">
+                <button onclick="closeBulkStatusModal()"
+                        class="flex-1 px-4 py-2 rounded-[10px] bg-gray-200 hover:bg-gray-300 text-gray-700 transition-colors font-medium">
+                    Cancel
+                </button>
+                <button id="bulkStatusConfirmBtn" onclick="submitBulkStatusForm()"
+                        class="flex-1 px-4 py-2 rounded-[10px] bg-blue-600 hover:bg-blue-700 text-white transition-colors font-medium">
+                    Confirm
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection

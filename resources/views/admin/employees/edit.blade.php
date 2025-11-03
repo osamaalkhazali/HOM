@@ -22,7 +22,7 @@
 
             <form method="POST" action="{{ route('admin.employees.update', $employee) }}" class="p-6">
                 @csrf
-                @method('PUT')
+                @method('PATCH')
 
                 <div class="space-y-6">
                     <!-- User Selection (Disabled - Cannot change) -->

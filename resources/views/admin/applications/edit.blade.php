@@ -91,7 +91,7 @@
                     <div class="px-6 py-4 border-b border-gray-200">
                         <h3 class="text-lg font-medium text-gray-900">Application Management</h3>
                     </div>
-                    <form method="POST" action="{{ route('admin.applications.update', $application) }}" class="p-6">
+                    <form method="POST" action="{{ route('admin.applications.update', $application) }}" class="p-6" id="updateApplicationForm">
                         @csrf
                         @method('PUT')
 
@@ -109,18 +109,7 @@
                                         {{ $meta['label'] }}
                                     </option>
                                 @endforeach
-                            </select>
-                            @error('status')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                            <p id="status-hint" class="mt-1 text-xs text-gray-500">{{ $statusOptions[old('status', $application->status)]['hint'] ?? 'Select the current status of this application' }}</p>
-                            <div id="auto-status-notice" class="hidden mt-2 bg-blue-50 border border-blue-200 text-blue-700 text-xs rounded-lg px-3 py-2">
-                                <i class="fas fa-info-circle mr-1"></i>
-                                Status will automatically change to <span class="font-semibold">Documents Requested</span> when you add document requests below.
-                            </div>
-                        </div>
-
-                        <!-- Document Requests -->
+                            </select>                        <!-- Document Requests -->
                         <div id="document-requests-section" class="border-t pt-6">
                             <div class="flex items-center justify-between mb-4">
                                 <div>
@@ -538,6 +527,114 @@
                     }
                 }
             });
+
+            // Status change confirmation
+            const form = document.getElementById('updateApplicationForm');
+            const statusSelect = document.getElementById('status');
+            const initialStatus = '{{ $application->status }}';
+            let pendingSubmit = false;
+
+            form?.addEventListener('submit', function(e) {
+                if (pendingSubmit) {
+                    return true;
+                }
+
+                const newStatus = statusSelect?.value;
+
+                if (newStatus === 'hired' && newStatus !== initialStatus) {
+                    e.preventDefault();
+                    showStatusConfirmModal('hired');
+                    return false;
+                } else if (newStatus === 'rejected' && newStatus !== initialStatus) {
+                    e.preventDefault();
+                    showStatusConfirmModal('rejected');
+                    return false;
+                }
+            });
+
+            function showStatusConfirmModal(status) {
+                const modal = document.getElementById('statusConfirmModal');
+                const title = document.getElementById('statusConfirmTitle');
+                const message = document.getElementById('statusConfirmMessage');
+                const confirmBtn = document.getElementById('statusConfirmBtn');
+
+                if (status === 'hired') {
+                    title.textContent = 'Hire Candidate';
+                    message.innerHTML = `
+                        <p class="text-sm text-gray-700 mb-3">Are you sure you want to mark this application as <strong>Hired</strong>?</p>
+                        <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-[10px]">
+                            <div class="flex items-start">
+                                <i class="fas fa-info-circle text-blue-600 mt-0.5 mr-2"></i>
+                                <div class="text-sm text-blue-800">
+                                    <p class="font-semibold mb-1">Important:</p>
+                                    <p>This candidate will be added to the Employees section. Once added, the employee record can only be removed by the Client HR.</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    confirmBtn.textContent = 'Hire Candidate';
+                    confirmBtn.className = 'flex-1 px-4 py-2 rounded-[10px] bg-green-600 hover:bg-green-700 text-white transition-colors font-medium';
+                } else if (status === 'rejected') {
+                    title.textContent = 'Reject Application';
+                    message.innerHTML = `
+                        <p class="text-sm text-gray-700 mb-3">Are you sure you want to mark this application as <strong>Rejected</strong>?</p>
+                        <div class="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-[10px]">
+                            <div class="flex items-start">
+                                <i class="fas fa-exclamation-triangle text-amber-600 mt-0.5 mr-2"></i>
+                                <div class="text-sm text-amber-800">
+                                    <p>The candidate will be notified that their application was not successful.</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    confirmBtn.textContent = 'Reject Application';
+                    confirmBtn.className = 'flex-1 px-4 py-2 rounded-[10px] bg-red-600 hover:bg-red-700 text-white transition-colors font-medium';
+                }
+
+                modal.classList.remove('hidden');
+            }
+
+            function closeStatusConfirmModal() {
+                document.getElementById('statusConfirmModal').classList.add('hidden');
+            }
+
+            function confirmStatusChange() {
+                pendingSubmit = true;
+                closeStatusConfirmModal();
+                form.submit();
+            }
+
+            // Close modal when clicking outside
+            document.getElementById('statusConfirmModal')?.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeStatusConfirmModal();
+                }
+            });
         });
     </script>
+
+    <!-- Status Confirmation Modal -->
+    <div id="statusConfirmModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50">
+        <div class="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-[10px] bg-white">
+            <div class="mt-3">
+                <div class="flex items-center justify-center w-12 h-12 mx-auto bg-blue-100 rounded-[10px]">
+                    <i class="fas fa-user-check text-blue-600 text-2xl"></i>
+                </div>
+                <div class="mt-4 text-center">
+                    <h3 id="statusConfirmTitle" class="text-lg font-medium text-gray-900 mb-3">Confirm Status Change</h3>
+                    <div id="statusConfirmMessage" class="text-left"></div>
+                </div>
+                <div class="flex gap-3 mt-6">
+                    <button onclick="closeStatusConfirmModal()"
+                            class="flex-1 px-4 py-2 rounded-[10px] bg-gray-200 hover:bg-gray-300 text-gray-700 transition-colors font-medium">
+                        Cancel
+                    </button>
+                    <button id="statusConfirmBtn" onclick="confirmStatusChange()"
+                            class="flex-1 px-4 py-2 rounded-[10px] bg-blue-600 hover:bg-blue-700 text-white transition-colors font-medium">
+                        Confirm
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
