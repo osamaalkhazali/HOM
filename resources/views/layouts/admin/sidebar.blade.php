@@ -127,6 +127,7 @@
                 </div>
 
                 <!-- Clients -->
+                @if(auth('admin')->user()->isSuperAdmin() || auth('admin')->user()->isAdmin())
                 <a href="{{ route('admin.clients.index') }}"
                     class="group flex items-center px-2 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.clients.*') ? '' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
                     style="{{ request()->routeIs('admin.clients.*') ? 'background: rgba(13,110,253,0.08); color: var(--primary-color);' : '' }}">
@@ -136,8 +137,10 @@
                         {{ \App\Models\Client::count() }}
                     </span>
                 </a>
+                @endif
 
                 <!-- Categories -->
+                @if(auth('admin')->user()->isSuperAdmin() || auth('admin')->user()->isAdmin())
                 <a href="{{ route('admin.categories.index') }}"
                     class="group flex items-center px-2 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.categories*') ? '' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
                     style="{{ request()->routeIs('admin.categories*') ? 'background: rgba(13,110,253,0.08); color: var(--primary-color);' : '' }}">
@@ -147,8 +150,10 @@
                         {{ \App\Models\Category::count() }}
                     </span>
                 </a>
+                @endif
 
                 <!-- Users & Profiles -->
+                @if(auth('admin')->user()->isSuperAdmin() || auth('admin')->user()->isAdmin())
                 <div class="space-y-1">
                     <button onclick="toggleSubmenu('users')"
                         class="group flex items-center w-full px-2 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.users*') ? '' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
@@ -176,22 +181,27 @@
                         </a>
                     </div>
                 </div>
+                @endif
 
                 <!-- Admin Management -->
+                @if(auth('admin')->user()->isSuperAdmin())
                 <a href="{{ route('admin.admins.index') }}"
                     class="group flex items-center px-2 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.admins.*') ? '' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
                     style="{{ request()->routeIs('admin.admins.*') ? 'background: rgba(13,110,253,0.06); color: var(--primary-color);' : '' }}">
                     <i class="fas fa-users-cog mr-3"></i>
                     Admin Management
                 </a>
+                @endif
 
                 <!-- Settings -->
+                @if(auth('admin')->user()->isSuperAdmin() || auth('admin')->user()->isAdmin())
                 <a href="{{ route('admin.settings.index') }}"
                     class="group flex items-center px-2 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.settings.*') ? '' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
                     style="{{ request()->routeIs('admin.settings.*') ? 'background: rgba(13,110,253,0.06); color: var(--primary-color);' : '' }}">
                     <i class="fas fa-cog mr-3"></i>
                     Settings
                 </a>
+                @endif
             </div>
         </div>
     </div>
