@@ -25,12 +25,19 @@
                         <i class="fas fa-chevron-down ml-auto transform transition-transform" id="jobs-chevron"></i>
                     </button>
                     <div class="ml-6 space-y-1 hidden" id="jobs-submenu">
+                        @php
+                            $currentAdmin = auth('admin')->user();
+                            $jobsQuery = \App\Models\Job::query();
+                            if ($currentAdmin->isClientHr() && $currentAdmin->client_id) {
+                                $jobsQuery->where('client_id', $currentAdmin->client_id);
+                            }
+                        @endphp
                         <a href="{{ route('admin.jobs.index') }}"
                             class="group flex items-center px-2 py-2 text-sm rounded-md {{ request()->routeIs('admin.jobs.index') && !request()->has('status') ? '' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
                             style="{{ request()->routeIs('admin.jobs.index') && !request()->has('status') ? 'background: rgba(13,110,253,0.08); color: var(--primary-color);' : '' }}">
                             <i class="fas fa-list mr-3"></i>All Jobs
                             <span class="ml-auto bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
-                                {{ \App\Models\Job::count() }}
+                                {{ (clone $jobsQuery)->count() }}
                             </span>
                         </a>
                         @if(auth('admin')->user()->isSuperAdmin() || auth('admin')->user()->isAdmin())
@@ -45,7 +52,7 @@
                             style="{{ request()->get('status') === 'active' ? 'background: rgba(13,110,253,0.06); color: var(--primary-color);' : '' }}">
                             <i class="fas fa-eye mr-3"></i>Active Jobs
                             <span class="ml-auto bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
-                                {{ \App\Models\Job::where('status', 'active')->count() }}
+                                {{ (clone $jobsQuery)->where('status', 'active')->count() }}
                             </span>
                         </a>
                         <a href="{{ route('admin.jobs.index', ['status' => 'inactive']) }}"
@@ -53,7 +60,7 @@
                             style="{{ request()->get('status') === 'inactive' ? 'background: rgba(13,110,253,0.06); color: var(--primary-color);' : '' }}">
                             <i class="fas fa-pause mr-3"></i>Inactive Jobs
                             <span class="ml-auto bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full">
-                                {{ \App\Models\Job::where('status', 'inactive')->count() }}
+                                {{ (clone $jobsQuery)->where('status', 'inactive')->count() }}
                             </span>
                         </a>
                         <a href="{{ route('admin.jobs.index', ['status' => 'draft']) }}"
@@ -61,14 +68,14 @@
                             style="{{ request()->get('status') === 'draft' ? 'background: rgba(13,110,253,0.06); color: var(--primary-color);' : '' }}">
                             <i class="fas fa-file-alt mr-3"></i>Draft Jobs
                             <span class="ml-auto bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-full">
-                                {{ \App\Models\Job::where('status', 'draft')->count() }}
+                                {{ (clone $jobsQuery)->where('status', 'draft')->count() }}
                             </span>
                         </a>
                         <a href="{{ route('admin.jobs.deleted') }}"
                             class="group flex items-center px-2 py-2 text-sm rounded-md {{ request()->routeIs('admin.jobs.deleted') ? '' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
                             style="{{ request()->routeIs('admin.jobs.deleted') ? 'background: rgba(13,110,253,0.06); color: var(--primary-color);' : '' }}">
                             <i class="fas fa-trash mr-3"></i>Deleted Jobs
-                            @php $deletedCount = \App\Models\Job::onlyTrashed()->count(); @endphp
+                            @php $deletedCount = (clone $jobsQuery)->onlyTrashed()->count(); @endphp
                             @if ($deletedCount > 0)
                                 <span class="ml-auto bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full">
                                     {{ $deletedCount }}
@@ -89,12 +96,20 @@
                             id="applications-chevron"></i>
                     </button>
                     <div id="applications-submenu" class="ml-6 space-y-1 hidden">
+                        @php
+                            $applicationsQuery = \App\Models\Application::query();
+                            if ($currentAdmin->isClientHr() && $currentAdmin->client_id) {
+                                $applicationsQuery->whereHas('job', function($q) use ($currentAdmin) {
+                                    $q->where('client_id', $currentAdmin->client_id);
+                                });
+                            }
+                        @endphp
                         <a href="{{ route('admin.applications.index') }}"
                             class="group flex items-center px-2 py-2 text-sm rounded-md {{ request()->routeIs('admin.applications.index') && !request()->has('status') ? '' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
                             style="{{ request()->routeIs('admin.applications.index') && !request()->has('status') ? 'background: rgba(13,110,253,0.08); color: var(--primary-color);' : '' }}">
                             <i class="fas fa-list mr-3"></i>All Applications
                             <span class="ml-auto bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
-                                {{ \App\Models\Application::count() }}
+                                {{ (clone $applicationsQuery)->count() }}
                             </span>
                         </a>
                         <a href="{{ route('admin.applications.index', ['status' => 'pending']) }}"
@@ -102,7 +117,7 @@
                             style="{{ request()->get('status') === 'pending' ? 'background: rgba(13,110,253,0.06); color: var(--primary-color);' : '' }}">
                             <i class="fas fa-clock mr-3"></i>Pending
                             <span class="ml-auto bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full">
-                                {{ \App\Models\Application::where('status', 'pending')->count() }}
+                                {{ (clone $applicationsQuery)->where('status', 'pending')->count() }}
                             </span>
                         </a>
                         <a href="{{ route('admin.applications.index', ['status' => 'reviewed']) }}"
@@ -110,7 +125,7 @@
                             style="{{ request()->get('status') === 'reviewed' ? 'background: rgba(13,110,253,0.08); color: var(--primary-color);' : '' }}">
                             <i class="fas fa-eye mr-3"></i>Reviewed
                             <span class="ml-auto bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
-                                {{ \App\Models\Application::where('status', 'reviewed')->count() }}
+                                {{ (clone $applicationsQuery)->where('status', 'reviewed')->count() }}
                             </span>
                         </a>
                         <a href="{{ route('admin.applications.index', ['status' => 'shortlisted']) }}"
@@ -118,7 +133,7 @@
                             style="{{ request()->get('status') === 'shortlisted' ? 'background: rgba(13,110,253,0.06); color: var(--primary-color);' : '' }}">
                             <i class="fas fa-star mr-3"></i>Shortlisted
                             <span class="ml-auto bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
-                                {{ \App\Models\Application::where('status', 'shortlisted')->count() }}
+                                {{ (clone $applicationsQuery)->where('status', 'shortlisted')->count() }}
                             </span>
                         </a>
                         <a href="{{ route('admin.applications.index', ['status' => 'hired']) }}"
@@ -126,7 +141,7 @@
                             style="{{ request()->get('status') === 'hired' ? 'background: rgba(13,110,253,0.06); color: var(--primary-color);' : '' }}">
                             <i class="fas fa-user-check mr-3"></i>Hired
                             <span class="ml-auto bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded-full">
-                                {{ \App\Models\Application::where('status', 'hired')->count() }}
+                                {{ (clone $applicationsQuery)->where('status', 'hired')->count() }}
                             </span>
                         </a>
                     </div>
@@ -142,12 +157,20 @@
                         <i class="fas fa-chevron-down ml-auto transform transition-transform" id="employees-chevron"></i>
                     </button>
                     <div class="ml-6 space-y-1 hidden" id="employees-submenu">
+                        @php
+                            $employeesQuery = \App\Models\Employee::query();
+                            if ($currentAdmin->isClientHr() && $currentAdmin->client_id) {
+                                $employeesQuery->whereHas('job', function($q) use ($currentAdmin) {
+                                    $q->where('client_id', $currentAdmin->client_id);
+                                });
+                            }
+                        @endphp
                         <a href="{{ route('admin.employees.index') }}"
                             class="group flex items-center px-2 py-2 text-sm rounded-md {{ request()->routeIs('admin.employees.index') && !request()->has('status') ? '' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
                             style="{{ request()->routeIs('admin.employees.index') && !request()->has('status') ? 'background: rgba(13,110,253,0.08); color: var(--primary-color);' : '' }}">
                             <i class="fas fa-list mr-3"></i>All Employees
                             <span class="ml-auto bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
-                                {{ \App\Models\Employee::count() }}
+                                {{ (clone $employeesQuery)->distinct('user_id')->count('user_id') }}
                             </span>
                         </a>
                         <a href="{{ route('admin.employees.index', ['status' => 'active']) }}"
@@ -155,7 +178,7 @@
                             style="{{ request()->get('status') === 'active' ? 'background: rgba(13,110,253,0.06); color: var(--primary-color);' : '' }}">
                             <i class="fas fa-check-circle mr-3"></i>Active Employees
                             <span class="ml-auto bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
-                                {{ \App\Models\Employee::where('status', 'active')->count() }}
+                                {{ (clone $employeesQuery)->where('status', 'active')->distinct('user_id')->count('user_id') }}
                             </span>
                         </a>
                         <a href="{{ route('admin.employees.index', ['status' => 'on_leave']) }}"
@@ -163,7 +186,7 @@
                             style="{{ request()->get('status') === 'on_leave' ? 'background: rgba(13,110,253,0.06); color: var(--primary-color);' : '' }}">
                             <i class="fas fa-plane mr-3"></i>On Leave
                             <span class="ml-auto bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full">
-                                {{ \App\Models\Employee::where('status', 'on_leave')->count() }}
+                                {{ (clone $employeesQuery)->where('status', 'on_leave')->distinct('user_id')->count('user_id') }}
                             </span>
                         </a>
                         <a href="{{ route('admin.employees.index', ['status' => 'resigned']) }}"
@@ -171,7 +194,7 @@
                             style="{{ request()->get('status') === 'resigned' ? 'background: rgba(13,110,253,0.06); color: var(--primary-color);' : '' }}">
                             <i class="fas fa-user-minus mr-3"></i>Resigned
                             <span class="ml-auto bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-full">
-                                {{ \App\Models\Employee::where('status', 'resigned')->count() }}
+                                {{ (clone $employeesQuery)->where('status', 'resigned')->distinct('user_id')->count('user_id') }}
                             </span>
                         </a>
                         <a href="{{ route('admin.employees.index', ['status' => 'terminated']) }}"
@@ -179,7 +202,7 @@
                             style="{{ request()->get('status') === 'terminated' ? 'background: rgba(13,110,253,0.06); color: var(--primary-color);' : '' }}">
                             <i class="fas fa-ban mr-3"></i>Terminated
                             <span class="ml-auto bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full">
-                                {{ \App\Models\Employee::where('status', 'terminated')->count() }}
+                                {{ (clone $employeesQuery)->where('status', 'terminated')->distinct('user_id')->count('user_id') }}
                             </span>
                         </a>
                     </div>
