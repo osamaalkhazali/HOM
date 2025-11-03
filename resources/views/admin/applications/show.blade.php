@@ -452,12 +452,6 @@
                     </div>
                 @endif
 
-                </div>
-                    @endforeach
-                </div>
-            @endif
-        </div>
-
             <!-- Sidebar -->
             <div class="space-y-6">
                 <!-- Job Information -->
