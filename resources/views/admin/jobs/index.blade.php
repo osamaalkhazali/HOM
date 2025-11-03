@@ -24,10 +24,12 @@
             <p class="text-gray-600 mt-2">Manage all job postings and their status on your portal.</p>
         </div>
         <div class="flex items-center gap-2 flex-wrap">
+            @if(auth('admin')->user()->isSuperAdmin() || auth('admin')->user()->isAdmin())
             <a href="{{ route('admin.jobs.create') }}"
                class="bg-green-600 text-white px-4 py-2 rounded-md text-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">
                 <i class="fas fa-plus mr-2"></i>Add New Job
             </a>
+            @endif
             <div class="relative">
                 <button type="button"
                         class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
@@ -324,6 +326,7 @@
                                         class="text-blue-600 hover:text-blue-900 p-1 rounded" title="View Details">
                                         <i class="fas fa-eye"></i>
                                     </a>
+                                    @if(auth('admin')->user()->isSuperAdmin() || auth('admin')->user()->isAdmin())
                                     <a href="{{ route('admin.jobs.edit', $job) }}"
                                         class="text-yellow-600 hover:text-yellow-900 p-1 rounded" title="Edit Job">
                                         <i class="fas fa-edit"></i>
@@ -341,6 +344,7 @@
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </form>
+                                    @endif
                                 </div>
                             </td>
                         </tr>

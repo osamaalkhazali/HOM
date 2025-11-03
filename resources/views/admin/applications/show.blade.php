@@ -11,10 +11,12 @@
                 <p class="mt-1 text-sm text-gray-600">Review and manage job application</p>
             </div>
             <div class="flex space-x-3">
+                @if(auth('admin')->user()->isSuperAdmin() || auth('admin')->user()->isAdmin())
                 <a href="{{ route('admin.applications.edit', $application) }}"
                     class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
                     <i class="fas fa-edit mr-2"></i>Edit Application
                 </a>
+                @endif
                 <a href="{{ route('admin.applications.index') }}"
                     class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors">
                     <i class="fas fa-arrow-left mr-2"></i>Back to Applications
@@ -26,6 +28,7 @@
         <div class="bg-white rounded-lg shadow p-6">
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-lg font-medium text-gray-900">Application Status</h2>
+                @if(auth('admin')->user()->isSuperAdmin() || auth('admin')->user()->isAdmin())
                 <form method="POST" action="{{ route('admin.applications.update-status', $application) }}"
                     class="flex items-center space-x-2">
                     @csrf
@@ -58,6 +61,7 @@
                         @endforeach
                     </select>
                 </form>
+                @endif
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -269,7 +273,9 @@
                             <div class="flex-1">
                                 @if($application->user)
                                     <h4 class="text-xl font-semibold text-gray-900 flex items-center gap-2">
-                                        {{ $application->user->name }}
+                                        <a href="{{ route('admin.users.show', $application->user) }}" class="text-blue-600 hover:text-blue-800 hover:underline">
+                                            {{ $application->user->name }}
+                                        </a>
                                         @if($application->user->deleted_at)
                                             <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700 border border-red-200">
                                                 <i class="fas fa-user-slash mr-1"></i>Deleted User
@@ -473,7 +479,13 @@
                             <div>
                                 <h4 class="text-lg font-semibold text-gray-900">
                                     @if($application->job)
-                                        {{ $application->job->title }}
+                                        @if(!$application->job->deleted_at)
+                                            <a href="{{ route('admin.jobs.show', $application->job) }}" class="text-blue-600 hover:text-blue-800 hover:underline">
+                                                {{ $application->job->title }}
+                                            </a>
+                                        @else
+                                            {{ $application->job->title }}
+                                        @endif
                                         @if($application->job->deleted_at)
                                             <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700 border border-red-200">
                                                 <i class="fas fa-exclamation-triangle mr-1 text-[10px]"></i>Job Removed
@@ -610,6 +622,7 @@
                         <h3 class="text-lg font-medium text-gray-900">Quick Actions</h3>
                     </div>
                     <div class="p-6 space-y-3">
+                        @if(auth('admin')->user()->isSuperAdmin() || auth('admin')->user()->isAdmin())
                         <a href="{{ route('admin.applications.edit', $application) }}"
                            class="w-full inline-flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg transition-colors text-sm">
                             <i class="fas fa-sliders-h mr-2"></i>Edit & Manage Documents
@@ -715,6 +728,7 @@
                                 <i class="fas fa-trash mr-2"></i>Delete Application
                             </button>
                         </form>
+                        @endif
                     </div>
                 </div>
             </div>

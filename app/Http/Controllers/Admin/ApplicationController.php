@@ -49,21 +49,30 @@ class ApplicationController extends Controller
 
     protected function baseQuery(): Builder
     {
-        return Application::with([
-      'user' => function ($q) {
-        $q->withTrashed();
-      },
-      'user.profile',
-      'job' => function ($q) {
-        $q->withTrashed();
-      },
-      'job.category',
-      'job.client',
-      'job.subCategory.category',
+        $query = Application::with([
+            'user' => function ($q) {
+                $q->withTrashed();
+            },
+            'user.profile',
+            'job' => function ($q) {
+                $q->withTrashed();
+            },
+            'job.category',
+            'job.client',
+            'job.subCategory.category',
             'questionAnswers.question',
             'documents.jobDocument',
             'documentRequests',
-    ]);
+        ]);
+
+        // Scope to client for Client HR role
+        if (auth('admin')->user()->isClientHr()) {
+            $query->whereHas('job', function ($jobQuery) {
+                $jobQuery->where('client_id', auth('admin')->user()->client_id);
+            });
+        }
+
+        return $query;
     }
 
     protected function applyFilters(Request $request, Builder $query): void
@@ -375,6 +384,13 @@ class ApplicationController extends Controller
    */
   public function show(Application $application)
   {
+    // Check if Client HR user has access to this application
+    if (auth('admin')->user()->isClientHr()) {
+        if ($application->job->client_id !== auth('admin')->user()->client_id) {
+            abort(403, 'You do not have permission to view this application.');
+        }
+    }
+
     $application->load([
       'user' => function ($q) {
         $q->withTrashed();

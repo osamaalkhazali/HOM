@@ -314,6 +314,19 @@ class UserController extends Controller
    */
   public function show(User $user)
   {
+    // Check if Client HR user has access to this user (only if user applied to their client's jobs)
+    if (auth('admin')->user()->isClientHr()) {
+        $hasAccess = $user->applications()
+            ->whereHas('job', function ($query) {
+                $query->where('client_id', auth('admin')->user()->client_id);
+            })
+            ->exists();
+
+        if (!$hasAccess) {
+            abort(403, 'You do not have permission to view this user.');
+        }
+    }
+
     $user->load(['profile', 'applications.job', 'jobs']);
     return view('admin.users.show', compact('user'));
   }

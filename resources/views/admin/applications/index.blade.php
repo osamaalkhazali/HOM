@@ -248,6 +248,7 @@
         </form>
     </div>
     <!-- Bulk Actions -->
+    @if(auth('admin')->user()->isSuperAdmin() || auth('admin')->user()->isAdmin())
     <div class="bg-white rounded-lg shadow p-4" id="bulk-actions" style="display: none;">
         <div class="flex items-center justify-between">
             <div class="flex items-center space-x-4">
@@ -290,6 +291,7 @@
             </button>
         </div>
     </div>
+    @endif
 
     <!-- Applications Table -->
     <div class="bg-white rounded-lg shadow overflow-hidden">
@@ -307,11 +309,13 @@
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
+                            @if(auth('admin')->user()->isSuperAdmin() || auth('admin')->user()->isAdmin())
                             <th class="px-6 py-3 text-left">
                                 <input type="checkbox" id="select-all"
                                        class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                                        onchange="toggleAll()">
                             </th>
+                            @endif
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Applicant</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Job Details</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
@@ -323,10 +327,12 @@
                     <tbody class="bg-white divide-y divide-gray-200">
                         @foreach($applications as $application)
                             <tr class="hover:bg-gray-50">
+                                @if(auth('admin')->user()->isSuperAdmin() || auth('admin')->user()->isAdmin())
                                 <td class="px-6 py-4">
                                     <input type="checkbox" class="application-checkbox rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                                            value="{{ $application->id }}" onchange="updateSelection()">
                                 </td>
+                                @endif
                                 <td class="px-6 py-4">
                                     <div class="flex items-center">
                                         <div class="flex-shrink-0 h-10 w-10">
@@ -343,7 +349,9 @@
                                         <div class="ml-4">
                                             @if($application->user)
                                                 <div class="text-sm font-medium text-gray-900 flex items-center gap-2">
-                                                    {{ $application->user->name }}
+                                                    <a href="{{ route('admin.users.show', $application->user) }}" class="text-blue-600 hover:text-blue-800 hover:underline">
+                                                        {{ $application->user->name }}
+                                                    </a>
                                                     @if($application->user->deleted_at)
                                                         <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-red-100 text-red-700 border border-red-200">
                                                             <i class="fas fa-user-slash mr-1"></i>Deleted User
@@ -365,7 +373,13 @@
                                 </td>
                                 <td class="px-6 py-4">
                                     <div class="text-sm font-medium text-gray-900 flex items-center flex-wrap gap-2">
-                                        <span>{{ $application->job->title ?? 'Job Deleted' }}</span>
+                                        @if($application->job && !$application->job->deleted_at)
+                                            <a href="{{ route('admin.jobs.show', $application->job) }}" class="text-blue-600 hover:text-blue-800 hover:underline">
+                                                {{ $application->job->title }}
+                                            </a>
+                                        @else
+                                            <span>{{ $application->job->title ?? 'Job Deleted' }}</span>
+                                        @endif
                                         @if(!$application->job)
                                             <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700 border border-red-200">
                                                 <i class="fas fa-exclamation-triangle mr-1 text-[10px]"></i>Job Removed
@@ -492,6 +506,7 @@
                                             <i class="fas fa-eye"></i>
                                         </a>
 
+                                        @if(auth('admin')->user()->isSuperAdmin() || auth('admin')->user()->isAdmin())
                                         <!-- Edit Application -->
                                         <a href="{{ route('admin.applications.edit', $application) }}"
                                            class="text-green-600 hover:text-green-900 bg-green-50 hover:bg-green-100 p-2 rounded"
@@ -531,6 +546,7 @@
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                         </form>
+                                        @endif
                                     </div>
                                 </td>
                             </tr>

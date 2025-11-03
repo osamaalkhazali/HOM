@@ -46,8 +46,8 @@ class JobController extends Controller
 
     protected function baseIndexQuery(): Builder
     {
-    return Job::with([
-      'client',
+        $query = Job::with([
+            'client',
             'category',
             'subCategory.category',
             'postedBy',
@@ -56,6 +56,13 @@ class JobController extends Controller
             'questions',
             'documents',
         ]);
+
+        // Scope to client for Client HR role
+        if (auth('admin')->user()->isClientHr()) {
+            $query->where('client_id', auth('admin')->user()->client_id);
+        }
+
+        return $query;
     }
 
     protected function applyIndexFilters(Request $request, Builder $query): void
@@ -392,6 +399,13 @@ class JobController extends Controller
    */
   public function show(Job $job)
   {
+    // Check if Client HR user has access to this job
+    if (auth('admin')->user()->isClientHr()) {
+        if ($job->client_id !== auth('admin')->user()->client_id) {
+            abort(403, 'You do not have permission to view this job.');
+        }
+    }
+
     $job->load(['category', 'subCategory', 'postedBy', 'applications.user', 'questions', 'documents', 'client']);
     return view('admin.jobs.show', compact('job'));
   }

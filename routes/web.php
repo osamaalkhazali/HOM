@@ -76,48 +76,58 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Jobs Management - accessible to all admin roles
         Route::get('/jobs', [AdminJobController::class, 'index'])->name('jobs.index');
         Route::get('/jobs/export/{format}', [AdminJobController::class, 'export'])->name('jobs.export');
-        Route::get('/jobs/create', [AdminJobController::class, 'create'])->name('jobs.create');
-        Route::post('/jobs', [AdminJobController::class, 'store'])->name('jobs.store');
         Route::get('/jobs/deleted', [AdminJobController::class, 'deleted'])->name('jobs.deleted');
-        Route::patch('/jobs/restore-all', [AdminJobController::class, 'restoreAll'])->name('jobs.restore-all');
-        Route::delete('/jobs/force-delete-all', [AdminJobController::class, 'forceDeleteAll'])->name('jobs.force-delete-all');
         Route::get('/jobs/{job}', [AdminJobController::class, 'show'])->name('jobs.show');
-        Route::get('/jobs/{job}/edit', [AdminJobController::class, 'edit'])->name('jobs.edit');
-        Route::patch('/jobs/{job}', [AdminJobController::class, 'update'])->name('jobs.update');
-        Route::patch('/jobs/{job}/toggle-status', [AdminJobController::class, 'toggleStatus'])->name('jobs.toggle-status');
-        Route::patch('/jobs/{job}/extend-deadline', [AdminJobController::class, 'extendDeadline'])->name('jobs.extend-deadline');
-        Route::delete('/jobs/{job}', [AdminJobController::class, 'destroy'])->name('jobs.destroy');
-        Route::patch('/jobs/{id}/restore', [AdminJobController::class, 'restore'])->name('jobs.restore');
-        Route::delete('/jobs/{id}/force-delete', [AdminJobController::class, 'forceDelete'])->name('jobs.force-delete');
+
+        // Job actions - Super Admin and Admin only
+        Route::middleware(['admin.role:super,admin'])->group(function () {
+            Route::get('/jobs/create', [AdminJobController::class, 'create'])->name('jobs.create');
+            Route::post('/jobs', [AdminJobController::class, 'store'])->name('jobs.store');
+            Route::patch('/jobs/restore-all', [AdminJobController::class, 'restoreAll'])->name('jobs.restore-all');
+            Route::delete('/jobs/force-delete-all', [AdminJobController::class, 'forceDeleteAll'])->name('jobs.force-delete-all');
+            Route::get('/jobs/{job}/edit', [AdminJobController::class, 'edit'])->name('jobs.edit');
+            Route::patch('/jobs/{job}', [AdminJobController::class, 'update'])->name('jobs.update');
+            Route::patch('/jobs/{job}/toggle-status', [AdminJobController::class, 'toggleStatus'])->name('jobs.toggle-status');
+            Route::patch('/jobs/{job}/extend-deadline', [AdminJobController::class, 'extendDeadline'])->name('jobs.extend-deadline');
+            Route::delete('/jobs/{job}', [AdminJobController::class, 'destroy'])->name('jobs.destroy');
+            Route::patch('/jobs/{id}/restore', [AdminJobController::class, 'restore'])->name('jobs.restore');
+            Route::delete('/jobs/{id}/force-delete', [AdminJobController::class, 'forceDelete'])->name('jobs.force-delete');
+        });
 
         // Applications Management - accessible to all admin roles
         Route::get('/applications', [ApplicationController::class, 'index'])->name('applications.index');
         Route::get('/applications/export/{format}', [ApplicationController::class, 'export'])->name('applications.export');
         Route::get('/applications/{application}', [ApplicationController::class, 'show'])->name('applications.show');
-        Route::get('/applications/{application}/edit', [ApplicationController::class, 'edit'])->name('applications.edit');
-        Route::put('/applications/{application}', [ApplicationController::class, 'update'])->name('applications.update');
-        Route::patch('/applications/{application}/status', [ApplicationController::class, 'updateStatus'])->name('applications.update-status');
-        Route::post('/applications/{application}/upload-documents', [ApplicationController::class, 'uploadRequestedDocuments'])->name('applications.upload-documents');
-        Route::delete('/applications/{application}', [ApplicationController::class, 'destroy'])->name('applications.destroy');
-        Route::patch('/applications/bulk-update-status', [ApplicationController::class, 'bulkUpdateStatus'])->name('applications.bulk-update-status');
-        Route::delete('/applications/bulk-delete', [ApplicationController::class, 'bulkDelete'])->name('applications.bulk-delete');
         Route::get('/applications/{application}/cv', [SecureDocumentController::class, 'downloadApplicationCv'])->name('applications.cv.download');
         Route::get('/applications/{application}/cv/view', [SecureDocumentController::class, 'viewApplicationCv'])->name('applications.cv.view');
         Route::get('/applications/{application}/documents/{document}/download', [SecureDocumentController::class, 'downloadApplicationDocument'])->name('applications.documents.download');
         Route::get('/applications/{application}/requested-documents/{documentRequest}/download', [SecureDocumentController::class, 'downloadRequestedDocument'])->name('applications.requested-documents.download');
         Route::get('/applications/requested-documents/{documentRequest}/view', [SecureDocumentController::class, 'viewRequestedDocument'])->name('applications.requested-documents.view');
 
+        // User show page - accessible to all admin roles (scoped by controller logic for Client HR)
+        Route::get('/users/{user}', [UserController::class, 'show'])->name('users.show');
+        Route::get('/users/{user}/cv', [SecureDocumentController::class, 'downloadUserCv'])->name('users.cv.download');
+        Route::get('/users/{user}/cv/view', [SecureDocumentController::class, 'viewUserCv'])->name('users.cv.view');
+
+        // Application actions - Super Admin and Admin only
+        Route::middleware(['admin.role:super,admin'])->group(function () {
+            Route::get('/applications/{application}/edit', [ApplicationController::class, 'edit'])->name('applications.edit');
+            Route::put('/applications/{application}', [ApplicationController::class, 'update'])->name('applications.update');
+            Route::patch('/applications/{application}/status', [ApplicationController::class, 'updateStatus'])->name('applications.update-status');
+            Route::post('/applications/{application}/upload-documents', [ApplicationController::class, 'uploadRequestedDocuments'])->name('applications.upload-documents');
+            Route::delete('/applications/{application}', [ApplicationController::class, 'destroy'])->name('applications.destroy');
+            Route::patch('/applications/bulk-update-status', [ApplicationController::class, 'bulkUpdateStatus'])->name('applications.bulk-update-status');
+            Route::delete('/applications/bulk-delete', [ApplicationController::class, 'bulkDelete'])->name('applications.bulk-delete');
+        });
+
         // Routes for Super Admin and Admin only
         Route::middleware(['admin.role:super,admin'])->group(function () {
-            // User management routes
+            // User management routes (except show which is accessible to Client HR)
             Route::get('/users', [UserController::class, 'index'])->name('users.index');
             Route::get('/users/export/{format}', [UserController::class, 'export'])->name('users.export');
             Route::get('/users/deleted', [UserController::class, 'deleted'])->name('users.deleted');
             Route::post('/users/{id}/restore', [UserController::class, 'restore'])->name('users.restore');
             Route::delete('/users/{id}/force-delete', [UserController::class, 'forceDelete'])->name('users.force-delete');
-            Route::get('/users/{user}', [UserController::class, 'show'])->name('users.show');
-            Route::get('/users/{user}/cv', [SecureDocumentController::class, 'downloadUserCv'])->name('users.cv.download');
-            Route::get('/users/{user}/cv/view', [SecureDocumentController::class, 'viewUserCv'])->name('users.cv.view');
             Route::patch('/users/{user}/toggle-status', [UserController::class, 'toggleStatus'])->name('users.toggle-status');
             Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
 

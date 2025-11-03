@@ -11,6 +11,7 @@
                 <p class="mt-1 text-sm text-gray-600">View complete job information and manage applications</p>
             </div>
             <div class="flex space-x-3">
+                @if(auth('admin')->user()->isSuperAdmin() || auth('admin')->user()->isAdmin())
                 <form method="POST" action="{{ route('admin.jobs.toggle-status', $job) }}" class="inline">
                     @csrf
                     @method('PATCH')
@@ -25,6 +26,7 @@
                     class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
                     <i class="fas fa-edit mr-2"></i>Edit Job
                 </a>
+                @endif
                 <a href="{{ route('admin.jobs.index') }}"
                     class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors">
                     <i class="fas fa-arrow-left mr-2"></i>Back to Jobs
@@ -375,6 +377,7 @@
                     </div>
                     <div class="p-6 space-y-3">
                         @php $jobExpired = $job->deadline->isPast(); @endphp
+                        @if(auth('admin')->user()->isSuperAdmin() || auth('admin')->user()->isAdmin())
                         <form method="POST" action="{{ route('admin.jobs.extend-deadline', $job) }}">
                             @csrf
                             @method('PATCH')
@@ -403,6 +406,7 @@
                                 {{ $job->is_active ? 'Deactivate Job' : 'Activate Job' }}
                             </button>
                         </form>
+                        @endif
 
                             <a href="{{ route('admin.applications.index', ['job_id' => $job->id]) }}"
                             class="w-full flex items-center justify-center px-4 py-2 border border-purple-300 rounded-md shadow-sm text-sm font-medium text-purple-700 bg-purple-50 hover:bg-purple-100 transition-colors">

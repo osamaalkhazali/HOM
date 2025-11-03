@@ -88,6 +88,7 @@
                 </div>
 
                 <!-- Quick Actions -->
+                @if(auth('admin')->user()->isSuperAdmin() || auth('admin')->user()->isAdmin())
                 <div class="px-6 py-4 border-t border-gray-200">
                     <div class="flex space-x-2">
                         <form method="POST" action="{{ route('admin.users.toggle-status', $user) }}" class="flex-1">
@@ -114,6 +115,7 @@
                         </button>
                     </form>
                 </div>
+                @endif
             </div>
         </div>
 
