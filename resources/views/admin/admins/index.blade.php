@@ -110,7 +110,7 @@
                     <div class="ml-4">
                         <p class="text-sm font-medium text-gray-600">Super Admins</p>
                         <p class="text-2xl font-semibold text-gray-900">
-                            {{ \App\Models\Admin::where('is_super', true)->count() }}</p>
+                            {{ \App\Models\Admin::where('role', 'super')->count() }}</p>
                     </div>
                 </div>
             </div>
@@ -171,8 +171,9 @@
                             <select id="role" name="role"
                                     class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                                 <option value="">All Roles</option>
-                                <option value="super_admin" {{ request('role') === 'super_admin' ? 'selected' : '' }}>Super Admin</option>
+                                <option value="super" {{ request('role') === 'super' ? 'selected' : '' }}>Super Admin</option>
                                 <option value="admin" {{ request('role') === 'admin' ? 'selected' : '' }}>Admin</option>
+                                <option value="client_hr" {{ request('role') === 'client_hr' ? 'selected' : '' }}>Client HR</option>
                             </select>
                         </div>
                     </div>
@@ -257,9 +258,11 @@
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <span
                                             class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                                        {{ $admin->role === 'super_admin' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800' }}">
-                                            @if ($admin->role === 'super_admin')
+                                        {{ $admin->role === 'super' ? 'bg-purple-100 text-purple-800' : ($admin->role === 'client_hr' ? 'bg-orange-100 text-orange-800' : 'bg-blue-100 text-blue-800') }}">
+                                            @if ($admin->role === 'super')
                                                 <i class="fas fa-crown mr-1"></i>Super Admin
+                                            @elseif ($admin->role === 'client_hr')
+                                                <i class="fas fa-building mr-1"></i>Client HR
                                             @else
                                                 <i class="fas fa-user-cog mr-1"></i>Admin
                                             @endif

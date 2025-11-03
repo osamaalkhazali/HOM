@@ -21,9 +21,21 @@ class AdminSeeder extends Seeder
                 'name' => 'HOM HR Department',
                 'email' => 'hr@hom-intl.com',
                 'password' => Hash::make('password'),
-                'is_super' => true,
+                'role' => 'super',
+                'client_id' => null,
                 'email_verified_at' => now(),
                 'last_login_at' => now()->subDays(1),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name' => 'Normal Admin',
+                'email' => 'admin@hom-intl.com',
+                'password' => Hash::make('password'),
+                'role' => 'admin',
+                'client_id' => null,
+                'email_verified_at' => now(),
+                'last_login_at' => now()->subDays(2),
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
@@ -36,7 +48,30 @@ class AdminSeeder extends Seeder
             );
         }
 
+        // Create client HR for Bromine Jo
+        $client = \App\Models\Client::where('slug', 'bromine-jo')->first();
+        if ($client) {
+            Admin::updateOrCreate(
+                ['email' => 'hr@bromineje.com'],
+                [
+                    'name' => 'Bromine Jo HR',
+                    'email' => 'hr@bromineje.com',
+                    'password' => Hash::make('password'),
+                    'role' => 'client_hr',
+                    'client_id' => $client->id,
+                    'email_verified_at' => now(),
+                    'last_login_at' => now()->subDays(3),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]
+            );
+        }
+
         $this->command->info('Created super admin: hr@hom-intl.com');
+        $this->command->info('Created normal admin: admin@hom-intl.com');
+        if ($client) {
+            $this->command->info('Created client HR: hr@bromineje.com (linked to Bromine Jo)');
+        }
         $this->command->info('Admin seeder completed successfully!');
         $this->command->info('All admins have password: "password"');
         $this->command->info('No emails were sent during seeding.');

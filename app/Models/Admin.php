@@ -11,17 +11,31 @@ class Admin extends Authenticatable
     use Notifiable, SoftDeletes;
 
     protected $table = 'admins';
-    protected $fillable = ['name', 'email', 'password', 'is_super', 'email_verified_at', 'last_login_at'];
+    protected $fillable = ['name', 'email', 'password', 'role', 'client_id', 'email_verified_at', 'last_login_at'];
     protected $hidden = ['password', 'remember_token'];
     protected $casts = [
         'email_verified_at' => 'datetime',
         'last_login_at' => 'datetime',
-        'is_super' => 'boolean',
     ];
+
+    public function client()
+    {
+        return $this->belongsTo(Client::class);
+    }
 
     public function isSuperAdmin()
     {
-        return $this->is_super === true;
+        return $this->role === 'super';
+    }
+
+    public function isAdmin()
+    {
+        return $this->role === 'admin';
+    }
+
+    public function isClientHr()
+    {
+        return $this->role === 'client_hr';
     }
 
     public function getStatusAttribute()
@@ -29,9 +43,14 @@ class Admin extends Authenticatable
         return $this->email_verified_at ? 'active' : 'inactive';
     }
 
-    public function getRoleAttribute()
+    public function getRoleNameAttribute()
     {
-        return $this->is_super ? 'super_admin' : 'admin';
+        return match($this->role) {
+            'super' => 'Super Admin',
+            'admin' => 'Admin',
+            'client_hr' => 'Client HR',
+            default => 'Unknown',
+        };
     }
 
     public function scopeActive($query)
@@ -46,7 +65,12 @@ class Admin extends Authenticatable
 
     public function scopeSuperAdmin($query)
     {
-        return $query->where('is_super', true);
+        return $query->where('role', 'super');
+    }
+
+    public function scopeClientHr($query)
+    {
+        return $query->where('role', 'client_hr');
     }
 
     /**
@@ -54,6 +78,6 @@ class Admin extends Authenticatable
      */
     public function wantsApplicationEmails(): bool
     {
-        return $this->is_super === true;
+        return $this->role === 'super';
     }
 }

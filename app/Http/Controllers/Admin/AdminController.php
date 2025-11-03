@@ -62,10 +62,12 @@ class AdminController extends Controller
     }
 
     if ($request->filled('role')) {
-      if ($request->get('role') === 'super_admin') {
-        $query->where('is_super', true);
+      if ($request->get('role') === 'super') {
+        $query->where('role', 'super');
       } elseif ($request->get('role') === 'admin') {
-        $query->where('is_super', false);
+        $query->where('role', 'admin');
+      } elseif ($request->get('role') === 'client_hr') {
+        $query->where('role', 'client_hr');
       }
     }
   }
@@ -142,7 +144,11 @@ class AdminController extends Controller
    */
   protected function mapAdminRow(Admin $admin): array
   {
-    $role = $admin->is_super ? 'Super Admin' : 'Admin';
+    $role = match($admin->role) {
+      'super' => 'Super Admin',
+      'client_hr' => 'Client HR',
+      default => 'Admin',
+    };
     $isActive = $admin->email_verified_at ? 'Yes' : 'No';
 
     $verifiedAt = $admin->email_verified_at instanceof Carbon
@@ -200,7 +206,8 @@ class AdminController extends Controller
       'name' => 'required|string|max:255',
       'email' => 'required|string|email|max:255|unique:admins',
       'password' => 'required|string|min:8|confirmed',
-      'role' => 'required|in:admin,super_admin',
+      'role' => 'required|in:admin,super,client_hr',
+      'client_id' => 'nullable|exists:clients,id',
       'status' => 'required|in:active,inactive',
     ]);
 
@@ -208,7 +215,8 @@ class AdminController extends Controller
       'name' => $request->name,
       'email' => $request->email,
       'password' => Hash::make($request->password),
-      'is_super' => $request->role === 'super_admin',
+      'role' => $request->role,
+      'client_id' => $request->client_id,
       'email_verified_at' => $request->status === 'active' ? now() : null,
     ]);
 
@@ -241,14 +249,16 @@ class AdminController extends Controller
       'name' => 'required|string|max:255',
       'email' => ['required', 'string', 'email', 'max:255', Rule::unique('admins')->ignore($admin->id)],
       'password' => 'nullable|string|min:8|confirmed',
-      'role' => 'required|in:admin,super_admin',
+      'role' => 'required|in:admin,super,client_hr',
+      'client_id' => 'nullable|exists:clients,id',
       'status' => 'required|in:active,inactive',
     ]);
 
     $updateData = [
       'name' => $request->name,
       'email' => $request->email,
-      'is_super' => $request->role === 'super_admin',
+      'role' => $request->role,
+      'client_id' => $request->client_id,
       'email_verified_at' => $request->status === 'active' ? now() : null,
     ];
 

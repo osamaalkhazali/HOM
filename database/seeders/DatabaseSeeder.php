@@ -15,10 +15,10 @@ class DatabaseSeeder extends Seeder
 
         // Run seeders in proper order to maintain foreign key relationships
         $this->call([
-            AdminSeeder::class,           // Independent - no dependencies
             CategorySeeder::class,        // Independent - no dependencies
             SubCategorySeeder::class,     // Depends on Category
-            ClientSeeder::class,          // Clients available before jobs
+            ClientSeeder::class,          // Clients available before admins
+            AdminSeeder::class,           // Depends on Client for client_hr role
             UserSeeder::class,           // Independent - no dependencies
             ProfileSeeder::class,        // Depends on User
             JobSeeder::class,            // Depends on SubCategory and User
