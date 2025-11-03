@@ -37,7 +37,7 @@ class SecondClientSeeder extends Seeder
         // 2. Create Client HR Account
         $clientHR = Admin::create([
             'name' => 'Sarah Johnson',
-            'email' => 'o.a.alkhazali@gmail.com',
+            'email' => 'hr@techvision.com',
             'password' => Hash::make('password'),
             'role' => 'client_hr',
             'client_id' => $client->id,
