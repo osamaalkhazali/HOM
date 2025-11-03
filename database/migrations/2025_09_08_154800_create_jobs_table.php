@@ -23,7 +23,7 @@ return new class extends Migration
             $table->foreignId('sub_category_id')->nullable()->constrained()->restrictOnDelete();
             $table->string('company', 160)->index();
             $table->string('company_ar', 160)->nullable();
-            $table->unsignedBigInteger('client_id');
+            $table->unsignedBigInteger('client_id')->nullable();
             $table->decimal('salary', 10, 2)->nullable();
             $table->string('location', 160)->index();
             $table->string('location_ar', 160)->nullable();
