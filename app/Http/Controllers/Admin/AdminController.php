@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Admin;
+use App\Models\Client;
+use App\Notifications\AdminAccountCreated;
 use App\Services\Admin\AdminExportService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -194,7 +196,8 @@ class AdminController extends Controller
    */
   public function create()
   {
-    return view('admin.admins.create');
+    $clients = Client::where('is_active', true)->orderBy('name')->get();
+    return view('admin.admins.create', compact('clients'));
   }
 
   /**
@@ -207,21 +210,50 @@ class AdminController extends Controller
       'email' => 'required|string|email|max:255|unique:admins',
       'password' => 'required|string|min:8|confirmed',
       'role' => 'required|in:admin,super,client_hr',
-      'client_id' => 'nullable|exists:clients,id',
+      'client_id' => 'required_if:role,client_hr|nullable|exists:clients,id',
       'status' => 'required|in:active,inactive',
+      'send_email' => 'boolean',
     ]);
 
-    Admin::create([
+    // Store the plain password before hashing (for email)
+    $plainPassword = $request->password;
+
+    $admin = Admin::create([
       'name' => $request->name,
       'email' => $request->email,
       'password' => Hash::make($request->password),
       'role' => $request->role,
-      'client_id' => $request->client_id,
+      'client_id' => $request->role === 'client_hr' ? $request->client_id : null,
       'email_verified_at' => $request->status === 'active' ? now() : null,
     ]);
 
+    // Send email notification with login credentials
+    if ($request->boolean('send_email', true)) {
+      try {
+        $admin->notify(new AdminAccountCreated($admin, $plainPassword));
+      } catch (\Exception $e) {
+        // Log error but don't stop the process
+        \Log::error('Failed to send admin account creation email', [
+          'admin_id' => $admin->id,
+          'email' => $admin->email,
+          'error' => $e->getMessage(),
+        ]);
+      }
+    }
+
+    $roleLabel = match($admin->role) {
+      'super' => 'Super Admin',
+      'client_hr' => 'Client HR',
+      default => 'Admin',
+    };
+
+    $message = "{$roleLabel} created successfully.";
+    if ($request->boolean('send_email', true)) {
+      $message .= ' Login credentials have been sent to their email.';
+    }
+
     return redirect()->route('admin.admins.index')
-      ->with('success', 'Admin created successfully.');
+      ->with('success', $message);
   }
 
   /**
@@ -237,7 +269,8 @@ class AdminController extends Controller
    */
   public function edit(Admin $admin)
   {
-    return view('admin.admins.edit', compact('admin'));
+    $clients = Client::where('is_active', true)->orderBy('name')->get();
+    return view('admin.admins.edit', compact('admin', 'clients'));
   }
 
   /**
@@ -250,7 +283,7 @@ class AdminController extends Controller
       'email' => ['required', 'string', 'email', 'max:255', Rule::unique('admins')->ignore($admin->id)],
       'password' => 'nullable|string|min:8|confirmed',
       'role' => 'required|in:admin,super,client_hr',
-      'client_id' => 'nullable|exists:clients,id',
+      'client_id' => 'required_if:role,client_hr|nullable|exists:clients,id',
       'status' => 'required|in:active,inactive',
     ]);
 
@@ -258,7 +291,7 @@ class AdminController extends Controller
       'name' => $request->name,
       'email' => $request->email,
       'role' => $request->role,
-      'client_id' => $request->client_id,
+      'client_id' => $request->role === 'client_hr' ? $request->client_id : null,
       'email_verified_at' => $request->status === 'active' ? now() : null,
     ];
 

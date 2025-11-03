@@ -73,15 +73,33 @@
                     <!-- Role -->
                     <div>
                         <label for="role" class="block text-sm font-medium text-gray-700 mb-1">Role</label>
-                        <select id="role" name="role" required
+                        <select id="role" name="role" required onchange="toggleClientField()"
                             class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 @error('role') border-red-500 @enderror">
                             <option value="">Select Role</option>
-                            <option value="admin" {{ old('role', $admin->role) === 'admin' ? 'selected' : '' }}>Admin
-                            </option>
-                            <option value="super_admin" {{ old('role', $admin->role) === 'super_admin' ? 'selected' : '' }}>
-                                Super Admin</option>
+                            <option value="admin" {{ old('role', $admin->role) === 'admin' ? 'selected' : '' }}>Admin</option>
+                            <option value="super" {{ old('role', $admin->role) === 'super' ? 'selected' : '' }}>Super Admin</option>
+                            <option value="client_hr" {{ old('role', $admin->role) === 'client_hr' ? 'selected' : '' }}>Client HR</option>
                         </select>
                         @error('role')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <!-- Client Selection (for Client HR only) -->
+                    <div id="client-field" style="display: {{ old('role', $admin->role) === 'client_hr' ? 'block' : 'none' }};">
+                        <label for="client_id" class="block text-sm font-medium text-gray-700 mb-1">
+                            Client <span class="text-red-500">*</span>
+                        </label>
+                        <select id="client_id" name="client_id"
+                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 @error('client_id') border-red-500 @enderror">
+                            <option value="">Select Client</option>
+                            @foreach($clients as $client)
+                                <option value="{{ $client->id }}" {{ old('client_id', $admin->client_id) == $client->id ? 'selected' : '' }}>
+                                    {{ $client->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('client_id')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
@@ -130,10 +148,9 @@
                         <div>
                             <h4 class="text-sm font-medium text-blue-800">Role Permissions</h4>
                             <div class="mt-2 text-sm text-blue-700 space-y-1">
-                                <p><strong>Admin:</strong> Can manage users, jobs, applications, categories, and profiles.
-                                </p>
-                                <p><strong>Super Admin:</strong> Has all admin permissions plus ability to manage other
-                                    administrators.</p>
+                                <p><strong>Admin:</strong> Can manage users, jobs, applications, categories, and profiles.</p>
+                                <p><strong>Super Admin:</strong> Has all admin permissions plus ability to manage other administrators.</p>
+                                <p><strong>Client HR:</strong> Can manage only their assigned client's jobs, applications, and employees.</p>
                             </div>
                         </div>
                     </div>
@@ -166,4 +183,30 @@
             </form>
         </div>
     </div>
+
+    <script>
+        function toggleClientField() {
+            const roleSelect = document.getElementById('role');
+            const clientField = document.getElementById('client-field');
+            const clientSelect = document.getElementById('client_id');
+
+            if (roleSelect.value === 'client_hr') {
+                clientField.style.display = 'block';
+                clientSelect.required = true;
+            } else {
+                clientField.style.display = 'none';
+                clientSelect.required = false;
+                if (!clientSelect.dataset.originalValue) {
+                    clientSelect.value = '';
+                }
+            }
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const clientSelect = document.getElementById('client_id');
+            clientSelect.dataset.originalValue = clientSelect.value;
+            toggleClientField();
+        });
+    </script>
 @endsection
