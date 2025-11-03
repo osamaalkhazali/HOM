@@ -72,12 +72,7 @@ class Client extends Model
       return null;
     }
 
-    $disk = Storage::disk('public');
-
-    if (method_exists($disk, 'url')) {
-      return $disk->url($this->logo_path);
-    }
-
-    return Storage::url($this->logo_path);
+    // Return route to serve the logo securely
+    return route('admin.clients.logo', $this);
   }
 }

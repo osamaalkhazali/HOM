@@ -498,53 +498,61 @@
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                    <div class="flex items-center justify-end space-x-2">
-                                        <!-- View Application -->
-                                        <a href="{{ route('admin.applications.show', $application) }}"
-                                           class="text-blue-600 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 p-2 rounded"
-                                           title="View Details">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
+                                    <div class="flex flex-col items-end gap-2">
+                                        <!-- Action Buttons Row -->
+                                        <div class="flex items-center justify-end space-x-2">
+                                            <!-- View Application -->
+                                            <a href="{{ route('admin.applications.show', $application) }}"
+                                               class="text-blue-600 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 p-2 rounded"
+                                               title="View Details">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+
+                                            @if(auth('admin')->user()->isSuperAdmin() || auth('admin')->user()->isAdmin())
+                                            <!-- Edit Application -->
+                                            <a href="{{ route('admin.applications.edit', $application) }}"
+                                               class="text-green-600 hover:text-green-900 bg-green-50 hover:bg-green-100 p-2 rounded"
+                                               title="Edit Application">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+
+                                            <!-- Delete Application -->
+                                            <form method="POST" action="{{ route('admin.applications.destroy', $application) }}" class="inline"
+                                                  data-confirm="Are you sure you want to delete this application?"
+                                                  data-confirm-variant="danger"
+                                                  data-confirm-confirm="Delete"
+                                                  data-confirm-cancel="Cancel">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit"
+                                                        class="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 p-2 rounded"
+                                                        title="Delete Application">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                            @endif
+                                        </div>
 
                                         @if(auth('admin')->user()->isSuperAdmin() || auth('admin')->user()->isAdmin())
-                                        <!-- Edit Application -->
-                                        <a href="{{ route('admin.applications.edit', $application) }}"
-                                           class="text-green-600 hover:text-green-900 bg-green-50 hover:bg-green-100 p-2 rounded"
-                                           title="Edit Application">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-
-                                        <!-- Quick Status Update -->
-                                        <form method="POST" action="{{ route('admin.applications.update-status', $application) }}" class="inline">
+                                        <!-- Quick Status Update Dropdown (below buttons) -->
+                                        <form method="POST" action="{{ route('admin.applications.update-status', $application) }}" class="w-full">
                                             @csrf
                                             @method('PATCH')
                                             <select name="status" onchange="this.form.submit()"
-                                                    class="text-xs border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500">
-                                                <option value="">Quick Update</option>
-                                                @foreach ($statusOptions as $statusOption)
+                                                    class="w-full text-xs border border-gray-300 rounded-md px-3 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-gray-400 transition-colors">
+                                                <option value="">Change Status...</option>
+                                                @php
+                                                    $manualStatuses = ['pending', 'under_reviewing', 'reviewed', 'shortlisted', 'rejected', 'hired'];
+                                                @endphp
+                                                @foreach ($manualStatuses as $statusOption)
                                                     @php
                                                         $labelEn = __('site.application_statuses.' . $statusOption, [], 'en');
                                                     @endphp
                                                     <option value="{{ $statusOption }}" {{ $application->status === $statusOption ? 'disabled' : '' }}>
-                                                        {{ $labelEn }}
+                                                        {{ $application->status === $statusOption ? '✓ ' : '' }}{{ $labelEn }}
                                                     </option>
                                                 @endforeach
                                             </select>
-                                        </form>
-
-                                        <!-- Delete Application -->
-                                        <form method="POST" action="{{ route('admin.applications.destroy', $application) }}" class="inline"
-                                              data-confirm="Are you sure you want to delete this application?"
-                                              data-confirm-variant="danger"
-                                              data-confirm-confirm="Delete"
-                                              data-confirm-cancel="Cancel">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit"
-                                                    class="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 p-2 rounded"
-                                                    title="Delete Application">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
                                         </form>
                                         @endif
                                     </div>

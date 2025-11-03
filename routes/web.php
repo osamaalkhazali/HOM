@@ -104,6 +104,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/applications/{application}/requested-documents/{documentRequest}/download', [SecureDocumentController::class, 'downloadRequestedDocument'])->name('applications.requested-documents.download');
         Route::get('/applications/requested-documents/{documentRequest}/view', [SecureDocumentController::class, 'viewRequestedDocument'])->name('applications.requested-documents.view');
 
+        // Client logo - accessible to all admin roles (for dashboard)
+        Route::get('/clients/{client}/logo', [ClientController::class, 'serveLogo'])->name('clients.logo');
+
         // User show page - accessible to all admin roles (scoped by controller logic for Client HR)
         Route::get('/users/{user}', [UserController::class, 'show'])->name('users.show');
         Route::get('/users/{user}/cv', [SecureDocumentController::class, 'downloadUserCv'])->name('users.cv.download');

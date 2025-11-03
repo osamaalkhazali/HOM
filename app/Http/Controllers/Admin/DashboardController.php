@@ -28,12 +28,20 @@ class DashboardController extends Controller
         $previousMonth = Carbon::now()->subMonth()->startOfMonth();
         $lastMonth = Carbon::now()->subMonth()->endOfMonth();
 
+        // Determine if filtering by client (for Client HR)
+        $clientId = $admin->isClientHr() ? $admin->client_id : null;
+
         // Get basic statistics
+        $jobsQuery = $clientId ? Job::where('client_id', $clientId) : Job::query();
+        $applicationsQuery = $clientId
+            ? Application::whereHas('job', fn($q) => $q->where('client_id', $clientId))
+            : Application::query();
+
         $stats = [
-            'total_jobs' => Job::count(),
-            'active_jobs' => Job::where('is_active', true)->count(),
-            'total_applications' => Application::count(),
-            'pending_applications' => Application::where('status', 'pending')->count(),
+            'total_jobs' => (clone $jobsQuery)->count(),
+            'active_jobs' => (clone $jobsQuery)->where('is_active', true)->count(),
+            'total_applications' => (clone $applicationsQuery)->count(),
+            'pending_applications' => (clone $applicationsQuery)->where('status', 'pending')->count(),
             'total_users' => User::count(),
             'users_with_profiles' => User::whereHas('profile')->count(),
             'total_categories' => Category::count(),
@@ -43,12 +51,12 @@ class DashboardController extends Controller
         // Get growth metrics (this month vs last month)
         $growth = [
             'jobs' => [
-                'current' => Job::where('created_at', '>=', $currentMonth)->count(),
-                'previous' => Job::whereBetween('created_at', [$previousMonth, $lastMonth])->count(),
+                'current' => (clone $jobsQuery)->where('created_at', '>=', $currentMonth)->count(),
+                'previous' => (clone $jobsQuery)->whereBetween('created_at', [$previousMonth, $lastMonth])->count(),
             ],
             'applications' => [
-                'current' => Application::where('created_at', '>=', $currentMonth)->count(),
-                'previous' => Application::whereBetween('created_at', [$previousMonth, $lastMonth])->count(),
+                'current' => (clone $applicationsQuery)->where('created_at', '>=', $currentMonth)->count(),
+                'previous' => (clone $applicationsQuery)->whereBetween('created_at', [$previousMonth, $lastMonth])->count(),
             ],
             'users' => [
                 'current' => User::where('created_at', '>=', $currentMonth)->count(),
@@ -68,9 +76,12 @@ class DashboardController extends Controller
         for ($i = 5; $i >= 0; $i--) {
             $monthStart = Carbon::now()->subMonths($i)->startOfMonth();
             $monthEnd = Carbon::now()->subMonths($i)->endOfMonth();
+            $query = $clientId
+                ? Job::where('client_id', $clientId)->whereBetween('created_at', [$monthStart, $monthEnd])
+                : Job::whereBetween('created_at', [$monthStart, $monthEnd]);
             $jobsChartData->push([
                 'month' => $monthStart->format('M'),
-                'count' => Job::whereBetween('created_at', [$monthStart, $monthEnd])->count()
+                'count' => $query->count()
             ]);
         }
 
@@ -86,7 +97,12 @@ class DashboardController extends Controller
         }
 
         // Get application status distribution
-        $applicationStatusData = Application::select('status', DB::raw('count(*) as count'))
+        $applicationStatusQuery = $clientId
+            ? Application::whereHas('job', fn($q) => $q->where('client_id', $clientId))
+            : Application::query();
+
+        $applicationStatusData = $applicationStatusQuery
+            ->select('status', DB::raw('count(*) as count'))
             ->groupBy('status')
             ->get()
             ->pluck('count', 'status')
@@ -101,16 +117,18 @@ class DashboardController extends Controller
         }
 
         // Get recent jobs
-        $recentJobs = Job::with(['subCategory.category'])
-            ->latest()
-            ->limit(5)
-            ->get();
+        $recentJobsQuery = Job::with(['subCategory.category']);
+        if ($clientId) {
+            $recentJobsQuery->where('client_id', $clientId);
+        }
+        $recentJobs = $recentJobsQuery->latest()->limit(5)->get();
 
         // Get recent applications
-        $recentApplications = Application::with(['user', 'job'])
-            ->latest()
-            ->limit(5)
-            ->get();
+        $recentApplicationsQuery = Application::with(['user', 'job']);
+        if ($clientId) {
+            $recentApplicationsQuery->whereHas('job', fn($q) => $q->where('client_id', $clientId));
+        }
+        $recentApplications = $recentApplicationsQuery->latest()->limit(5)->get();
 
         // Get top categories by job count
         $topCategories = Category::withCount(['subCategories as jobs_count' => function ($query) {
@@ -136,8 +154,12 @@ class DashboardController extends Controller
 
         // Additional insights
         $insights = [
-            'jobs_today' => Job::whereDate('created_at', Carbon::today())->count(),
-            'applications_today' => Application::whereDate('created_at', Carbon::today())->count(),
+            'jobs_today' => $clientId
+                ? Job::where('client_id', $clientId)->whereDate('created_at', Carbon::today())->count()
+                : Job::whereDate('created_at', Carbon::today())->count(),
+            'applications_today' => $clientId
+                ? Application::whereHas('job', fn($q) => $q->where('client_id', $clientId))->whereDate('created_at', Carbon::today())->count()
+                : Application::whereDate('created_at', Carbon::today())->count(),
             'users_today' => User::whereDate('created_at', Carbon::today())->count(),
             'avg_applications_per_job' => $stats['total_jobs'] > 0
                 ? round($stats['total_applications'] / $stats['total_jobs'], 1)
@@ -158,7 +180,8 @@ class DashboardController extends Controller
             'recentApplications',
             'topCategories',
             'recentUsers',
-            'insights'
+            'insights',
+            'clientId'
         ));
     }
 

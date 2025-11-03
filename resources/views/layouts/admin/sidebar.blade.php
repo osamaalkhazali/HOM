@@ -11,13 +11,17 @@
                     Dashboard
                 </a>
 
-                <!-- Jobs Management -->
+                <!-- Jobs -->
                 <div class="space-y-1">
                     <button onclick="toggleSubmenu('jobs')"
                         class="group flex items-center w-full px-2 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.jobs*') ? '' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
                         style="{{ request()->routeIs('admin.jobs*') ? 'background: rgba(13,110,253,0.06); color: var(--primary-color);' : '' }}">
                         <i class="fas fa-briefcase mr-3"></i>
-                        Jobs Management
+                        @if(auth('admin')->user()->isClientHr())
+                            Jobs
+                        @else
+                            Jobs Management
+                        @endif
                         <i class="fas fa-chevron-down ml-auto transform transition-transform" id="jobs-chevron"></i>
                     </button>
                     <div class="ml-6 space-y-1 hidden" id="jobs-submenu">
@@ -29,11 +33,13 @@
                                 {{ \App\Models\Job::count() }}
                             </span>
                         </a>
+                        @if(auth('admin')->user()->isSuperAdmin() || auth('admin')->user()->isAdmin())
                         <a href="{{ route('admin.jobs.create') }}"
                             class="group flex items-center px-2 py-2 text-sm rounded-md {{ request()->routeIs('admin.jobs.create') ? '' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
                             style="{{ request()->routeIs('admin.jobs.create') ? 'background: rgba(13,110,253,0.08); color: var(--primary-color);' : '' }}">
                             <i class="fas fa-plus mr-3"></i>Add New Job
                         </a>
+                        @endif
                         <a href="{{ route('admin.jobs.index', ['status' => 'active']) }}"
                             class="group flex items-center px-2 py-2 text-sm rounded-md {{ request()->get('status') === 'active' ? '' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
                             style="{{ request()->get('status') === 'active' ? 'background: rgba(13,110,253,0.06); color: var(--primary-color);' : '' }}">

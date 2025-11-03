@@ -186,7 +186,7 @@ class ClientController extends Controller
    */
   protected function storeLogo(UploadedFile $file): string
   {
-    return $file->store('clients/logos', 'public');
+    return $file->store('clients/logos', 'private');
   }
 
   /**
@@ -198,9 +198,21 @@ class ClientController extends Controller
       return;
     }
 
-    $disk = Storage::disk('public');
+    $disk = Storage::disk('private');
     if ($disk->exists($path)) {
       $disk->delete($path);
     }
+  }
+
+  /**
+   * Serve the client logo securely.
+   */
+  public function serveLogo(Client $client)
+  {
+    if (!$client->logo_path || !Storage::disk('private')->exists($client->logo_path)) {
+      abort(404);
+    }
+
+    return response()->file(Storage::disk('private')->path($client->logo_path));
   }
 }

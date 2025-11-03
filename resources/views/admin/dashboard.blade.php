@@ -1,16 +1,58 @@
 @extends('layouts.admin.app')
 
-@section('title', 'Admin Dashboard')
+@section('title', auth('admin')->user()->isClientHr() ? 'HR Dashboard' : 'Admin Dashboard')
 
 @section('content')
-    <!-- Header -->
+    <!-- Client Header for HR -->
+    @if(auth('admin')->user()->isClientHr() && auth('admin')->user()->client)
+        <div class="mb-8 bg-white rounded-xl shadow-lg p-8 border-t-4 border-blue-900" style="border-top-color: #18458f;">
+            <div class="flex items-center gap-6">
+                @if(auth('admin')->user()->client->logo_url)
+                    <img src="{{ auth('admin')->user()->client->logo_url }}"
+                         alt="{{ auth('admin')->user()->client->name }}"
+                         class="h-24 w-32 object-contain rounded-xl bg-gray-50 p-3 shadow-md">
+                @else
+                    <div class="h-24 w-32 bg-gray-50 rounded-xl flex items-center justify-center shadow-md">
+                        <i class="fas fa-building text-4xl" style="color: #18458f;"></i>
+                    </div>
+                @endif
+                <div class="flex-1">
+                    <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ auth('admin')->user()->client->name }}</h1>
+                    <div class="flex items-center gap-4 text-gray-600">
+                        <span class="flex items-center gap-2">
+                            <i class="fas fa-user-tie" style="color: #18458f;"></i>
+                            <span class="font-medium">{{ auth('admin')->user()->name }}</span>
+                        </span>
+                        <span class="text-gray-400">•</span>
+                        <span class="flex items-center gap-2">
+                            <i class="fas fa-tachometer-alt" style="color: #18458f;"></i>
+                            <span>HR Dashboard</span>
+                        </span>
+                        @if(auth('admin')->user()->client->website_url)
+                            <span class="text-gray-400">•</span>
+                            <a href="{{ auth('admin')->user()->client->website_url }}"
+                               target="_blank"
+                               class="flex items-center gap-2 hover:opacity-80 transition-colors"
+                               style="color: #18458f;">
+                                <i class="fas fa-external-link-alt"></i>
+                                <span>{{ parse_url(auth('admin')->user()->client->website_url, PHP_URL_HOST) }}</span>
+                            </a>
+                        @endif
+                    </div>
+                    <p class="text-gray-600 mt-3">Welcome back! Here's an overview of your company's recruitment activity.</p>
+                </div>
+            </div>
+        </div>
+    @endif    <!-- Header -->
+    @if(!auth('admin')->user()->isClientHr())
     <div class="mb-8">
         <h1 class="text-3xl font-bold text-gray-900">Dashboard Overview</h1>
         <p class="text-gray-600 mt-2">Welcome back! Here's what's happening with your job portal today.</p>
     </div>
+    @endif
 
     <!-- Stats Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-{{ auth('admin')->user()->isClientHr() ? '2' : '4' }} gap-6 mb-8">
         <!-- Total Jobs -->
         <div class="bg-white rounded-lg shadow p-6">
             <div class="flex items-center">
@@ -18,7 +60,13 @@
                     <i class="fas fa-briefcase text-xl"></i>
                 </div>
                 <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-600">Total Jobs</p>
+                    <p class="text-sm font-medium text-gray-600">
+                        @if(auth('admin')->user()->isClientHr())
+                            My Jobs
+                        @else
+                            Total Jobs
+                        @endif
+                    </p>
                     <p class="text-2xl font-semibold text-gray-900">{{ number_format($stats['total_jobs']) }}</p>
                     <p class="text-xs text-gray-500">{{ number_format($stats['active_jobs']) }} active</p>
                 </div>
@@ -42,7 +90,13 @@
                     <i class="fas fa-file-alt text-xl"></i>
                 </div>
                 <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-600">Applications</p>
+                    <p class="text-sm font-medium text-gray-600">
+                        @if(auth('admin')->user()->isClientHr())
+                            My Applications
+                        @else
+                            Applications
+                        @endif
+                    </p>
                     <p class="text-2xl font-semibold text-gray-900">{{ number_format($stats['total_applications']) }}</p>
                     <p class="text-xs text-gray-500">{{ number_format($stats['pending_applications']) }} pending</p>
                 </div>
@@ -59,6 +113,7 @@
             </div>
         </div>
 
+        @if(auth('admin')->user()->isSuperAdmin() || auth('admin')->user()->isAdmin())
         <!-- Total Users -->
         <div class="bg-white rounded-lg shadow p-6">
             <div class="flex items-center">
@@ -102,34 +157,47 @@
                 </span>
             </div>
         </div>
+        @endif
     </div>
 
     <!-- Today's Insights -->
     <div class="mb-8">
-        <div class="bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg shadow p-6 text-white">
+        <div class="rounded-lg shadow p-6 text-white" style="background-color: #18458f;">
             <h2 class="text-xl font-semibold mb-4">
                 <i class="fas fa-calendar-day mr-2"></i>Today's Activity
             </h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            @if(auth('admin')->user()->isClientHr())
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="text-center">
                     <div class="text-3xl font-bold">{{ $insights['jobs_today'] }}</div>
-                    <div class="text-blue-100">{{ Str::plural('Job', $insights['jobs_today']) }} Posted Today</div>
+                    <div class="opacity-90">{{ Str::plural('Job', $insights['jobs_today']) }} Posted Today</div>
                 </div>
                 <div class="text-center">
                     <div class="text-3xl font-bold">{{ $insights['applications_today'] }}</div>
-                    <div class="text-blue-100">{{ Str::plural('Application', $insights['applications_today']) }} Received
-                        Today</div>
+                    <div class="opacity-90">{{ Str::plural('Application', $insights['applications_today']) }} Received Today</div>
+                </div>
+            </div>
+            @else
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="text-center">
+                    <div class="text-3xl font-bold">{{ $insights['jobs_today'] }}</div>
+                    <div class="opacity-90">{{ Str::plural('Job', $insights['jobs_today']) }} Posted Today</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl font-bold">{{ $insights['applications_today'] }}</div>
+                    <div class="opacity-90">{{ Str::plural('Application', $insights['applications_today']) }} Received Today</div>
                 </div>
                 <div class="text-center">
                     <div class="text-3xl font-bold">{{ $insights['users_today'] }}</div>
-                    <div class="text-blue-100">New {{ Str::plural('User', $insights['users_today']) }} Today</div>
+                    <div class="opacity-90">New {{ Str::plural('User', $insights['users_today']) }} Today</div>
                 </div>
             </div>
+            @endif
         </div>
     </div>
 
     <!-- Charts Row -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+    <div class="grid grid-cols-1 lg:grid-cols-{{ auth('admin')->user()->isClientHr() ? '2' : '3' }} gap-6 mb-8">
         <!-- Jobs Posted Chart -->
         <div class="bg-white rounded-lg shadow p-6">
             <h3 class="text-lg font-semibold text-gray-900 mb-4">Jobs Posted (Last 6 Months)</h3>
@@ -146,6 +214,7 @@
             </div>
         </div>
 
+        @if(auth('admin')->user()->isSuperAdmin() || auth('admin')->user()->isAdmin())
         <!-- User Growth Chart -->
         <div class="bg-white rounded-lg shadow p-6">
             <h3 class="text-lg font-semibold text-gray-900 mb-4">User Registrations (Last 6 Months)</h3>
@@ -153,6 +222,7 @@
                 <canvas id="usersChart"></canvas>
             </div>
         </div>
+        @endif
     </div>
 
     <!-- Recent Activities and Quick Actions -->
@@ -258,6 +328,7 @@
     </div>
 
     <!-- Top Categories -->
+    @if(auth('admin')->user()->isSuperAdmin() || auth('admin')->user()->isAdmin())
     <div class="mt-8">
         <div class="bg-white rounded-lg shadow">
             <div class="p-6 border-b border-gray-200">
@@ -298,6 +369,7 @@
             </div>
         </div>
     </div>
+    @endif
 @endsection
 
 @push('scripts')
