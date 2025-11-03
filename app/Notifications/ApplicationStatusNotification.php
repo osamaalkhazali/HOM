@@ -24,6 +24,7 @@ class ApplicationStatusNotification extends Notification
     protected const ADMIN_MAIL_STATUSES = [
         'pending',
         'documents_submitted',
+        'hired', // Client HR should be notified when someone is hired
     ];
 
     public function __construct(

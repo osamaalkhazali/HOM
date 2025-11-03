@@ -117,6 +117,18 @@ return [
         'action' => 'Review documents',
         'support' => 'Visit the admin dashboard to continue the hiring workflow.',
       ],
+      'hired' => [
+        'subject' => 'New employee hired: :applicant for :job',
+        'preheader' => ':applicant has been hired for ":job" position.',
+        'intro' => 'Great news! :applicant has been successfully hired for the ":job" position.',
+        'lines' => [
+          'The candidate has been notified and an employee record has been automatically created.',
+          'You can now proceed with onboarding steps and prepare the necessary documentation.',
+          'Access the employee details from the admin dashboard to manage their information.',
+        ],
+        'action' => 'View employee details',
+        'support' => 'Visit the admin dashboard to continue with the onboarding process.',
+      ],
     ],
   ],
 ];
