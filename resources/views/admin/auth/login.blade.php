@@ -2,134 +2,137 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
     <title>Admin Login - {{ config('app.name', 'HOM') }}</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{{ asset('hom-favicon.png') }}">
+    <link rel="shortcut icon" type="image/png" href="{{ asset('hom-favicon.png') }}">
+
+    <!-- Bootstrap & Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Poppins font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- Site shared styles -->
+    @include('layouts.styles')
+
     <style>
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Poppins', sans-serif;
+            background: #f5f5f5;
+            background-image: url("https://www.transparenttextures.com/patterns/carbon-fibre.png");
         }
-        .login-card {
-            backdrop-filter: blur(10px);
-            background: rgba(255, 255, 255, 0.95);
+
+        .auth-logo {
+            height: 120px;
+            width: auto;
+        }
+
+        .auth-card {
+            border-radius: 10px;
+            border: 1px solid #e0e6ed;
+            background-color: #ffffff;
         }
     </style>
 </head>
 
-<body class="min-h-screen flex items-center justify-center p-4">
-    <div class="login-card p-8 md:p-10 rounded-2xl shadow-2xl w-full max-w-md">
-        <!-- Logo -->
-        <div class="text-center mb-8">
-            <div class="mb-4">
-                <img src="{{ asset('assets/images/HOM-logo.png') }}" alt="{{ config('app.name') }}" class="h-16 mx-auto">
-            </div>
-            <h1 class="text-3xl font-bold text-gray-900 mb-2">
-                Admin Portal
-            </h1>
-            <p class="text-gray-600">Sign in to manage your platform</p>
-        </div>
-
-        <!-- Session Status -->
-        @if (session('status'))
-            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg mb-4">
-                <p class="text-sm">{{ session('status') }}</p>
-            </div>
-        @endif
-
-        <!-- Validation Errors -->
-        @if ($errors->any())
-            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-4">
-                @foreach ($errors->all() as $error)
-                    <p class="text-sm">{{ $error }}</p>
-                @endforeach
-            </div>
-        @endif
-
-        <form method="POST" action="{{ route('admin.login') }}">
-            @csrf
-
-            <!-- Email -->
-            <div class="mb-6">
-                <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
-                    Email Address
-                </label>
-                <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <i class="fas fa-envelope text-gray-400"></i>
-                    </div>
-                    <input type="email" id="email" name="email" value="{{ old('email') }}"
-                        class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
-                        placeholder="admin@example.com" required autofocus>
+<body>
+    <div class="min-vh-100 d-flex flex-column align-items-center justify-content-center py-4">
+        <div class="auth-card panel shadow-soft w-100" style="max-width: 420px;">
+            <div class="panel-body p-4">
+                <div class="text-center mb-4">
+                    <a href="{{ url('/') }}" class="d-inline-flex align-items-center text-decoration-none">
+                        <img src="{{ asset('assets/images/HOM-logo.png') }}" alt="HOM" class="auth-logo">
+                    </a>
                 </div>
-            </div>
 
-            <!-- Password -->
-            <div class="mb-6">
-                <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
-                    Password
-                </label>
-                <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <i class="fas fa-lock text-gray-400"></i>
+                <div class="text-center mb-4">
+                    <h1 class="h3 mb-2 fw-bold" style="color: var(--primary-color);">Admin Portal</h1>
+                    <p class="text-muted mb-0">Sign in to manage your platform</p>
+                </div>
+
+                @if (session('status'))
+                    <div class="alert alert-success" role="alert">{{ session('status') }}</div>
+                @endif
+
+                @if ($errors->any())
+                    <div class="alert alert-danger" role="alert">
+                        @foreach ($errors->all() as $error)
+                            <div>{{ $error }}</div>
+                        @endforeach
                     </div>
-                    <input type="password" id="password" name="password"
-                        class="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
-                        placeholder="Enter your password" required>
-                    <button type="button" onclick="togglePassword()"
-                        class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition">
-                        <i class="fas fa-eye" id="toggleIcon"></i>
+                @endif
+
+                <form method="POST" action="{{ route('admin.login') }}">
+                    @csrf
+
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email Address</label>
+                        <input id="email" type="email" name="email" class="form-control"
+                            value="{{ old('email') }}" required autofocus autocomplete="username"
+                            placeholder="admin@example.com">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <div class="position-relative">
+                            <input id="password" type="password" name="password" class="form-control pe-5" required
+                                autocomplete="current-password" placeholder="Enter your password">
+                            <button type="button"
+                                class="btn btn-link position-absolute top-50 end-0 translate-middle-y text-muted"
+                                onclick="togglePasswordVisibility('password', this)" style="text-decoration: none;">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center justify-content-between mb-4">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="remember_me" name="remember">
+                            <label class="form-check-label text-muted" for="remember_me">Remember me</label>
+                        </div>
+                        <a class="text-decoration-none small" href="{{ route('admin.password.request') }}"
+                            style="color: var(--primary-color);">Forgot password?</a>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 mb-3 py-2"
+                        style="border-radius: 10px; background: var(--primary-color); border: none;">
+                        <i class="fas fa-sign-in-alt me-2"></i>Sign In
                     </button>
-                </div>
+
+                    <div class="text-center">
+                        <a class="text-decoration-none" href="{{ route('welcome') }}"
+                            style="color: var(--primary-color);">
+                            <i class="fas fa-arrow-left me-1"></i>Back to Website
+                        </a>
+                    </div>
+                </form>
             </div>
-
-            <!-- Remember Me & Forgot Password -->
-            <div class="flex items-center justify-between mb-6">
-                <div class="flex items-center">
-                    <input type="checkbox" id="remember" name="remember"
-                        class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded">
-                    <label for="remember" class="ml-2 block text-sm text-gray-700">
-                        Remember me
-                    </label>
-                </div>
-                <a href="{{ route('admin.password.request') }}" class="text-sm text-purple-600 hover:text-purple-800 font-medium">
-                    Forgot password?
-                </a>
-            </div>
-
-            <!-- Submit Button -->
-            <button type="submit"
-                class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-3 px-4 rounded-lg hover:from-purple-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition duration-200 font-semibold shadow-lg">
-                <i class="fas fa-sign-in-alt mr-2"></i>Sign In
-            </button>
-        </form>
-
-        <!-- Footer -->
-        <div class="mt-8 text-center">
-            <a href="{{ route('welcome') }}" class="text-sm text-gray-600 hover:text-gray-800 transition">
-                <i class="fas fa-arrow-left mr-1"></i>Back to Website
-            </a>
-        </div>
-
-        <div class="mt-4 text-center text-xs text-gray-500">
-            © {{ date('Y') }} {{ config('app.name') }}. All rights reserved.
         </div>
     </div>
 
-    <script>
-        function togglePassword() {
-            const passwordInput = document.getElementById('password');
-            const toggleIcon = document.getElementById('toggleIcon');
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                toggleIcon.classList.remove('fa-eye');
-                toggleIcon.classList.add('fa-eye-slash');
+    <script>
+        function togglePasswordVisibility(inputId, button) {
+            const input = document.getElementById(inputId);
+            const icon = button.querySelector('i');
+
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
             } else {
-                passwordInput.type = 'password';
-                toggleIcon.classList.remove('fa-eye-slash');
-                toggleIcon.classList.add('fa-eye');
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
             }
         }
     </script>
