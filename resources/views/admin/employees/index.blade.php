@@ -20,8 +20,8 @@
                         <i class="fas fa-users text-xl" style="color: #18458f;"></i>
                     </div>
                     <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-600">Total Employees</p>
-                        <p class="text-2xl font-semibold text-gray-900">{{ $employees->total() }}</p>
+                        <p class="text-sm font-medium text-gray-600">Total Users</p>
+                        <p class="text-2xl font-semibold text-gray-900">{{ $users->total() }}</p>
                     </div>
                 </div>
             </div>
@@ -192,118 +192,166 @@
                 <div class="flex justify-between items-center">
                     <h3 class="text-lg font-medium text-gray-900">Employees</h3>
                     <div class="text-sm text-gray-500">
-                        Showing {{ $employees->firstItem() ?? 0 }} to {{ $employees->lastItem() ?? 0 }} of
-                        {{ $employees->total() }} employees
+                        Showing {{ $users->firstItem() ?? 0 }} to {{ $users->lastItem() ?? 0 }} of
+                        {{ $users->total() }} users
                     </div>
                 </div>
             </div>
 
-            @if ($employees->count() > 0)
+            @if ($users->count() > 0)
                 <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
+                    <table class="min-w-full divide-y divide-gray-200" style="min-width: 1200px;">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Employee</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 250px;">
+                                    Name & Email</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 200px;">
                                     Position</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Client</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 140px;">
                                     Status</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 180px;">
+                                    Company/Client</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 180px;">
                                     Hire Date</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Documents</th>
-                                <th
-                                    class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 80px;">
+                                    Docs</th>
+                                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 140px;">
                                     Actions</th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
-                            @foreach ($employees as $employee)
-                                <tr class="hover:bg-gray-50">
-                                    <td class="px-6 py-4">
-                                        <div class="flex items-center">
-                                            <div class="flex-shrink-0 h-10 w-10">
-                                                <div class="h-10 w-10 rounded-full flex items-center justify-center text-white font-medium"
-                                                    style="background-color: #18458f;">
-                                                    {{ substr($employee->user->name, 0, 2) }}
+                            @foreach ($users as $userData)
+                                @php
+                                    $user = $userData['user'];
+                                    $userEmployees = $userData['employees'];
+                                    $totalDocs = $userData['total_documents'];
+                                    $employeeCount = $userEmployees->count();
+                                @endphp
+                                @foreach ($userEmployees as $index => $employee)
+                                    <tr class="hover:bg-gray-50 {{ $index > 0 ? 'border-t-0' : '' }}"
+                                        style="border-left: 4px solid {{ match($employee->status) {
+                                            'active' => '#10b981',
+                                            'resigned' => '#f97316',
+                                            'terminated' => '#ef4444',
+                                            'transferred' => '#3b82f6',
+                                            default => '#6b7280'
+                                        } }};">
+                                        <!-- Name & Email (rowspan for first row only) -->
+                                        @if ($index === 0)
+                                            <td class="px-4 py-3 align-top" rowspan="{{ $employeeCount }}">
+                                                <div class="flex items-start gap-3">
+                                                    <div class="flex-shrink-0 h-10 w-10">
+                                                        <div class="h-10 w-10 rounded-full flex items-center justify-center text-white font-semibold"
+                                                            style="background-color: #18458f;">
+                                                            {{ strtoupper(substr($user->name, 0, 2)) }}
+                                                        </div>
+                                                    </div>
+                                                    <div class="flex-1 min-w-0">
+                                                        <a href="{{ route('admin.users.show', $user) }}"
+                                                           class="text-sm font-semibold text-gray-900 hover:text-blue-600 hover:underline block">
+                                                            {{ $user->name }}
+                                                        </a>
+                                                        <div class="text-xs text-gray-500 mt-0.5">{{ $user->email }}</div>
+                                                        @if($user->profile && $user->profile->phone)
+                                                            <div class="text-xs text-gray-500 mt-0.5">
+                                                                <i class="fas fa-phone text-gray-400 text-[10px] mr-1"></i>{{ $user->profile->phone }}
+                                                            </div>
+                                                        @endif
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div class="ml-4">
-                                                <div class="text-sm font-medium text-gray-900">{{ $employee->user->name }}
-                                                </div>
-                                                <div class="text-sm text-gray-500">{{ $employee->user->email }}</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <div class="text-sm text-gray-900">{{ $employee->position_title }}</div>
-                                        @if ($employee->job)
-                                            <div class="text-xs text-gray-500">{{ $employee->job->title }}</div>
+                                            </td>
                                         @endif
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        @if ($employee->client)
-                                            <div class="text-sm text-gray-900">{{ $employee->client->name }}</div>
-                                        @else
-                                            <span class="text-sm text-gray-400">N/A</span>
-                                        @endif
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <span
-                                            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-{{ $employee->status_color }}-100 text-{{ $employee->status_color }}-800">
-                                            {{ $employee->status_label }}
-                                        </span>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm text-gray-900">
-                                            {{ $employee->hire_date ? $employee->hire_date->format('M d, Y') : 'N/A' }}
-                                        </div>
-                                        @if ($employee->end_date)
-                                            <div class="text-xs text-gray-500">Ended:
-                                                {{ $employee->end_date->format('M d, Y') }}</div>
-                                        @endif
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="flex items-center gap-1">
-                                            <i class="fas fa-file text-gray-400"></i>
-                                            <span class="text-sm text-gray-900">{{ $employee->documents->count() }}</span>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <div class="flex items-center justify-end gap-2">
-                                            <a href="{{ route('admin.employees.show', $employee) }}"
-                                                class="text-blue-600 hover:text-blue-900 p-2 rounded bg-blue-50 hover:bg-blue-100"
-                                                title="View Details">
-                                                <i class="fas fa-eye"></i>
-                                            </a>
 
-                                            @if (auth('admin')->user()->isClientHr())
-                                                <a href="{{ route('admin.employees.edit', $employee) }}"
-                                                    class="text-green-600 hover:text-green-900 p-2 rounded bg-green-50 hover:bg-green-100"
-                                                    title="Edit">
-                                                    <i class="fas fa-edit"></i>
+                                        <!-- Position -->
+                                        <td class="px-4 py-3">
+                                            <a href="{{ route('admin.employees.show', $employee) }}"
+                                               class="text-sm font-medium text-gray-900 hover:text-blue-600 hover:underline">
+                                                {{ $employee->position_title }}
+                                            </a>
+                                        </td>
+
+                                        <!-- Status -->
+                                        <td class="px-4 py-3">
+                                            @php
+                                                $statusConfig = match($employee->status) {
+                                                    'active' => ['bg' => 'bg-green-100', 'text' => 'text-green-700', 'icon' => 'fa-check-circle', 'label' => 'Active'],
+                                                    'resigned' => ['bg' => 'bg-orange-100', 'text' => 'text-orange-700', 'icon' => 'fa-sign-out-alt', 'label' => 'Resigned'],
+                                                    'terminated' => ['bg' => 'bg-red-100', 'text' => 'text-red-700', 'icon' => 'fa-times-circle', 'label' => 'Terminated'],
+                                                    'transferred' => ['bg' => 'bg-blue-100', 'text' => 'text-blue-700', 'icon' => 'fa-exchange-alt', 'label' => 'Transferred'],
+                                                    default => ['bg' => 'bg-gray-100', 'text' => 'text-gray-700', 'icon' => 'fa-circle', 'label' => ucfirst($employee->status)]
+                                                };
+                                            @endphp
+                                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium {{ $statusConfig['bg'] }} {{ $statusConfig['text'] }}">
+                                                <i class="fas {{ $statusConfig['icon'] }} mr-1.5"></i>{{ $statusConfig['label'] }}
+                                            </span>
+                                        </td>
+
+                                        <!-- Company/Client -->
+                                        <td class="px-4 py-3">
+                                            @if ($employee->client)
+                                                <div class="text-sm text-gray-900">
+                                                    <i class="fas fa-building text-gray-400 mr-1.5"></i>{{ $employee->client->name }}
+                                                </div>
+                                            @else
+                                                <span class="text-sm text-gray-400">N/A</span>
+                                            @endif
+                                        </td>
+
+                                        <!-- Hire Date -->
+                                        <td class="px-4 py-3">
+                                            <div class="text-sm text-gray-900">
+                                                <i class="fas fa-calendar text-gray-400 mr-1.5"></i>{{ $employee->hire_date ? $employee->hire_date->format('M d, Y') : 'N/A' }}
+                                            </div>
+                                            @if ($employee->end_date)
+                                                <div class="text-xs text-red-600 mt-1">
+                                                    <i class="fas fa-calendar-times text-red-400 mr-1"></i>Ended: {{ $employee->end_date->format('M d, Y') }}
+                                                </div>
+                                            @endif
+                                        </td>
+
+                                        <!-- Documents (per position) -->
+                                        <td class="px-4 py-3 text-center">
+                                            <div class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-gray-100">
+                                                <div class="text-center">
+                                                    <div class="text-lg font-bold text-gray-900">{{ $employee->documents->count() }}</div>
+                                                </div>
+                                            </div>
+                                        </td>
+
+                                        <!-- Actions -->
+                                        <td class="px-4 py-3">
+                                            <div class="flex items-center justify-end gap-1.5">
+                                                <a href="{{ route('admin.employees.show', $employee) }}"
+                                                    class="text-blue-600 hover:text-blue-900 p-1.5 rounded bg-blue-50 hover:bg-blue-100"
+                                                    title="View Details">
+                                                    <i class="fas fa-eye text-xs"></i>
                                                 </a>
 
-                                                <button type="button"
-                                                    onclick="confirmDeleteEmployee({{ $employee->id }}, '{{ $employee->user->name }}')"
-                                                    class="text-red-600 hover:text-red-900 p-2 rounded bg-red-50 hover:bg-red-100"
-                                                    title="Delete">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
+                                                @if (auth('admin')->user()->isClientHr())
+                                                    <a href="{{ route('admin.employees.edit', $employee) }}"
+                                                        class="text-green-600 hover:text-green-900 p-1.5 rounded bg-green-50 hover:bg-green-100"
+                                                        title="Edit">
+                                                        <i class="fas fa-edit text-xs"></i>
+                                                    </a>
 
-                                                <form id="delete-employee-form-{{ $employee->id }}" method="POST"
-                                                    action="{{ route('admin.employees.destroy', $employee) }}"
-                                                    class="hidden">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                </form>
-                                            @endif
-                                        </div>
-                                    </td>
-                                </tr>
+                                                    <button type="button"
+                                                        onclick="confirmDeleteEmployee({{ $employee->id }}, '{{ $user->name }}', '{{ $employee->position_title }}')"
+                                                        class="text-red-600 hover:text-red-900 p-1.5 rounded bg-red-50 hover:bg-red-100"
+                                                        title="Delete">
+                                                        <i class="fas fa-trash text-xs"></i>
+                                                    </button>
+
+                                                    <form id="delete-employee-form-{{ $employee->id }}" method="POST"
+                                                        action="{{ route('admin.employees.destroy', $employee) }}"
+                                                        class="hidden">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                    </form>
+                                                @endif
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endforeach
                             @endforeach
                         </tbody>
                     </table>
@@ -311,15 +359,15 @@
 
                 <!-- Pagination -->
                 <div class="px-6 py-4 border-t border-gray-200">
-                    {{ $employees->links('admin.partials.pagination') }}
+                    {{ $users->links('admin.partials.pagination') }}
                 </div>
             @else
                 <div class="px-6 py-12 text-center">
                     <i class="fas fa-users text-gray-400 text-4xl mb-4"></i>
-                    <h3 class="text-lg font-medium text-gray-900 mb-2">No employees found</h3>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">No users found</h3>
                     <p class="text-gray-500 mb-4">
                         @if (request()->hasAny(['search', 'status', 'document_type', 'client_id', 'job_id', 'date_from', 'date_to']))
-                            No employees match your current filters.
+                            No users match your current filters.
                         @else
                             No employee records have been created yet.
                         @endif
@@ -367,9 +415,9 @@
     <script>
         let deleteFormId = null;
 
-        function confirmDeleteEmployee(employeeId, employeeName) {
+        function confirmDeleteEmployee(employeeId, userName, positionTitle) {
             deleteFormId = 'delete-employee-form-' + employeeId;
-            document.getElementById('deleteEmployeeName').textContent = employeeName;
+            document.getElementById('deleteEmployeeName').textContent = userName + ' - ' + positionTitle;
             document.getElementById('deleteEmployeeModal').classList.remove('hidden');
         }
 

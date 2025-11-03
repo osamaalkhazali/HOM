@@ -20,7 +20,7 @@ class EmployeeController extends Controller
         $admin = Auth::guard('admin')->user();
 
         // Base query with relationships
-        $query = Employee::with(['user.profile', 'job.client'])
+        $query = Employee::with(['user.profile', 'job.client', 'documents'])
             ->latest('hire_date');
 
         // Filter by client for Client HR
@@ -77,7 +77,33 @@ class EmployeeController extends Controller
             });
         }
 
-        $employees = $query->paginate(15)->withQueryString();
+        // Get all matching employees
+        $allEmployees = $query->get();
+
+        // Group by user_id and get unique users
+        $groupedEmployees = $allEmployees->groupBy('user_id')->map(function ($userEmployees) {
+            return [
+                'user' => $userEmployees->first()->user,
+                'employees' => $userEmployees->sortByDesc('hire_date'),
+                'total_documents' => $userEmployees->sum(function($emp) {
+                    return $emp->documents->count();
+                })
+            ];
+        });
+
+        // Convert to collection for pagination
+        $page = $request->get('page', 1);
+        $perPage = 15;
+        $total = $groupedEmployees->count();
+        $items = $groupedEmployees->slice(($page - 1) * $perPage, $perPage)->values();
+
+        $users = new \Illuminate\Pagination\LengthAwarePaginator(
+            $items,
+            $total,
+            $perPage,
+            $page,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
 
         // Get filter options
         $jobs = Job::orderBy('title')->get();
@@ -88,7 +114,7 @@ class EmployeeController extends Controller
         // Get document types from EmployeeDocument model
         $documentTypes = \App\Models\EmployeeDocument::getDocumentTypes();
 
-        return view('admin.employees.index', compact('employees', 'jobs', 'clients', 'documentTypes'));
+        return view('admin.employees.index', compact('users', 'jobs', 'clients', 'documentTypes'));
     }
 
     /**
