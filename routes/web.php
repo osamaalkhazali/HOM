@@ -68,23 +68,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     // Protected admin routes
     Route::middleware(['admin'])->group(function () {
+        // Dashboard - accessible to all admin roles
         Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard.index');
         Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-        // User management routes
-        Route::get('/users', [UserController::class, 'index'])->name('users.index');
-        Route::get('/users/export/{format}', [UserController::class, 'export'])->name('users.export');
-        Route::get('/users/deleted', [UserController::class, 'deleted'])->name('users.deleted');
-        Route::post('/users/{id}/restore', [UserController::class, 'restore'])->name('users.restore');
-        Route::delete('/users/{id}/force-delete', [UserController::class, 'forceDelete'])->name('users.force-delete');
-        Route::get('/users/{user}', [UserController::class, 'show'])->name('users.show');
-        Route::get('/users/{user}/cv', [SecureDocumentController::class, 'downloadUserCv'])->name('users.cv.download');
-        Route::get('/users/{user}/cv/view', [SecureDocumentController::class, 'viewUserCv'])->name('users.cv.view');
-        Route::patch('/users/{user}/toggle-status', [UserController::class, 'toggleStatus'])->name('users.toggle-status');
-        Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
-
-        // Job management routes
+        // Jobs Management - accessible to all admin roles
         Route::get('/jobs', [AdminJobController::class, 'index'])->name('jobs.index');
         Route::get('/jobs/export/{format}', [AdminJobController::class, 'export'])->name('jobs.export');
         Route::get('/jobs/create', [AdminJobController::class, 'create'])->name('jobs.create');
@@ -101,7 +90,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::patch('/jobs/{id}/restore', [AdminJobController::class, 'restore'])->name('jobs.restore');
         Route::delete('/jobs/{id}/force-delete', [AdminJobController::class, 'forceDelete'])->name('jobs.force-delete');
 
-        // Application management routes
+        // Applications Management - accessible to all admin roles
         Route::get('/applications', [ApplicationController::class, 'index'])->name('applications.index');
         Route::get('/applications/export/{format}', [ApplicationController::class, 'export'])->name('applications.export');
         Route::get('/applications/{application}', [ApplicationController::class, 'show'])->name('applications.show');
@@ -116,47 +105,61 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/applications/{application}/cv/view', [SecureDocumentController::class, 'viewApplicationCv'])->name('applications.cv.view');
         Route::get('/applications/{application}/documents/{document}/download', [SecureDocumentController::class, 'downloadApplicationDocument'])->name('applications.documents.download');
         Route::get('/applications/{application}/requested-documents/{documentRequest}/download', [SecureDocumentController::class, 'downloadRequestedDocument'])->name('applications.requested-documents.download');
+        Route::get('/applications/requested-documents/{documentRequest}/view', [SecureDocumentController::class, 'viewRequestedDocument'])->name('applications.requested-documents.view');
 
-        // Category management routes
-        Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
-        Route::get('/categories/create', [CategoryController::class, 'create'])->name('categories.create');
-        Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
-        Route::post('/categories/add-subcategories', [CategoryController::class, 'addSubcategories'])->name('categories.add-subcategories');
-        Route::get('/categories/{category}/subcategories', [CategoryController::class, 'getSubcategories'])->name('categories.subcategories');
-        Route::get('/categories/{category}/edit', [CategoryController::class, 'edit'])->name('categories.edit');
-        Route::patch('/categories/{category}', [CategoryController::class, 'update'])->name('categories.update');
-        Route::delete('/categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
+        // Routes for Super Admin and Admin only
+        Route::middleware(['admin.role:super,admin'])->group(function () {
+            // User management routes
+            Route::get('/users', [UserController::class, 'index'])->name('users.index');
+            Route::get('/users/export/{format}', [UserController::class, 'export'])->name('users.export');
+            Route::get('/users/deleted', [UserController::class, 'deleted'])->name('users.deleted');
+            Route::post('/users/{id}/restore', [UserController::class, 'restore'])->name('users.restore');
+            Route::delete('/users/{id}/force-delete', [UserController::class, 'forceDelete'])->name('users.force-delete');
+            Route::get('/users/{user}', [UserController::class, 'show'])->name('users.show');
+            Route::get('/users/{user}/cv', [SecureDocumentController::class, 'downloadUserCv'])->name('users.cv.download');
+            Route::get('/users/{user}/cv/view', [SecureDocumentController::class, 'viewUserCv'])->name('users.cv.view');
+            Route::patch('/users/{user}/toggle-status', [UserController::class, 'toggleStatus'])->name('users.toggle-status');
+            Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
 
-        // Deleted categories routes
-        Route::get('/categories/deleted', [CategoryController::class, 'deleted'])->name('categories.deleted');
-        Route::post('/categories/{id}/restore', [CategoryController::class, 'restore'])->name('categories.restore');
-        Route::delete('/categories/{id}/force-delete', [CategoryController::class, 'forceDelete'])->name('categories.force-delete');
+            // Category management routes
+            Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
+            Route::get('/categories/create', [CategoryController::class, 'create'])->name('categories.create');
+            Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
+            Route::post('/categories/add-subcategories', [CategoryController::class, 'addSubcategories'])->name('categories.add-subcategories');
+            Route::get('/categories/{category}/subcategories', [CategoryController::class, 'getSubcategories'])->name('categories.subcategories');
+            Route::get('/categories/{category}/edit', [CategoryController::class, 'edit'])->name('categories.edit');
+            Route::patch('/categories/{category}', [CategoryController::class, 'update'])->name('categories.update');
+            Route::delete('/categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
+            Route::get('/categories/deleted', [CategoryController::class, 'deleted'])->name('categories.deleted');
+            Route::post('/categories/{id}/restore', [CategoryController::class, 'restore'])->name('categories.restore');
+            Route::delete('/categories/{id}/force-delete', [CategoryController::class, 'forceDelete'])->name('categories.force-delete');
 
-        // Client management routes
-        Route::resource('clients', ClientController::class);
+            // Client management routes
+            Route::resource('clients', ClientController::class);
 
+            // Settings
+            Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
+            Route::post('/settings', [SettingController::class, 'update'])->name('settings.update');
+        });
 
+        // Routes for Super Admin only
+        Route::middleware(['admin.role:super'])->group(function () {
+            // Admin management routes
+            Route::get('/admins', [AdminController::class, 'index'])->name('admins.index');
+            Route::get('/admins/export/{format}', [AdminController::class, 'export'])->name('admins.export');
+            Route::get('/admins/create', [AdminController::class, 'create'])->name('admins.create');
+            Route::post('/admins', [AdminController::class, 'store'])->name('admins.store');
+            Route::get('/admins/{admin}', [AdminController::class, 'show'])->name('admins.show');
+            Route::get('/admins/{admin}/edit', [AdminController::class, 'edit'])->name('admins.edit');
+            Route::patch('/admins/{admin}', [AdminController::class, 'update'])->name('admins.update');
+            Route::patch('/admins/{admin}/toggle-status', [AdminController::class, 'toggleStatus'])->name('admins.toggle-status');
+            Route::delete('/admins/{admin}', [AdminController::class, 'destroy'])->name('admins.destroy');
+        });
 
-        // Admin management routes (Super Admin only)
-        Route::get('/admins', [AdminController::class, 'index'])->name('admins.index');
-        Route::get('/admins/export/{format}', [AdminController::class, 'export'])->name('admins.export');
-        Route::get('/admins/create', [AdminController::class, 'create'])->name('admins.create');
-        Route::post('/admins', [AdminController::class, 'store'])->name('admins.store');
-        Route::get('/admins/{admin}', [AdminController::class, 'show'])->name('admins.show');
-        Route::get('/admins/{admin}/edit', [AdminController::class, 'edit'])->name('admins.edit');
-        Route::patch('/admins/{admin}', [AdminController::class, 'update'])->name('admins.update');
-        Route::patch('/admins/{admin}/toggle-status', [AdminController::class, 'toggleStatus'])->name('admins.toggle-status');
-        Route::delete('/admins/{admin}', [AdminController::class, 'destroy'])->name('admins.destroy');
-
-        // Settings
-        Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
-        Route::post('/settings', [SettingController::class, 'update'])->name('settings.update');
-
-        // Admin notifications
+        // Admin notifications - accessible to all admin roles
         Route::get('/notifications', [AdminNotificationController::class, 'index'])->name('notifications.index');
         Route::post('/notifications/read-all', [AdminNotificationController::class, 'readAll'])->name('notifications.readAll');
         Route::get('/notifications/open/{id}', [AdminNotificationController::class, 'open'])->name('notifications.open');
-        Route::get('/applications/requested-documents/{documentRequest}/view', [SecureDocumentController::class, 'viewRequestedDocument'])->name('applications.requested-documents.view');
     });
 });
 
