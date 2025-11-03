@@ -4,13 +4,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Login - {{ config('app.name', 'HOM') }}</title>
+    <title>Reset Password - {{ config('app.name', 'HOM') }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         body {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
+
         .login-card {
             backdrop-filter: blur(10px);
             background: rgba(255, 255, 255, 0.95);
@@ -23,20 +24,14 @@
         <!-- Logo -->
         <div class="text-center mb-8">
             <div class="mb-4">
-                <img src="{{ asset('assets/images/HOM-logo.png') }}" alt="{{ config('app.name') }}" class="h-16 mx-auto">
+                <img src="{{ asset('assets/images/HOM-logo.png') }}" alt="{{ config('app.name') }}"
+                    class="h-16 mx-auto">
             </div>
             <h1 class="text-3xl font-bold text-gray-900 mb-2">
-                Admin Portal
+                Reset Password
             </h1>
-            <p class="text-gray-600">Sign in to manage your platform</p>
+            <p class="text-gray-600">Enter your new password below</p>
         </div>
-
-        <!-- Session Status -->
-        @if (session('status'))
-            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg mb-4">
-                <p class="text-sm">{{ session('status') }}</p>
-            </div>
-        @endif
 
         <!-- Validation Errors -->
         @if ($errors->any())
@@ -47,8 +42,11 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('admin.login') }}">
+        <form method="POST" action="{{ route('admin.password.update') }}">
             @csrf
+
+            <!-- Password Reset Token -->
+            <input type="hidden" name="token" value="{{ $token }}">
 
             <!-- Email -->
             <div class="mb-6">
@@ -59,16 +57,19 @@
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <i class="fas fa-envelope text-gray-400"></i>
                     </div>
-                    <input type="email" id="email" name="email" value="{{ old('email') }}"
-                        class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
-                        placeholder="admin@example.com" required autofocus>
+                    <input type="email" id="email" name="email" value="{{ old('email', $email) }}" readonly
+                        class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed focus:outline-none transition"
+                        placeholder="admin@example.com" required>
+                    <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                        <i class="fas fa-lock text-gray-400"></i>
+                    </div>
                 </div>
             </div>
 
             <!-- Password -->
             <div class="mb-6">
                 <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
-                    Password
+                    New Password
                 </label>
                 <div class="relative">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -76,39 +77,44 @@
                     </div>
                     <input type="password" id="password" name="password"
                         class="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
-                        placeholder="Enter your password" required>
-                    <button type="button" onclick="togglePassword()"
+                        placeholder="Enter new password" required>
+                    <button type="button" onclick="togglePassword('password', 'toggleIcon1')"
                         class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition">
-                        <i class="fas fa-eye" id="toggleIcon"></i>
+                        <i class="fas fa-eye" id="toggleIcon1"></i>
                     </button>
                 </div>
             </div>
 
-            <!-- Remember Me & Forgot Password -->
-            <div class="flex items-center justify-between mb-6">
-                <div class="flex items-center">
-                    <input type="checkbox" id="remember" name="remember"
-                        class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded">
-                    <label for="remember" class="ml-2 block text-sm text-gray-700">
-                        Remember me
-                    </label>
+            <!-- Confirm Password -->
+            <div class="mb-6">
+                <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-2">
+                    Confirm Password
+                </label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fas fa-lock text-gray-400"></i>
+                    </div>
+                    <input type="password" id="password_confirmation" name="password_confirmation"
+                        class="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
+                        placeholder="Confirm new password" required>
+                    <button type="button" onclick="togglePassword('password_confirmation', 'toggleIcon2')"
+                        class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition">
+                        <i class="fas fa-eye" id="toggleIcon2"></i>
+                    </button>
                 </div>
-                <a href="{{ route('admin.password.request') }}" class="text-sm text-purple-600 hover:text-purple-800 font-medium">
-                    Forgot password?
-                </a>
             </div>
 
             <!-- Submit Button -->
             <button type="submit"
                 class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-3 px-4 rounded-lg hover:from-purple-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition duration-200 font-semibold shadow-lg">
-                <i class="fas fa-sign-in-alt mr-2"></i>Sign In
+                <i class="fas fa-key mr-2"></i>Reset Password
             </button>
         </form>
 
         <!-- Footer -->
         <div class="mt-8 text-center">
-            <a href="{{ route('welcome') }}" class="text-sm text-gray-600 hover:text-gray-800 transition">
-                <i class="fas fa-arrow-left mr-1"></i>Back to Website
+            <a href="{{ route('admin.login') }}" class="text-sm text-gray-600 hover:text-gray-800 transition">
+                <i class="fas fa-arrow-left mr-1"></i>Back to Login
             </a>
         </div>
 
@@ -118,9 +124,9 @@
     </div>
 
     <script>
-        function togglePassword() {
-            const passwordInput = document.getElementById('password');
-            const toggleIcon = document.getElementById('toggleIcon');
+        function togglePassword(inputId, iconId) {
+            const passwordInput = document.getElementById(inputId);
+            const toggleIcon = document.getElementById(iconId);
 
             if (passwordInput.type === 'password') {
                 passwordInput.type = 'text';
