@@ -67,6 +67,14 @@
                             <div>{{ $error }}</div>
                         @endforeach
                     </div>
+
+                    @if (session('show_resend'))
+                        <div class="alert alert-warning" role="alert">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Your email is not verified.
+                            <a href="{{ route('admin.verification.notice') }}" class="alert-link">Click here to resend verification email</a>
+                        </div>
+                    @endif
                 @endif
 
                 <form method="POST" action="{{ route('admin.login') }}">

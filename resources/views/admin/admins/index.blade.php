@@ -290,34 +290,39 @@
                                                 class="text-blue-600 hover:text-blue-900">
                                                 <i class="fas fa-eye"></i>
                                             </a>
-                                            <a href="{{ route('admin.admins.edit', $admin) }}"
-                                                class="text-indigo-600 hover:text-indigo-900">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
-                                            <form method="POST"
-                                                action="{{ route('admin.admins.toggle-status', $admin) }}"
-                                                class="inline">
-                                                @csrf
-                                                @method('PATCH')
-                                                <button type="submit" class="text-yellow-600 hover:text-yellow-900">
-                                                    <i
-                                                        class="fas fa-toggle-{{ $admin->status === 'active' ? 'on' : 'off' }}"></i>
-                                                </button>
-                                            </form>
-                                            @if ($admin->id !== auth('admin')->id())
-                                                <form method="POST" action="{{ route('admin.admins.destroy', $admin) }}"
-                                                    class="inline"
-                                                    data-confirm="{{ __('site.confirm.actions.admins.delete.message', [], 'en') }}"
-                                                    data-confirm-title="{{ __('site.confirm.delete.title', [], 'en') }}"
-                                                    data-confirm-variant="danger"
-                                                    data-confirm-confirm="{{ __('site.confirm.actions.admins.delete.confirm', [], 'en') }}"
-                                                    data-confirm-cancel="{{ __('site.confirm.cancel', [], 'en') }}">
+
+                                            @if ($admin->role !== 'super')
+                                                <a href="{{ route('admin.admins.edit', $admin) }}"
+                                                    class="text-indigo-600 hover:text-indigo-900">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <form method="POST"
+                                                    action="{{ route('admin.admins.toggle-status', $admin) }}"
+                                                    class="inline">
                                                     @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="text-red-600 hover:text-red-900">
-                                                        <i class="fas fa-trash"></i>
+                                                    @method('PATCH')
+                                                    <button type="submit" class="text-yellow-600 hover:text-yellow-900">
+                                                        <i
+                                                            class="fas fa-toggle-{{ $admin->status === 'active' ? 'on' : 'off' }}"></i>
                                                     </button>
                                                 </form>
+                                                @if ($admin->id !== auth('admin')->id())
+                                                    <form method="POST" action="{{ route('admin.admins.destroy', $admin) }}"
+                                                        class="inline"
+                                                        data-confirm="{{ __('site.confirm.actions.admins.delete.message', [], 'en') }}"
+                                                        data-confirm-title="{{ __('site.confirm.delete.title', [], 'en') }}"
+                                                        data-confirm-variant="danger"
+                                                        data-confirm-confirm="{{ __('site.confirm.actions.admins.delete.confirm', [], 'en') }}"
+                                                        data-confirm-cancel="{{ __('site.confirm.cancel', [], 'en') }}">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="text-red-600 hover:text-red-900">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                @endif
+                                            @else
+                                                <span class="text-gray-400 text-xs italic">Protected</span>
                                             @endif
                                         </div>
                                     </td>

@@ -269,6 +269,12 @@ class AdminController extends Controller
    */
   public function edit(Admin $admin)
   {
+    // Prevent editing super admin
+    if ($admin->role === 'super') {
+      return redirect()->route('admin.admins.index')
+        ->with('error', 'Super Admin accounts cannot be edited.');
+    }
+
     $clients = Client::where('is_active', true)->orderBy('name')->get();
     return view('admin.admins.edit', compact('admin', 'clients'));
   }
@@ -278,6 +284,12 @@ class AdminController extends Controller
    */
   public function update(Request $request, Admin $admin)
   {
+    // Prevent updating super admin
+    if ($admin->role === 'super') {
+      return redirect()->route('admin.admins.index')
+        ->with('error', 'Super Admin accounts cannot be updated.');
+    }
+
     $request->validate([
       'name' => 'required|string|max:255',
       'email' => ['required', 'string', 'email', 'max:255', Rule::unique('admins')->ignore($admin->id)],
@@ -310,6 +322,12 @@ class AdminController extends Controller
    */
   public function toggleStatus(Admin $admin)
   {
+    // Prevent toggling super admin status
+    if ($admin->role === 'super') {
+      return redirect()->back()
+        ->with('error', 'Super Admin status cannot be changed.');
+    }
+
     $admin->update([
       'email_verified_at' => $admin->email_verified_at ? null : now()
     ]);
@@ -330,9 +348,88 @@ class AdminController extends Controller
         ->with('error', 'You cannot delete your own account.');
     }
 
+    // Prevent deletion of super admin
+    if ($admin->role === 'super') {
+      return redirect()->back()
+        ->with('error', 'Super Admin accounts cannot be deleted.');
+    }
+
     $admin->delete();
 
     return redirect()->route('admin.admins.index')
       ->with('success', 'Admin deleted successfully.');
+  }
+
+  /**
+   * Show the form for editing the authenticated admin's profile.
+   */
+  public function editProfile()
+  {
+    $admin = auth('admin')->user();
+    return view('admin.profile.edit', compact('admin'));
+  }
+
+  /**
+   * Update the authenticated admin's profile.
+   */
+  public function updateProfile(Request $request)
+  {
+    $admin = auth('admin')->user();
+
+    $request->validate([
+      'name' => ['required', 'string', 'max:255'],
+      'email' => ['required', 'string', 'email', 'max:255', Rule::unique('admins')->ignore($admin->id)],
+      'phone' => ['nullable', 'string', 'max:20'],
+      'current_password' => ['nullable', 'required_with:password'],
+      'password' => ['nullable', 'min:8', 'confirmed'],
+    ]);
+
+    // Verify current password if attempting to change password
+    if ($request->filled('current_password')) {
+      if (!Hash::check($request->current_password, $admin->password)) {
+        return back()->withErrors(['current_password' => 'The current password is incorrect.']);
+      }
+    }
+
+    // Check if email is being changed
+    $emailChanged = $admin->email !== $request->email;
+
+    $updateData = [
+      'name' => $request->name,
+      'email' => $request->email,
+      'phone' => $request->phone,
+    ];
+
+    // If email changed, remove verification and send new verification email
+    if ($emailChanged) {
+      $updateData['email_verified_at'] = null;
+    }
+
+    if ($request->filled('password')) {
+      $updateData['password'] = Hash::make($request->password);
+    }
+
+    $admin->update($updateData);
+
+    // Send verification email if email was changed
+    if ($emailChanged) {
+      try {
+        $admin->sendEmailVerificationNotification();
+        \Log::info('Verification email sent to: ' . $admin->email);
+      } catch (\Exception $e) {
+        \Log::error('Failed to send verification email: ' . $e->getMessage());
+      }
+
+      // Log out the admin since their email is now unverified
+      auth('admin')->logout();
+      $request->session()->invalidate();
+      $request->session()->regenerateToken();
+
+      return redirect()->route('admin.login')
+        ->with('status', 'Your email has been updated. Please check your new email address to verify it before logging in.');
+    }
+
+    return redirect()->route('admin.profile.edit')
+      ->with('success', 'Profile updated successfully.');
   }
 }

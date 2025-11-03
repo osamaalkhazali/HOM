@@ -72,7 +72,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/forgot-password', [AuthController::class, 'sendResetLinkEmail'])->name('password.email');
         Route::get('/reset-password/{token}', [AuthController::class, 'showResetPasswordForm'])->name('password.reset');
         Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
+
+        // Email Verification Routes
+        Route::get('/verify-email', [AuthController::class, 'showVerificationNotice'])->name('verification.notice');
+        Route::post('/resend-verification', [AuthController::class, 'resendVerificationEmail'])->name('verification.resend');
     });
+
+    // Email verification (signed route, accessible without auth)
+    Route::get('/verify-email/{id}/{hash}', [AuthController::class, 'verifyEmail'])
+        ->middleware(['signed'])
+        ->name('verification.verify');
 
     // Protected admin routes
     Route::middleware(['admin'])->group(function () {
@@ -200,6 +209,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/notifications', [AdminNotificationController::class, 'index'])->name('notifications.index');
         Route::post('/notifications/read-all', [AdminNotificationController::class, 'readAll'])->name('notifications.readAll');
         Route::get('/notifications/open/{id}', [AdminNotificationController::class, 'open'])->name('notifications.open');
+
+        // Admin Profile - accessible to all admin roles
+        Route::get('/profile', [AdminController::class, 'editProfile'])->name('profile.edit');
+        Route::patch('/profile', [AdminController::class, 'updateProfile'])->name('profile.update');
     });
 });
 

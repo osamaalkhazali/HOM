@@ -31,10 +31,35 @@ class AuthController extends Controller
 
         // Attempt login with remember me option
         if (Auth::guard('admin')->attempt($credentials, $request->filled('remember'))) {
+            $admin = Auth::guard('admin')->user();
+
+            // Check if email is verified
+            if (!$admin->hasVerifiedEmail()) {
+                Auth::guard('admin')->logout();
+
+                // Send verification email automatically
+                try {
+                    $admin->sendEmailVerificationNotification();
+                    \Log::info('Verification email sent to: ' . $admin->email);
+                } catch (\Exception $e) {
+                    \Log::error('Failed to send verification email: ' . $e->getMessage());
+                }
+
+                // Store email in session for verification page
+                session(['admin_email' => $request->email]);
+
+                return back()
+                    ->withInput($request->only('email', 'remember'))
+                    ->withErrors([
+                        'email' => 'Your email address is not verified. We have sent you a verification link. Please check your email.',
+                    ])
+                    ->with('show_resend', true);
+            }
+
             $request->session()->regenerate();
 
             // Update last login
-            Auth::guard('admin')->user()->update(['last_login_at' => now()]);
+            $admin->update(['last_login_at' => now()]);
 
             // Redirect to intended URL if set, otherwise to dashboard
             return redirect()->intended(route('admin.dashboard'));
@@ -118,5 +143,68 @@ class AuthController extends Controller
         return $status === Password::PASSWORD_RESET
             ? redirect()->route('admin.login')->with('status', __($status))
             : back()->withErrors(['email' => [__($status)]]);
+    }
+
+    /**
+     * Display the email verification notice.
+     */
+    public function showVerificationNotice()
+    {
+        return view('admin.auth.verify-email');
+    }
+
+    /**
+     * Handle email verification.
+     */
+    public function verifyEmail(Request $request)
+    {
+        $admin = Admin::findOrFail($request->route('id'));
+
+        if (!hash_equals((string) $request->route('hash'), sha1($admin->getEmailForVerification()))) {
+            return redirect()->route('admin.login')
+                ->withErrors(['email' => 'Invalid verification link.']);
+        }
+
+        if ($admin->hasVerifiedEmail()) {
+            return redirect()->route('admin.login')
+                ->with('status', 'Your email is already verified. You can now log in.');
+        }
+
+        $admin->markEmailAsVerified();
+
+        return redirect()->route('admin.login')
+            ->with('status', 'Your email has been verified successfully! You can now log in.');
+    }
+
+    /**
+     * Resend the email verification notification.
+     */
+    public function resendVerificationEmail(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email|exists:admins,email',
+        ]);
+
+        $admin = Admin::where('email', $request->email)->first();
+
+        if (!$admin) {
+            return back()->withErrors(['email' => 'Admin not found with this email address.']);
+        }
+
+        if ($admin->hasVerifiedEmail()) {
+            return back()->with('status', 'Your email is already verified. You can log in now.');
+        }
+
+        try {
+            $admin->sendEmailVerificationNotification();
+
+            // Store email in session for next time
+            session(['admin_email' => $request->email]);
+
+            return back()->with('status', 'Verification link has been sent to your email address. Please check your inbox.');
+        } catch (\Exception $e) {
+            \Log::error('Failed to send verification email: ' . $e->getMessage());
+            return back()->withErrors(['email' => 'Failed to send verification email. Please try again later.']);
+        }
     }
 }

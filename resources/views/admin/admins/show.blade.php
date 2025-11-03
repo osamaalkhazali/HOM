@@ -11,10 +11,12 @@
                 <p class="mt-1 text-sm text-gray-600">View administrator information and permissions</p>
             </div>
             <div class="flex space-x-3">
-                <a href="{{ route('admin.admins.edit', $admin) }}"
-                    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
-                    <i class="fas fa-edit mr-2"></i>Edit Admin
-                </a>
+                @if ($admin->role !== 'super')
+                    <a href="{{ route('admin.admins.edit', $admin) }}"
+                        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
+                        <i class="fas fa-edit mr-2"></i>Edit Admin
+                    </a>
+                @endif
                 <a href="{{ route('admin.admins.index') }}"
                     class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors">
                     <i class="fas fa-arrow-left mr-2"></i>Back to Admins
