@@ -94,7 +94,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/jobs', [AdminJobController::class, 'index'])->name('jobs.index');
         Route::get('/jobs/export/{format}', [AdminJobController::class, 'export'])->name('jobs.export');
         Route::get('/jobs/deleted', [AdminJobController::class, 'deleted'])->name('jobs.deleted');
-        Route::get('/jobs/{job}', [AdminJobController::class, 'show'])->name('jobs.show');
 
         // Job actions - Super Admin and Admin only
         Route::middleware(['admin.role:super,admin'])->group(function () {
@@ -110,6 +109,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::patch('/jobs/{id}/restore', [AdminJobController::class, 'restore'])->name('jobs.restore');
             Route::delete('/jobs/{id}/force-delete', [AdminJobController::class, 'forceDelete'])->name('jobs.force-delete');
         });
+
+        // Job show route - must be after specific routes to avoid conflicts
+        Route::get('/jobs/{job}', [AdminJobController::class, 'show'])->name('jobs.show');
 
         // Applications Management - accessible to all admin roles
         Route::get('/applications', [ApplicationController::class, 'index'])->name('applications.index');
