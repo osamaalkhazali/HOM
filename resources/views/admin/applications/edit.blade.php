@@ -530,7 +530,7 @@
 
             // Status change confirmation
             const form = document.getElementById('updateApplicationForm');
-            const statusSelect = document.getElementById('status');
+            // statusSelect already declared above
             const initialStatus = '{{ $application->status }}';
             let pendingSubmit = false;
 
