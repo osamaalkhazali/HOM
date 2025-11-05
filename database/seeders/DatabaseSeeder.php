@@ -43,7 +43,7 @@ class DatabaseSeeder extends Seeder
         $this->command->line('');
         $this->command->info('🔐 Login credentials:');
         $this->command->line('   Super Admin: admin@jobportal.com / password123');
-        $this->command->line('   Client HR (Bromine Jo): hr@brominejob.com / password');
+        $this->command->line('   Client HR (Bromine Jo): hr@bromineje.com / password');
         $this->command->line('   Client HR (TechVision): hr@techvision.com / password');
         $this->command->line('   Users: Various test accounts with password "password"');
     }
