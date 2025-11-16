@@ -1,424 +1,222 @@
-<div align="center">
+HOM Platform
+==========
 
-<img src="public/assets/images/HOM-logo.png" alt="HOM Logo" width="300">
-
-# 🌐 HOM - House of Management
-### *For Studies and Consultations*
-
-[![Laravel](https://img.shields.io/badge/Laravel-11.x-FF2D20?style=for-the-badge&logo=laravel)](https://laravel.com)
-[![PHP](https://img.shields.io/badge/PHP-8.2+-777BB4?style=for-the-badge&logo=php)](https://php.net)
-[![Bootstrap](https://img.shields.io/badge/Bootstrap-5.3-7952B3?style=for-the-badge&logo=bootstrap)](https://getbootstrap.com)
-[![MySQL](https://img.shields.io/badge/MySQL-8.0+-4479A1?style=for-the-badge&logo=mysql)](https://mysql.com)
-
-*A comprehensive management consulting platform and job portal built with modern web technologies*
-
-[🚀 Live Demo](#) • [📖 Documentation](#installation) • [💬 Support](#support)
-
-</div>
+Modern multi-client recruitment and consulting portal for **House of Management (HOM)**. The platform delivers a unified experience for super administrators, in-house admins, client HR teams, and job seekers. Recent work focused on multi-client isolation, richer admin tooling, secure authentication, and a streamlined Client HR workflow.
 
 ---
 
-## ✨ About HOM
+## Table of Contents
 
-**House of Management for Studies and Consultations (HOM)** is a leading management consultancy that delivers comprehensive financial advisory, commercial strategy, project management, and construction consulting services to organizations across **industry, government, real estate, healthcare, tourism, and NGO sectors**.
-
-### 🎯 Our Mission
-Empowering businesses with strategic excellence through proactive financial advisory, strategic project management, and qualified business partnerships.
-
-### 🏢 Core Expertise
-- **Financial Analysis & Advisory** - Maximum value optimization and risk identification
-- **Project Development & Management** - End-to-end project lifecycle management  
-- **Strategic Business Consulting** - Commercial strategy and market positioning
-- **Construction & Real Estate** - Specialized consulting for construction projects
-- **Organizational Development** - Capacity building and operational excellence
-- **Technology Integration** - Digital transformation and process optimization
-
-### 🌍 Industry Focus
-HOM serves diverse sectors including **Industry, Government, Real Estate, Healthcare, Tourism, and NGO sectors** with tailored solutions delivered through our flexible staff base and qualified business partners.
+- [Key Capabilities](#key-capabilities)
+- [Role Overview](#role-overview)
+- [Application Workflows](#application-workflows)
+- [Getting Started](#getting-started)
+- [Environment Configuration](#environment-configuration)
+- [Running the Stack](#running-the-stack)
+- [Seeded Accounts](#seeded-accounts)
+- [Client HR Experience](#client-hr-experience)
+- [Administration Notes](#administration-notes)
+- [Troubleshooting](#troubleshooting)
 
 ---
 
-## 🚀 Key Features
+## Key Capabilities
 
-<table>
-<tr>
-<td width="50%">
-
-### 👥 **For Job Seekers**
-- 🔍 **Smart Job Search** - Advanced filtering and search
-- 📄 **Profile Management** - Complete professional profiles
-- 📋 **Application Tracking** - Real-time status updates
-- 🔔 **Smart Notifications** - Email alerts and in-app notifications
-- 💼 **CV Management** - Secure document upload and management
-
-</td>
-<td width="50%">
-
-### 🏢 **For Organizations**
-- 📊 **Admin Dashboard** - Comprehensive management interface
-- 📝 **Job Management** - Create and manage job postings
-- 👤 **User Management** - Advanced user administration
-- 📈 **Analytics** - Detailed reporting and insights
-- 🎯 **Application Processing** - Streamlined hiring workflow
-
-</td>
-</tr>
-</table>
-
-### 🌟 **Management Consulting Features**
-- 📋 **Financial Analysis & Advisory** - Maximum value optimization and comprehensive risk assessment
-- 🤝 **Strategic Project Management** - End-to-end project lifecycle management and delivery
-- 📄 **Commercial Strategy Development** - Market positioning and business strategy consulting
-- 🎯 **Construction & Real Estate Consulting** - Specialized expertise in construction project management
-- � **Organizational Development** - Capacity building and operational excellence initiatives
-- 💼 **Business Partnership Development** - Strategic alliances and partnership management
+- **Multi-Client Architecture** – Jobs, applications, employees, and notifications stay isolated per client.
+- **Role-Based Administration** – Three guard-driven roles (Super Admin, Admin, Client HR) with tailored permissions and dashboards.
+- **Admin Authentication Suite**
+    - Custom Bootstrap login theme with password visibility toggles
+    - Password reset flow dedicated to admins (separate broker, branded emails)
+    - Email verification enforced for every admin account
+    - Profile editor with phone support; email changes trigger re-verification and auto logout
+- **Notification System**
+    - Application status changes fire database + mail notifications
+    - Client HR is notified when an applicant is hired for their client
+- **Application Lifecycle Enhancements**
+    - Document request builder with dynamic rows
+    - Automatic employee record creation when status becomes `hired`
+    - Status change safety prompts for `hired` and `rejected`
+- **Data Visibility Improvements**
+    - Distinct employee counts in sidebar
+    - Client-filtered dashboards for Client HR users
+    - Horizontal scrolling tables where needed (employees, clients)
+- **Security Controls**
+    - `is_active` flag for admins; inactive accounts are blocked even if email is verified
+    - Super admin accounts are protected from edit/delete/status changes by other admins
 
 ---
 
-## �️ Technology Stack
+## Role Overview
 
-<div align="center">
-
-| **Backend** | **Frontend** | **Database** | **Tools** |
-|-------------|--------------|--------------|-----------|
-| ![Laravel](https://img.shields.io/badge/Laravel-FF2D20?style=flat-square&logo=laravel&logoColor=white) Laravel 11 | ![Bootstrap](https://img.shields.io/badge/Bootstrap-7952B3?style=flat-square&logo=bootstrap&logoColor=white) Bootstrap 5 | ![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=flat-square&logo=mysql&logoColor=white) MySQL 8.0+ | ![Vite](https://img.shields.io/badge/Vite-646CFF?style=flat-square&logo=vite&logoColor=white) Vite |
-| ![PHP](https://img.shields.io/badge/PHP-777BB4?style=flat-square&logo=php&logoColor=white) PHP 8.2+ | ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=black) Vanilla JS | ![Database](https://img.shields.io/badge/Database-Production-003B57?style=flat-square&logo=database&logoColor=white) Optimized | ![Composer](https://img.shields.io/badge/Composer-885630?style=flat-square&logo=composer&logoColor=white) Composer |
-
-</div>
-
----
-
-## 📋 Prerequisites
-
-<table>
-<tr>
-<td>
-
-**🔧 System Requirements**
-- PHP 8.2+ with extensions
-- Composer 2.0+
-- Node.js 18+ & NPM
-- MySQL 8.0+ or SQLite
-- Web Server (Apache/Nginx)
-
-</td>
-<td>
-
-**📦 PHP Extensions**
-- BCMath, Ctype, JSON
-- Mbstring, OpenSSL, PDO
-- Tokenizer, XML, GD
-- Fileinfo, Curl
-
-</td>
-</tr>
-</table>
+| Capability | Super Admin | Admin | Client HR |
+|-----------|-------------|-------|-----------|
+| Access all clients & data | ✅ | ✅ | ❌ (own client only) |
+| Manage admins | ✅ | ✅ | ❌ |
+| Create / edit / delete jobs | ✅ | ✅ | ❌ (read-only) |
+| View applications | ✅ | ✅ | ✅ (filtered) |
+| Change application status | ✅ | ✅ | ✅ (own client) |
+| Receive hire notifications | ✅ | ✅ | ✅ (if tied to client) |
+| View employee directory | ✅ | ✅ | ✅ (filtered) |
+| Edit platform settings | ✅ | ❌ | ❌ |
+| Access analytics dashboard | ✅ | ✅ | ✅ (client scope) |
 
 ---
 
-## � Installation Guide
+## Application Workflows
 
-### **Step 1: Clone Repository**
+### Hiring Flow
+1. Admin updates application status in `Admin ▸ Applications`.
+2. Status change confirmation prevents accidental `hired` / `rejected` transitions.
+3. When status becomes `hired`:
+     - Employee record is generated automatically (if missing).
+     - Candidate receives email + in-app notification.
+     - Matching Client HR user receives the same notification + email.
+
+### Document Requests
+- Add requested documents directly from the application edit view.
+- `Documents Requested` status is applied automatically when new requests are added.
+- Document upload / status progression is reflected in the timeline.
+
+---
+
+## Getting Started
+
+### Prerequisites
+- PHP 8.2+
+- Composer 2+
+- Node.js 18+
+- MySQL 8+ (or compatible)
+- SMTP credentials for outbound email
+
+### Installation
 ```bash
 git clone https://github.com/osamaalkhazali/HOM.git
 cd HOM
-```
 
-### **Step 2: Install Dependencies**
-```bash
-# Install PHP dependencies
 composer install
-
-# Install JavaScript dependencies
 npm install
-```
 
-### **Step 3: Environment Setup**
-```bash
-# Copy environment file
 copy .env.example .env
-
-# Generate application key
 php artisan key:generate
 ```
 
-### **Step 4: Configure Environment**
-Edit your `.env` file with the following configuration:
+Run migrations with sample data:
+
+```bash
+php artisan migrate:fresh --seed
+php artisan storage:link
+```
+
+Compile assets (choose one):
+
+```bash
+npm run dev
+npm run build
+```
+
+Start the application:
+
+```bash
+php artisan serve
+```
+
+Default URL: `http://hom.test` (adjust if your `.env` differs).
+
+---
+
+## Environment Configuration
+
+Minimal settings to update in `.env`:
 
 ```env
-APP_NAME="HOM - House of Management"
-APP_ENV=local
-APP_KEY=base64:your-generated-key
-APP_DEBUG=true
-APP_URL=http://localhost:8000
+APP_NAME="HOM"
+APP_URL=http://hom.test
 
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
-DB_DATABASE=hom_platform
-DB_USERNAME=your_username
-DB_PASSWORD=your_password
+DB_DATABASE=hom
+DB_USERNAME=hom_user
+DB_PASSWORD=secret
 
 MAIL_MAILER=smtp
-MAIL_HOST=smtp.gmail.com
+MAIL_HOST=smtp.example.com
 MAIL_PORT=587
-MAIL_USERNAME=your_email@gmail.com
-MAIL_PASSWORD=your_app_password
+MAIL_USERNAME=no-reply@hom.com
+MAIL_PASSWORD=app-password
 MAIL_ENCRYPTION=tls
-MAIL_FROM_ADDRESS=noreply@hom.com
-MAIL_FROM_NAME="HOM Platform"
+MAIL_FROM_ADDRESS=no-reply@hom.com
+MAIL_FROM_NAME="HOM"
 ```
 
-### **Step 5: Database Setup**
-```bash
-# Run migrations with sample data
-php artisan migrate --seed
-
-# Create storage symbolic link
-php artisan storage:link
-```
-
-### **Step 6: Build Assets**
-```bash
-# Development build
-npm run dev
-
-# Production build
-npm run build
-```
-
-### **Step 7: Launch Application**
-```bash
-php artisan serve
-```
-
-🎉 **Your application is now running at:** `http://localhost:8000`
+> Admin email verification and password resets depend on working SMTP credentials.
 
 ---
 
-## 👥 Default Access Credentials
+## Running the Stack
 
-<div align="center">
-
-### 🔐 **Admin Dashboard Access**
-| Field | Value |
-|-------|--------|
-| **Email** | `admin@hom.com` |
-| **Password** | `password123` |
-| **Role** | Super Administrator |
-
-### 👤 **Test User Account**
-| Field | Value |
-|-------|--------|
-| **Email** | `john@example.com` |
-| **Password** | `password` |
-| **Role** | Job Seeker |
-
-</div>
+| Task | Command |
+|------|---------|
+| Serve backend | `php artisan serve` |
+| Watch assets | `npm run dev` |
+| Run tests | `php artisan test` |
+| Clear caches | `php artisan optimize:clear` |
+| Reset database | `php artisan migrate:fresh --seed` |
 
 ---
 
-## 🏗️ Project Architecture
+## Seeded Accounts
 
-```
-HOM/
-├── 📁 app/
-│   ├── Http/Controllers/      # Application logic controllers
-│   ├── Models/               # Eloquent data models
-│   ├── Notifications/        # Email & app notifications
-│   └── Providers/           # Service providers
-├── 📁 database/
-│   ├── migrations/          # Database schema migrations
-│   ├── seeders/            # Sample data generators
-│   └── factories/          # Model factories
-├── 📁 resources/
-│   ├── views/              # Blade template files
-│   │   ├── admin/          # Admin panel views
-│   │   ├── auth/           # Authentication pages
-│   │   ├── jobs/           # Job-related pages
-│   │   └── landing/        # Homepage sections
-│   ├── css/                # Stylesheets
-│   └── js/                 # JavaScript files
-├── 📁 public/
-│   ├── assets/             # Static assets (images, etc.)
-│   ├── storage/            # Uploaded files symlink
-│   └── hom-favicon.png     # Custom favicon
-└── 📁 storage/
-    └── app/public/         # File uploads (CVs, documents)
-```
+After `migrate:fresh --seed` the following accounts are available:
+
+| Role | Email | Password | Notes |
+|------|-------|----------|-------|
+| Super Admin | `admin@jobportal.com` | `password123` | Full system access |
+| Super Admin | `hr@hom-intl.com` | `password` | Legacy seeded admin |
+| Admin | `admin@hom-intl.com` | `password` | General administrator |
+| Client HR (Bromine Jo) | `hr@bromineje.com` | `password` | Filtered to Bromine Jo data |
+| Client HR (TechVision) | `hr@techvision.com` | `password` | Filtered to TechVision data |
+| Job Seeker samples | `*.example.com` | `password` | See seeder output |
+
+All seeded admin accounts are active and email-verified.
 
 ---
 
-## 🎯 Feature Highlights
+## Client HR Experience
 
-<table>
-<tr>
-<td align="center" width="33%">
+Client HR users log in through the admin portal but see a scoped experience:
 
-### 🔔 **Smart Notifications**
-Real-time notifications for job applications, status updates, and admin activities with both email and in-app delivery.
+- Dashboard metrics and charts limited to their assigned client.
+- Read-only access to their organization's job postings (no create/edit/delete).
+- Full application workflow control for their client’s jobs, including status changes and document requests.
+- Employee directory filtered to hires belonging to their client.
+- Real-time notifications + emails when applicants move to `hired`.
+- Navigation stripped of super admin features; restricted routes return 403.
 
-</td>
-<td align="center" width="33%">
-
-### � **Advanced Dashboard**
-Comprehensive admin dashboard with analytics, user management, and system monitoring capabilities.
-
-</td>
-<td align="center" width="33%">
-
-### 🔒 **Security First**
-Built with Laravel's security features including CSRF protection, input validation, and secure file uploads.
-
-</td>
-</tr>
-<tr>
-<td align="center">
-
-### 📱 **Responsive Design**
-Mobile-first design with Bootstrap 5, ensuring perfect experience across all devices.
-
-</td>
-<td align="center">
-
-### ⚡ **Performance Optimized**
-Optimized database queries, asset compilation with Vite, and efficient caching strategies.
-
-</td>
-<td align="center">
-
-### 🎨 **Modern UI/UX**
-Clean, professional interface with smooth animations and intuitive user experience.
-
-</td>
-</tr>
-</table>
+> Client HR cannot manage admins, clients, or global settings. Contact an Admin if scope changes are required.
 
 ---
 
-## 📊 System Statistics
+## Administration Notes
 
-<div align="center">
-
-![GitHub repo size](https://img.shields.io/github/repo-size/osamaalkhazali/HOM?style=for-the-badge)
-![GitHub last commit](https://img.shields.io/github/last-commit/osamaalkhazali/HOM?style=for-the-badge)
-![GitHub commit activity](https://img.shields.io/github/commit-activity/m/osamaalkhazali/HOM?style=for-the-badge)
-
-</div>
+- Email verification is required. Profile email changes clear the verification timestamp, dispatch a new email, and log the admin out until confirmed.
+- `is_active` toggle is exposed in admin management. Inactive admins cannot authenticate even if verified.
+- Super admin records cannot be edited, deactivated, or deleted by other admins.
+- Use the notification bell in the admin navbar to access unread items. "Mark all as read" and "View all" links are available.
+- Document requests are allowed only in `shortlisted`, `documents_requested`, and `documents_submitted` statuses; the UI explains restrictions when disabled.
 
 ---
 
-## 🔧 Development Commands
+## Troubleshooting
 
-<table>
-<tr>
-<td width="50%">
-
-### **🏃 Development**
-```bash
-# Start development server
-php artisan serve
-
-# Watch assets for changes
-npm run dev
-
-# Run migrations
-php artisan migrate
-
-# Seed fresh data
-php artisan migrate:fresh --seed
-```
-
-</td>
-<td width="50%">
-
-### **🚀 Production**
-```bash
-# Optimize for production
-php artisan optimize
-
-# Cache configurations
-php artisan config:cache
-php artisan route:cache
-
-# Build production assets
-npm run build
-```
-
-</td>
-</tr>
-</table>
-
-### **🧹 Maintenance Commands**
-```bash
-# Clear all caches
-php artisan cache:clear
-php artisan config:clear
-php artisan route:clear
-php artisan view:clear
-
-# Storage management
-php artisan storage:link
-php artisan queue:work    # For job queues
-```
+| Issue | Resolution |
+|-------|------------|
+| Email reset/verification not received | Confirm SMTP settings, check mail logs, and ensure the queue worker (if used) is running. |
+| Admin login blocked | Verify `admins.is_active = 1` and `email_verified_at` is populated. Use `php artisan tinker` to inspect. |
+| "Route page not found" for admin features | Clear cached routes: `php artisan route:clear`. |
+| Missing uploads or broken images | Ensure `storage:link` has been executed and the web server has write access to `storage/app/public`. |
+| Seed data absent | Run `php artisan migrate:fresh --seed` to rebuild the sample dataset. |
 
 ---
 
-## 📞 Support & Contact
-
-<div align="center">
-
-**Need Help?** We're here to assist you!
-
-[![Email](https://img.shields.io/badge/Email-support%40hom.com-D14836?style=for-the-badge&logo=gmail)](mailto:support@hom.com)
-[![GitHub Issues](https://img.shields.io/badge/GitHub-Issues-181717?style=for-the-badge&logo=github)](https://github.com/osamaalkhazali/HOM/issues)
-[![Documentation](https://img.shields.io/badge/Documentation-Read%20More-blue?style=for-the-badge&logo=read-the-docs)](https://laravel.com/docs)
-
-</div>
-
-### 🆘 **Troubleshooting Guide**
-
-<details>
-<summary><strong>🔧 Common Issues & Solutions</strong></summary>
-
-**Storage Permission Issues:**
-```bash
-chmod -R 775 storage bootstrap/cache
-chown -R www-data:www-data storage bootstrap/cache
-```
-
-**Asset Compilation Problems:**
-```bash
-npm run build
-php artisan view:clear
-```
-
-**Database Connection Issues:**
-- Verify database credentials in `.env`
-- Ensure MySQL/SQLite service is running
-- Check if database exists
-
-**Email Configuration:**
-- Use app-specific passwords for Gmail
-- Configure SMTP settings correctly
-- Test with Mailtrap for development
-
-</details>
-
----
-
-## 📄 License & Credits
-
-<div align="center">
-
-**© 2025 House of Management for Studies and Consultations**
-
-Built with ❤️ using Laravel Framework
-
----
-
-### 🌟 **Star this repository if you find it helpful!**
-
-*This project represents modern web development practices and provides a robust foundation for management consulting platforms and job portals.*
-
-</div>
+Need additional help? Open an issue in the repository or contact the HOM engineering team.
