@@ -77,6 +77,33 @@
         letter-spacing: 0.01em;
     }
 
+    /* RTL adjustments */
+    .landing.rtl #services,
+    .landing.rtl #services .service-description,
+    .landing.rtl #services .service-team,
+    .landing.rtl #services .service-main-title,
+    .landing.rtl #services .service-main-desc,
+    .landing.rtl #services .project-text-content,
+    .landing.rtl #services .project-description,
+    .landing.rtl #services .project-title,
+    .landing.rtl #services .project-tag,
+    .landing.rtl #services .service-header-content,
+    .landing.rtl #service-details {
+        direction: rtl;
+        text-align: right;
+    }
+
+    .landing.rtl #services .project-content-wrapper,
+    .landing.rtl #services .project-content-wrapper-full {
+        flex-direction: row-reverse;
+        text-align: right;
+    }
+
+    .landing.rtl #services .slider-counter-display {
+        direction: ltr;
+        text-align: center;
+    }
+
 
     .section-bg-overlay {
         position: absolute;

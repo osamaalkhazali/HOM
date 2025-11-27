@@ -124,8 +124,7 @@ class EmployeeController extends Controller
     {
         $admin = Auth::guard('admin')->user();
 
-        // Only Client HR can create employees
-        if (!$admin->isClientHr()) {
+        if (!$admin->canManageEmployees()) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -145,8 +144,7 @@ class EmployeeController extends Controller
     {
         $admin = Auth::guard('admin')->user();
 
-        // Only Client HR can create employees
-        if (!$admin->isClientHr()) {
+        if (!$admin->canManageEmployees()) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -204,8 +202,7 @@ class EmployeeController extends Controller
     {
         $admin = Auth::guard('admin')->user();
 
-        // Only Client HR can edit employees
-        if (!$admin->isClientHr()) {
+        if (!$admin->canManageEmployees()) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -229,8 +226,7 @@ class EmployeeController extends Controller
     {
         $admin = Auth::guard('admin')->user();
 
-        // Only Client HR can update employees
-        if (!$admin->isClientHr()) {
+        if (!$admin->canManageEmployees()) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -261,8 +257,7 @@ class EmployeeController extends Controller
     {
         $admin = Auth::guard('admin')->user();
 
-        // Only Client HR can delete employees
-        if (!$admin->isClientHr()) {
+        if (!$admin->canManageEmployees()) {
             abort(403, 'Unauthorized action.');
         }
 

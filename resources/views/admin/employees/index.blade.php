@@ -327,7 +327,7 @@
                                                     <i class="fas fa-eye text-xs"></i>
                                                 </a>
 
-                                                @if (auth('admin')->user()->isClientHr())
+                                                @if (auth('admin')->user()->canManageEmployees())
                                                     <a href="{{ route('admin.employees.edit', $employee) }}"
                                                         class="text-green-600 hover:text-green-900 p-1.5 rounded bg-green-50 hover:bg-green-100"
                                                         title="Edit">

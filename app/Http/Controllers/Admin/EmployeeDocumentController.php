@@ -18,8 +18,7 @@ class EmployeeDocumentController extends Controller
     {
         $admin = Auth::guard('admin')->user();
 
-        // Only Client HR can upload documents
-        if (!$admin->isClientHr()) {
+        if (!$admin->canManageEmployeeDocuments()) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -109,8 +108,7 @@ class EmployeeDocumentController extends Controller
     {
         $admin = Auth::guard('admin')->user();
 
-        // Only Client HR can delete documents
-        if (!$admin->isClientHr()) {
+        if (!$admin->canManageEmployeeDocuments()) {
             abort(403, 'Unauthorized action.');
         }
 

@@ -42,6 +42,16 @@ class Admin extends Authenticatable implements CanResetPassword, MustVerifyEmail
         return $this->role === 'client_hr';
     }
 
+    public function canManageEmployees(): bool
+    {
+        return $this->isSuperAdmin() || $this->isAdmin() || $this->isClientHr();
+    }
+
+    public function canManageEmployeeDocuments(): bool
+    {
+        return $this->canManageEmployees();
+    }
+
     public function getStatusAttribute()
     {
         return ($this->email_verified_at && $this->is_active) ? 'active' : 'inactive';

@@ -2,7 +2,6 @@
 
 return [
     'nav' => [
-        'services' => 'Services',
         'clients' => 'Clients',
         'about' => 'About',
         'contact' => 'Contact',
@@ -81,7 +80,6 @@ return [
                 'textColor' => 'text-primary',
                 'status' => 'Active',
                 'description' => 'End-to-end project development solutions from conception to completion, including planning, design, execution, and delivery management.',
-                'team' => 'Project Managers: 3, Engineers: 5, Architects: 2, Consultants: 4',
                 'projects' => [
                     [
                         'name' => 'PET Recycling Plant - Qatar',
@@ -97,7 +95,6 @@ return [
                 'textColor' => 'text-success',
                 'status' => 'Scaling',
                 'description' => 'Strategic project oversight and management services ensuring timely delivery, budget compliance, and quality standards.',
-                'team' => 'Senior PMs: 2, Coordinators: 4, Analysts: 3, Quality Managers: 2',
                 'projects' => [
                     [
                         'tag' => 'Industrial Sector',
@@ -132,12 +129,11 @@ return [
                 'textColor' => 'text-purple',
                 'status' => 'Growing',
                 'description' => 'Specialized engineering services across multiple disciplines ensuring technical excellence, quality control, and innovative solutions for complex projects.',
-                'team' => 'Lead Engineers: 4, Specialists: 6, Field Experts: 3, Inspectors: 4',
                 'projects' => [
                     [
                         'tag' => 'Industrial Sector',
                         'name' => 'Al-Biariq Fertilizers Co., Yanbu â€“ Saudi Arabia',
-                        'description' => '<strong>Project Description:</strong> SOP fertilizers plant producing 22,000 MT/Year SOP and 25,000 MT/Year HCl, with Manheim technology reactors, utilities, and NPK physical blending plant.<br><br><strong>HOM Services:</strong> Pre-startup evaluation, commissioning plan preparation including cost, raw material, tools/equipment and staff requirements assessment, short- and long-term expansion opportunities.<br><br><strong>Achievements:</strong> Completed and reported successfully on time.',
+                        'description' => '<strong>Project Description:</strong> SOP fertilizers plant to produce 22,000 MT/Year SOP and 25,000 MT/Year HCl, using two Manheim technology reactors with all related utilities, equipment, and NPK physical blending plant accessories.<br><br><strong>HOM Services:</strong> Pre-startup evaluation, commissioning plan preparation covering cost, raw material, tools/equipment, and staff requirements, plus short-term and long-term expansion assessments and future opportunities.<br><br><strong>Achievements:</strong> Completed and reported successfully on time.',
                         'images' => [
                             '/assets/images/projects/engineering-services-project-1-1.png',
                             '/assets/images/projects/engineering-services-project-1-2.png',
@@ -172,16 +168,16 @@ return [
                     ],
                     [
                         'tag' => 'Industrial Sector',
-                        'name' => 'Chlorine ISO Tank Parking Area â€“ Jordan Bromine Co.',
-                        'description' => '<strong>Project Description:</strong> 600 mÂ² steel building for chlorine ISO tank parking at Jordan Bromine Co. plant.<br><br><strong>HOM Services:</strong> Design, engineering, project specification, and tender document preparation.<br><br><strong>Achievements:</strong> Completed successfully on time.',
+                        'name' => 'New Parking Area for Chlorine ISO Tanks - Jordan Bromine Co. - Jordan',
+                        'description' => '<strong>Project Description:</strong> 600 square meters steel building for Chlorine ISO Tank Parking area at Jordan Bromine Co. Plant.<br><br><strong>HOM Services:</strong> Design, Engineering, Project Specification and Tender Document preparation for the Project.<br><br><strong>Achievements:</strong> Completed successfully on time.',
                         'images' => [
                             '/assets/images/projects/engineering-services-project-5.png',
                         ],
                     ],
                     [
-                        'tag' => 'Industrial Sector',
-                        'name' => 'Ammunition Factory - Jordan',
-                        'description' => '<strong>Project Description:</strong> Complete process design and engineering of an ammunition factory.<br><br><strong>HOM Services:</strong> Basic and detailed design, Zone 2 electrical room, dust extraction, exhaust and HVAC systems, process flow diagrams, load calculations, pre-engineered building and crane design.<br><br><strong>Achievements:</strong> Completed successfully on time.',
+                        'tag' => 'Real Estate Sector',
+                        'name' => 'Al Maabar Jordan Real Estate Development Co. - Jordan',
+                        'description' => '<strong>Project Description:</strong> 1. St. Regis – Amman: Two 16-story tower hotel with 260 luxurious guest rooms project in Amman.<br>2. Marsa Zayed Project – Aqaba: $10 billion project, the biggest real estate and tourism initiative in the history of Jordan.<br><br><strong>HOM Services:</strong> Analysis, estimate review and verification of electrical load, and value engineering for both projects.<br><br><strong>Achievements:</strong> Completed successfully on time.',
                         'images' => [
                             '/assets/images/projects/engineering-services-project-6-1.png',
                             '/assets/images/projects/engineering-services-project-6-2.png',
@@ -196,25 +192,12 @@ return [
                 'textColor' => 'text-warning',
                 'status' => 'Trusted Partner',
                 'description' => 'Administrative consulting services covering organizational development, strategic planning, operational optimization, and business unit performance improvements.',
-                'team' => 'Business Consultants: 5, Analysts: 4, Researchers: 3, Sector Specialists: 3',
                 'projects' => [
                     [
-                        'tag' => 'Government Sector',
-                        'name' => 'Ministry of Energy & Mineral Resources - Jordan',
-                        'description' => '<strong>Project Description:</strong> Economic evaluation model for mineral resources processing investment opportunities: potash, phosphate, and other industrial minerals.<br><br><strong>HOM Services:</strong> Economic model for mineral sector projects considering socio-economic aspects.<br><br><strong>Achievements:</strong> Completed successfully on time.',
+                        'tag' => 'Industrial Sector',
+                        'name' => 'S\'HAIL GROUP - Qatar',
+                        'description' => '<strong>Project Description:</strong> Study and analyze the laws and regulations adopted by several countries to protect local industries and national producers, with emphasis on the recycling industry and measures supporting waste generated domestically as a national resource.<br><br><strong>HOM Services:</strong> Collect data, analyze findings, deliver detailed reports, and provide recommendations to protect the recycling industry in Qatar.<br><br><strong>Achievements:</strong> Completed successfully in a very short time.',
                         'image' => '/assets/images/projects/administrative-studies-project-1.png',
-                    ],
-                    [
-                        'tag' => 'Non-Profit Sector',
-                        'name' => 'Jordan River Foundation (JRF) - Jordan',
-                        'description' => '<strong>Project Description:</strong> Strategic planning covering product development, market expansion, marketing channels, and sales plan recommendations.<br><br><strong>HOM Services:</strong> Strategic planning, business plan preparation, market research, marketing plan.<br><br><strong>Achievements:</strong> Completed successfully on time.',
-                        'image' => '/assets/images/projects/administrative-studies-project-2.png',
-                    ],
-                    [
-                        'tag' => 'Government Sector',
-                        'name' => 'Ministry of Planning and International Cooperation - Jordan',
-                        'description' => '<strong>Project Description:</strong> Economic sector strategy update and business unit plans for tourism, industry, and ICT government institutions.<br><br><strong>HOM Services:</strong> Strategy update, business unit plans, market research, SWOT analysis.<br><br><strong>Achievements:</strong> Completed successfully on time.',
-                        'image' => '/assets/images/projects/administrative-studies-project-3.png',
                     ],
                 ],
             ],
@@ -225,7 +208,6 @@ return [
                 'textColor' => 'text-danger',
                 'status' => 'Research',
                 'description' => 'Comprehensive feasibility studies including market analysis, financial modeling, risk assessment, and investment recommendations.',
-                'team' => 'Market Researchers: 3, Financial Analysts: 2, Risk Assessors: 2, Industry Experts: 3',
                 'projects' => [
                     [
                         'name' => 'Our Experience',

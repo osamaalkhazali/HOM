@@ -77,7 +77,7 @@
                     <p class="text-sm text-gray-600">{{ $employee->position_title }}</p>
                 </div>
             </div>
-            @if (auth('admin')->user()->isClientHr())
+            @if (auth('admin')->user()->canManageEmployees())
                 <div class="flex items-center gap-2">
                     <a href="{{ route('admin.employees.edit', $employee) }}"
                         class="inline-flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-[10px] transition-colors">
@@ -238,7 +238,7 @@
                             </p>
                         </div>
                     </div>
-                    @if (auth('admin')->user()->isClientHr())
+                    @if (auth('admin')->user()->canManageEmployeeDocuments())
                         <button type="button" onclick="openUploadModal()"
                             class="inline-flex items-center gap-2 px-4 py-2.5 rounded-[10px] text-white font-medium shadow-sm hover:shadow transition-all"
                             style="background-color: #18458f;">
@@ -344,7 +344,7 @@
     </script>
 
     <!-- Upload Document Modal -->
-    @if (auth('admin')->user()->isClientHr())
+    @if (auth('admin')->user()->canManageEmployeeDocuments())
         <div id="uploadModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
             <div class="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-[10px] bg-white">
                 <div class="flex items-center justify-between mb-4">
@@ -421,7 +421,20 @@
 
         <script>
             function openUploadModal() {
-                document.getElementById('uploadModal').classList.remove('hidden');
+                const modal = document.getElementById('uploadModal');
+                const typeSelect = document.getElementById('document_type');
+                const availableOptions = typeSelect ? Array.from(typeSelect.options).map(option => option.value) : [];
+                const targetType = currentFolder && currentFolder !== 'all' && availableOptions.includes(currentFolder)
+                    ? currentFolder
+                    : '';
+
+                if (typeSelect) {
+                    typeSelect.value = targetType;
+                }
+
+                if (modal) {
+                    modal.classList.remove('hidden');
+                }
             }
 
             function closeUploadModal() {
@@ -495,7 +508,7 @@
                 const fileIcon = getFileIcon(doc.file_path || '');
                 const notes = doc.notes || '';
                 const hasNotes = notes.trim() !== '';
-                const canManage = {{ auth('admin')->user()->isClientHr() ? 'true' : 'false' }};
+                const canManage = {{ auth('admin')->user()->canManageEmployeeDocuments() ? 'true' : 'false' }};
                 const docName = doc.document_name || 'Untitled Document';
                 const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
