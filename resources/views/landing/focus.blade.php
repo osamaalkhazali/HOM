@@ -106,6 +106,12 @@
 
 <style>
     .between {
-        justify-content: space-between !important;
+        justify-content: center !important;
+    }
+
+    @media (min-width: 992px) {
+        .between {
+            justify-content: space-between !important;
+        }
     }
 </style>

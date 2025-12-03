@@ -241,4 +241,10 @@
     body.rtl .hero-bg-overlay {
         background: linear-gradient(270deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.85) 40%, rgba(255, 255, 255, 0.4) 55%, rgba(255, 255, 255, 0.1) 70%, rgba(255, 255, 255, 0.05) 80%, transparent 100%);
     }
+
+    body.rtl .hero-headline .text-gradient {
+        background: none;
+        color: var(--primary-color);
+        -webkit-text-fill-color: var(--primary-color);
+    }
 </style>

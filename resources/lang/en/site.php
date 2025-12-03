@@ -133,7 +133,7 @@ return [
                 'projects' => [
                     [
                         'tag' => 'Industrial Sector',
-                        'name' => 'Al-Biariq Fertilizers Co., Yanbu â€“ Saudi Arabia',
+                        'name' => 'Al-Biariq Fertilizers Co., Yanbu - Saudi Arabia',
                         'description' => '<strong>Project Description:</strong> SOP fertilizers plant to produce 22,000 MT/Year SOP and 25,000 MT/Year HCl, using two Manheim technology reactors with all related utilities, equipment, and NPK physical blending plant accessories.<br><br><strong>HOM Services:</strong> Pre-startup evaluation, commissioning plan preparation covering cost, raw material, tools/equipment, and staff requirements, plus short-term and long-term expansion assessments and future opportunities.<br><br><strong>Achievements:</strong> Completed and reported successfully on time.',
                         'images' => [
                             '/assets/images/projects/engineering-services-project-1-1.png',
@@ -143,7 +143,7 @@ return [
                     ],
                     [
                         'tag' => 'Industrial Sector',
-                        'name' => 'Almarai Poultry Co., Hail â€“ Saudi Arabia',
+                        'name' => 'Almarai Poultry Co., Hail - Saudi Arabia',
                         'description' => '<strong>Project Description:</strong> 30 Million USD electricity transmission, distribution, and national grid connection for Almarai poultry project in Hail, KSA.<br><br><strong>HOM Services:</strong> Technical specifications, conceptual design, and tender documents for MV electrical transmission and distribution (with Riyadh Engineering Center).<br><br><strong>Achievements:</strong> Completed successfully on time.',
                         'images' => [
                             '/assets/images/projects/engineering-services-project-2-1.png',
@@ -152,7 +152,7 @@ return [
                     ],
                     [
                         'tag' => 'Industrial Sector',
-                        'name' => 'National Chlorine Industries Co. â€“ Jordan',
+                        'name' => 'National Chlorine Industries Co. - Jordan',
                         'description' => '<strong>Project Description:</strong> Technical assessment of alternative energy sources including cogeneration, solar, and hybrid off-grid systems versus national grid connection.<br><br><strong>HOM Services:</strong> Analysis of technical and commercial proposals, 25-year financial assessment, evaluation, and recommendations.<br><br><strong>Achievements:</strong> Completed successfully on time.',
                         'images' => [
                             '/assets/images/projects/engineering-services-project-3-1.png',

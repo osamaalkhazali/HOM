@@ -1565,17 +1565,6 @@
                 </div>
             </div>
         </div>
-
-        <div class="row g-3 align-items-start mb-4">
-            <div class="col-lg-8">
-                ${data.description ? `<p class="service-description text-muted mb-2">${data.description}</p>` : ''}
-                ${data.team ? `<div class="service-team badge bg-light text-primary fw-semibold">${data.team}</div>` : ''}
-            </div>
-            <div class="col-lg-4 text-lg-end">
-                ${data.status ? `<span class="badge bg-primary text-white px-3 py-2">${data.status}</span>` : ''}
-            </div>
-        </div>
-
         <!-- Projects Section -->
         <div class="featured-projects-section">
             <!-- Projects Slider -->

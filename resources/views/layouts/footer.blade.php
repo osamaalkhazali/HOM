@@ -3,8 +3,12 @@
         <!-- Brand row -->
         <div class="row align-items-center mb-4">
             <div class="col-md-6 d-flex align-items-center" data-aos="fade-up">
-                <img src="{{ asset('assets/images/HOM-logo.png') }}" alt="HOM Logo" class="me-3"
-                    style="height:48px;width:auto;object-fit:contain;">
+                <div class="footer-logo-wrapper me-3">
+                    <div class="footer-logo-backdrop">
+                        <div class="footer-logo-border"></div>
+                        <img src="{{ asset('assets/images/HOM-logo.png') }}" alt="HOM Logo">
+                    </div>
+                </div>
                 <div>
                     <h5 class="fw-bold mb-1">{{ app()->getLocale() === 'ar' ? $companySettings['company_name_ar'] : $companySettings['company_name_en'] }}</h5>
                     <p class="mb-0 small opacity-75">{{ app()->getLocale() === 'ar' ? $companySettings['company_tagline_ar'] : $companySettings['company_tagline_en'] }}</p>
@@ -66,3 +70,51 @@
         </div>
     </div>
 </footer>
+
+<style>
+    .footer-logo-wrapper {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .footer-logo-backdrop {
+        position: relative;
+        padding: 0.65rem 1rem;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.96);
+        box-shadow: 0 8px 24px rgba(3, 26, 54, 0.25);
+    }
+
+    .footer-logo-border {
+        position: absolute;
+        inset: 0;
+        border-radius: 999px;
+        border: 2px solid rgba(255, 255, 255, 0.9);
+        box-shadow: inset 0 0 12px rgba(255, 255, 255, 0.5);
+        pointer-events: none;
+    }
+
+    .footer-logo-border::after {
+        content: none;
+    }
+
+    .footer-logo-backdrop img {
+        position: relative;
+        z-index: 1;
+        height: 42px;
+        width: auto;
+        object-fit: contain;
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.25));
+    }
+
+    @media (max-width: 576px) {
+        .footer-logo-backdrop {
+            padding: 0.5rem 0.85rem;
+        }
+
+        .footer-logo-backdrop img {
+            height: 36px;
+        }
+    }
+</style>
