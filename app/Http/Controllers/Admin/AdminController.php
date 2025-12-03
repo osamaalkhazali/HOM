@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Admin;
 use App\Models\Client;
 use App\Notifications\AdminAccountCreated;
+use App\Rules\StrongPassword;
 use App\Services\Admin\AdminExportService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -208,7 +209,7 @@ class AdminController extends Controller
     $request->validate([
       'name' => 'required|string|max:255',
       'email' => 'required|string|email|max:255|unique:admins',
-      'password' => 'required|string|min:8|confirmed',
+      'password' => ['required', 'string', 'confirmed', new StrongPassword()],
       'role' => 'required|in:admin,super,client_hr',
       'client_id' => 'required_if:role,client_hr|nullable|exists:clients,id',
       'status' => 'required|in:active,inactive',
@@ -294,7 +295,7 @@ class AdminController extends Controller
     $request->validate([
       'name' => 'required|string|max:255',
       'email' => ['required', 'string', 'email', 'max:255', Rule::unique('admins')->ignore($admin->id)],
-      'password' => 'nullable|string|min:8|confirmed',
+      'password' => ['nullable', 'string', 'confirmed', new StrongPassword()],
       'role' => 'required|in:admin,super,client_hr',
       'client_id' => 'required_if:role,client_hr|nullable|exists:clients,id',
       'status' => 'required|in:active,inactive',
@@ -383,7 +384,7 @@ class AdminController extends Controller
       'email' => ['required', 'string', 'email', 'max:255', Rule::unique('admins')->ignore($admin->id)],
       'phone' => ['nullable', 'string', 'max:20'],
       'current_password' => ['nullable', 'required_with:password'],
-      'password' => ['nullable', 'min:8', 'confirmed'],
+      'password' => ['nullable', 'string', 'confirmed', new StrongPassword()],
     ]);
 
     // Verify current password if attempting to change password

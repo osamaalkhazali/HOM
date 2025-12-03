@@ -61,6 +61,7 @@
                                 class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 @error('phone') border-red-500 @enderror"
                                 placeholder="+962 7X XXX XXXX">
                             @error('phone')
+                                <x-password-checklist for="password" class="mt-2" />
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
@@ -109,6 +110,7 @@
                             @error('password')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
+                            <x-password-checklist for="password" class="mt-2" />
                         </div>
 
                         <!-- Confirm New Password -->

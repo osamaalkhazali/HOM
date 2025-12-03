@@ -50,6 +50,7 @@
                         @error('password')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
+                        <x-password-checklist for="password" class="mt-2" />
                     </div>
 
                     <!-- Confirm Password -->

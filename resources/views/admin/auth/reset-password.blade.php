@@ -76,6 +76,7 @@
                                 <i class="fas fa-eye"></i>
                             </button>
                         </div>
+                        <x-password-checklist for="password" class="mt-2" />
                     </div>
 
                     <div class="mb-3">

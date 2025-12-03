@@ -51,6 +51,7 @@
                     @endforeach
                 </div>
             @endif
+            <x-password-checklist for="update_password_password" />
         </div>
 
         <div class="mb-4">

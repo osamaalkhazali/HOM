@@ -34,6 +34,7 @@
             @error('password')
                 <div class="text-danger small mt-1">{{ $message }}</div>
             @enderror
+            <x-password-checklist for="password" />
         </div>
 
         <div class="mb-4">

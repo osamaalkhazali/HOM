@@ -28,6 +28,7 @@
             @error('password')
                 <div class="text-danger small mt-1">{{ $message }}</div>
             @enderror
+            <x-password-checklist for="password" class="mt-2" />
         </div>
 
         <div class="mb-3">

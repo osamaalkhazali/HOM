@@ -22,7 +22,7 @@
             </div>
         </div>
 
-        <!-- Form -->
+                <!-- Form -->
         <div class="bg-white rounded-lg shadow">
             <form method="POST" action="{{ route('admin.admins.update', $admin) }}" class="p-6 space-y-6">
                 @csrf
@@ -59,6 +59,7 @@
                         @error('password')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
+                        <x-password-checklist for="password" class="mt-2" />
                     </div>
 
                     <!-- Confirm Password -->
