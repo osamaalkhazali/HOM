@@ -2,6 +2,7 @@
 
 return [
     'nav' => [
+        'services' => 'Services',
         'clients' => 'Clients',
         'about' => 'About',
         'contact' => 'Contact',
