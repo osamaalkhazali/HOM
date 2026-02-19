@@ -64,11 +64,11 @@ class Job extends Model
   }
 
   /**
-   * Get the user who posted the job.
+   * Get the admin who posted the job.
    */
   public function postedBy()
   {
-    return $this->belongsTo(User::class, 'posted_by');
+    return $this->belongsTo(Admin::class, 'posted_by');
   }
 
   public function client()

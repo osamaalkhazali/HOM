@@ -27,6 +27,14 @@ class Admin extends Authenticatable implements CanResetPassword, MustVerifyEmail
         return $this->belongsTo(Client::class);
     }
 
+    /**
+     * Get the jobs posted by this admin.
+     */
+    public function jobs()
+    {
+        return $this->hasMany(Job::class, 'posted_by');
+    }
+
     public function isSuperAdmin()
     {
         return $this->role === 'super';

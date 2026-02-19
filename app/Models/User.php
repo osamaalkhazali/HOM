@@ -55,14 +55,6 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
-     * Get the jobs posted by the user.
-     */
-    public function jobs()
-    {
-        return $this->hasMany(Job::class, 'posted_by');
-    }
-
-    /**
      * Get the profile associated with the user.
      */
     public function profile()

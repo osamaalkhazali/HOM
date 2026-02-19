@@ -327,7 +327,7 @@ class UserController extends Controller
         }
     }
 
-    $user->load(['profile', 'applications.job', 'jobs']);
+    $user->load(['profile', 'applications.job']);
     return view('admin.users.show', compact('user'));
   }
 
