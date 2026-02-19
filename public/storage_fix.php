@@ -27,8 +27,32 @@ if (empty($_SESSION['storage_fix_auth'])) {
   exit;
 }
 
-require __DIR__ . '/vendor/autoload.php';
-$app = require_once __DIR__ . '/bootstrap/app.php';
+// Support both locations:
+// 1) project root/storage_fix.php
+// 2) public/storage_fix.php (common on shared hosting)
+$basePathCandidates = [
+    __DIR__,
+    dirname(__DIR__),
+];
+
+$laravelBasePath = null;
+foreach ($basePathCandidates as $candidate) {
+    if (file_exists($candidate . '/vendor/autoload.php') && file_exists($candidate . '/bootstrap/app.php')) {
+        $laravelBasePath = $candidate;
+        break;
+    }
+}
+
+if (!$laravelBasePath) {
+    http_response_code(500);
+    echo '<h2>Storage Fix Error</h2>';
+    echo '<p>Could not find Laravel base path.</p>';
+    echo '<p>Place this file in project root or public folder of the same Laravel project.</p>';
+    exit;
+}
+
+require $laravelBasePath . '/vendor/autoload.php';
+$app = require_once $laravelBasePath . '/bootstrap/app.php';
 $app->make('Illuminate\Contracts\Console\Kernel')->bootstrap();
 
 use Illuminate\Support\Facades\Storage;
@@ -547,5 +571,4 @@ $action = $_GET['action'] ?? 'diagnose';
 </html>
 <?php
 
-// Clean up
-unlink(__DIR__ . '/check_docs.php');
+// No auto-cleanup here.

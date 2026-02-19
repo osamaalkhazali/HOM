@@ -68,10 +68,15 @@ class SecureDocumentController extends Controller
     /**
      * Download an uploaded supporting document (owner or admin).
      */
-    public function downloadApplicationDocument(Application $application, ApplicationDocument $document): StreamedResponse
+    public function downloadApplicationDocument(Application $application, string|int $document): StreamedResponse
     {
         $this->assertApplicationAccess($application);
-        $this->ensureDocumentMatch($application, $document);
+
+        $document = $application->documents()->whereKey($document)->first();
+
+        if (!$document) {
+            abort(404);
+        }
 
         if (!$document->file_path) {
             abort(404);
@@ -85,10 +90,15 @@ class SecureDocumentController extends Controller
     /**
      * Download a requested document submission (owner or admin).
      */
-    public function downloadRequestedDocument(Application $application, ApplicationDocumentRequest $documentRequest): StreamedResponse
+    public function downloadRequestedDocument(Application $application, string|int $documentRequest): StreamedResponse
     {
         $this->assertApplicationAccess($application);
-        $this->ensureRequestedDocumentMatch($application, $documentRequest);
+
+        $documentRequest = $application->documentRequests()->whereKey($documentRequest)->first();
+
+        if (!$documentRequest) {
+            abort(404);
+        }
 
         if (!$documentRequest->file_path) {
             abort(404);
